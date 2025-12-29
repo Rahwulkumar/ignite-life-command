@@ -1,4 +1,5 @@
 import { MainLayout } from "@/components/layout/MainLayout";
+import { PageTransition } from "@/components/layout/PageTransition";
 import { TrendingUp, Plus, ArrowUp, ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -19,7 +20,8 @@ const stats = [
 const TradingPage = () => {
   return (
     <MainLayout>
-      <div className="p-8 max-w-6xl mx-auto">
+      <PageTransition>
+        <div className="p-8 max-w-6xl mx-auto">
         {/* Header */}
         <header className="flex items-center justify-between mb-10">
           <div className="flex items-center gap-4">
@@ -85,10 +87,11 @@ const TradingPage = () => {
                   </p>
                 </div>
               </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      </PageTransition>
     </MainLayout>
   );
 };

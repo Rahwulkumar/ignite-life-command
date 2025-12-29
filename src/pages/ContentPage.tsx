@@ -1,4 +1,5 @@
 import { MainLayout } from "@/components/layout/MainLayout";
+import { PageTransition } from "@/components/layout/PageTransition";
 import { Bookmark, Plus, Folder, ExternalLink, Video, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -32,7 +33,8 @@ const folderColors: Record<string, string> = {
 const ContentPage = () => {
   return (
     <MainLayout>
-      <div className="p-8 max-w-6xl mx-auto">
+      <PageTransition>
+        <div className="p-8 max-w-6xl mx-auto">
         {/* Header */}
         <header className="flex items-center justify-between mb-10">
           <div className="flex items-center gap-4">
@@ -102,10 +104,11 @@ const ContentPage = () => {
                 </div>
                 <ExternalLink className="w-4 h-4 text-muted-foreground" />
               </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      </PageTransition>
     </MainLayout>
   );
 };

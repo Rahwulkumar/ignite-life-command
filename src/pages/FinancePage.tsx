@@ -1,4 +1,5 @@
 import { MainLayout } from "@/components/layout/MainLayout";
+import { PageTransition } from "@/components/layout/PageTransition";
 import { Wallet, Plus, TrendingUp, TrendingDown, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -20,7 +21,8 @@ const stats = [
 const FinancePage = () => {
   return (
     <MainLayout>
-      <div className="p-8 max-w-6xl mx-auto">
+      <PageTransition>
+        <div className="p-8 max-w-6xl mx-auto">
         {/* Header */}
         <header className="flex items-center justify-between mb-10">
           <div className="flex items-center gap-4">
@@ -91,9 +93,10 @@ const FinancePage = () => {
                 </span>
               </div>
             ))}
+            </div>
           </div>
         </div>
-      </div>
+      </PageTransition>
     </MainLayout>
   );
 };
