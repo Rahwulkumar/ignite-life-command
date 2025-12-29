@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,71 +6,59 @@
 
 @layer base {
   :root {
-    /* Clean Dark Theme */
-    --background: 0 0% 4%;
-    --foreground: 0 0% 98%;
+    /* Ultra-refined dark palette */
+    --background: 0 0% 3%;
+    --foreground: 0 0% 93%;
 
-    --card: 0 0% 7%;
-    --card-foreground: 0 0% 98%;
-    --card-elevated: 0 0% 9%;
+    --card: 0 0% 6%;
+    --card-foreground: 0 0% 93%;
+    --card-elevated: 0 0% 8%;
 
-    --popover: 0 0% 7%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 0 0% 6%;
+    --popover-foreground: 0 0% 93%;
 
-    /* Clean Neutral Primary */
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 4%;
+    --primary: 0 0% 93%;
+    --primary-foreground: 0 0% 3%;
 
-    --secondary: 0 0% 12%;
-    --secondary-foreground: 0 0% 85%;
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 70%;
 
-    --muted: 0 0% 14%;
-    --muted-foreground: 0 0% 55%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 45%;
 
-    --accent: 0 0% 18%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 0 0% 14%;
+    --accent-foreground: 0 0% 93%;
 
-    --destructive: 0 72% 51%;
+    --destructive: 0 62% 55%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 16%;
-    --input: 0 0% 14%;
-    --ring: 0 0% 98%;
+    --border: 0 0% 12%;
+    --input: 0 0% 10%;
+    --ring: 0 0% 93%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
-    /* Domain Colors - Refined */
-    --finance: 142 70% 45%;
-    --finance-glow: 142 80% 55%;
-    --trading: 38 92% 50%;
-    --trading-glow: 38 95% 60%;
-    --tech: 217 91% 60%;
-    --tech-glow: 217 95% 70%;
-    --spiritual: 270 70% 60%;
-    --spiritual-glow: 270 80% 70%;
-    --music: 340 75% 55%;
-    --music-glow: 340 85% 65%;
-    --content: 190 80% 50%;
-    --content-glow: 190 90% 60%;
-    --work: 45 85% 50%;
-    --work-glow: 45 95% 60%;
+    /* Minimal accent - single blue */
+    --accent-blue: 220 70% 55%;
 
-    /* Shadows */
-    --shadow-sm: 0 1px 2px hsl(0 0% 0% / 0.3);
-    --shadow-md: 0 4px 12px hsl(0 0% 0% / 0.4);
-    --shadow-lg: 0 8px 30px hsl(0 0% 0% / 0.5);
-    --shadow-glow: 0 0 40px -10px;
-    --shadow-neon: 0 0 20px -5px;
+    /* Domain colors - subtle, desaturated */
+    --finance: 145 45% 45%;
+    --trading: 35 70% 50%;
+    --tech: 215 60% 55%;
+    --spiritual: 265 40% 55%;
+    --music: 330 50% 50%;
+    --content: 185 50% 45%;
+    --work: 40 60% 50%;
 
     /* Sidebar */
-    --sidebar-background: 0 0% 5%;
-    --sidebar-foreground: 0 0% 80%;
-    --sidebar-primary: 0 0% 98%;
-    --sidebar-primary-foreground: 0 0% 4%;
-    --sidebar-accent: 0 0% 12%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 0 0% 14%;
-    --sidebar-ring: 0 0% 98%;
+    --sidebar-background: 0 0% 4%;
+    --sidebar-foreground: 0 0% 60%;
+    --sidebar-primary: 0 0% 93%;
+    --sidebar-primary-foreground: 0 0% 3%;
+    --sidebar-accent: 0 0% 10%;
+    --sidebar-accent-foreground: 0 0% 93%;
+    --sidebar-border: 0 0% 10%;
+    --sidebar-ring: 0 0% 93%;
   }
 }
 
@@ -81,98 +69,21 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Geist', system-ui, sans-serif;
-    letter-spacing: -0.01em;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    letter-spacing: -0.011em;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Geist', system-ui, sans-serif;
-    @apply font-semibold tracking-tight;
-  }
-
-  .font-mono {
-    font-family: 'Geist Mono', monospace;
-  }
-}
-
-@layer utilities {
-  .glass {
-    @apply bg-card/80 backdrop-blur-xl border border-border/50;
-  }
-
-  /* Domain Accent Borders */
-  .border-finance { border-color: hsl(var(--finance)); }
-  .border-trading { border-color: hsl(var(--trading)); }
-  .border-tech { border-color: hsl(var(--tech)); }
-  .border-spiritual { border-color: hsl(var(--spiritual)); }
-  .border-music { border-color: hsl(var(--music)); }
-  .border-content { border-color: hsl(var(--content)); }
-  .border-work { border-color: hsl(var(--work)); }
-
-  /* Glow Effects */
-  .glow-finance { box-shadow: var(--shadow-neon) hsl(var(--finance) / 0.4); }
-  .glow-trading { box-shadow: var(--shadow-neon) hsl(var(--trading) / 0.4); }
-  .glow-tech { box-shadow: var(--shadow-neon) hsl(var(--tech) / 0.4); }
-  .glow-spiritual { box-shadow: var(--shadow-neon) hsl(var(--spiritual) / 0.4); }
-  .glow-music { box-shadow: var(--shadow-neon) hsl(var(--music) / 0.4); }
-  .glow-content { box-shadow: var(--shadow-neon) hsl(var(--content) / 0.4); }
-  .glow-work { box-shadow: var(--shadow-neon) hsl(var(--work) / 0.4); }
-
-  /* Gradient backgrounds for domains */
-  .gradient-finance { background: linear-gradient(135deg, hsl(var(--finance) / 0.15), transparent 60%); }
-  .gradient-trading { background: linear-gradient(135deg, hsl(var(--trading) / 0.15), transparent 60%); }
-  .gradient-tech { background: linear-gradient(135deg, hsl(var(--tech) / 0.15), transparent 60%); }
-  .gradient-spiritual { background: linear-gradient(135deg, hsl(var(--spiritual) / 0.15), transparent 60%); }
-  .gradient-music { background: linear-gradient(135deg, hsl(var(--music) / 0.15), transparent 60%); }
-  .gradient-content { background: linear-gradient(135deg, hsl(var(--content) / 0.15), transparent 60%); }
-  .gradient-work { background: linear-gradient(135deg, hsl(var(--work) / 0.15), transparent 60%); }
-
-  /* Data Display */
-  .stat-value {
-    font-family: 'Geist Mono', monospace;
-    @apply text-3xl font-medium tracking-tight;
-  }
-
-  .stat-label {
-    @apply text-xs text-muted-foreground;
-  }
-
-  /* Animated gradient border */
-  .gradient-border {
-    position: relative;
-  }
-  
-  .gradient-border::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(135deg, hsl(var(--tech)), hsl(var(--music)), hsl(var(--finance)));
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    opacity: 0.5;
-  }
-
-  /* Icon container with glow */
-  .icon-glow {
-    @apply relative;
-  }
-  
-  .icon-glow::after {
-    content: '';
-    @apply absolute inset-0 rounded-lg blur-xl opacity-50;
-    background: inherit;
-    z-index: -1;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    @apply font-medium tracking-tight;
   }
 }
 
 /* Minimal scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -180,8 +91,8 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted-foreground) / 0.3);
-  border-radius: 3px;
+  background: hsl(var(--muted));
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -189,11 +100,10 @@
 }
 
 ::selection {
-  background: hsl(var(--primary) / 0.2);
-  color: hsl(var(--foreground));
+  background: hsl(var(--foreground) / 0.15);
 }
 
 :focus-visible {
-  outline: 2px solid hsl(var(--primary) / 0.5);
+  outline: 1px solid hsl(var(--foreground) / 0.3);
   outline-offset: 2px;
 }
