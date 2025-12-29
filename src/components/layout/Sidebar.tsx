@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
@@ -12,182 +11,102 @@ import {
   Briefcase,
   MessageSquare,
   Settings,
-  Menu,
-  X,
-  Zap,
 } from "lucide-react";
 
 const navigationItems = [
-  { icon: LayoutDashboard, label: "Command", path: "/", color: "primary" },
+  { icon: LayoutDashboard, label: "Overview", path: "/" },
   { icon: Wallet, label: "Finance", path: "/finance", color: "finance" },
   { icon: TrendingUp, label: "Trading", path: "/trading", color: "trading" },
   { icon: Code2, label: "Tech", path: "/tech", color: "tech" },
-  { icon: BookOpen, label: "Spirit", path: "/spiritual", color: "spiritual" },
+  { icon: BookOpen, label: "Spiritual", path: "/spiritual", color: "spiritual" },
   { icon: Music, label: "Music", path: "/music", color: "music" },
   { icon: Bookmark, label: "Content", path: "/content", color: "content" },
-  { icon: Briefcase, label: "Work", path: "/projects", color: "work" },
+  { icon: Briefcase, label: "Projects", path: "/projects", color: "work" },
 ];
 
-const agents = [
-  { name: "Marcus", role: "Finance", color: "finance" },
-  { name: "Atlas", role: "Trading", color: "trading" },
-  { name: "Nova", role: "Tech", color: "tech" },
-  { name: "Sage", role: "Spirit", color: "spiritual" },
-  { name: "Aria", role: "Music", color: "music" },
-];
-
-const colorMap: Record<string, string> = {
-  primary: "bg-primary text-primary-foreground",
-  finance: "bg-finance text-primary-foreground",
-  trading: "bg-trading text-primary-foreground",
-  tech: "bg-tech text-primary-foreground",
-  spiritual: "bg-spiritual text-primary-foreground",
-  music: "bg-music text-primary-foreground",
-  content: "bg-content text-primary-foreground",
-  work: "bg-work text-primary-foreground",
+const colorStyles: Record<string, string> = {
+  finance: "text-finance",
+  trading: "text-trading",
+  tech: "text-tech",
+  spiritual: "text-spiritual",
+  music: "text-music",
+  content: "text-content",
+  work: "text-work",
 };
 
-const borderColorMap: Record<string, string> = {
-  primary: "border-l-primary",
-  finance: "border-l-finance",
-  trading: "border-l-trading",
-  tech: "border-l-tech",
-  spiritual: "border-l-spiritual",
-  music: "border-l-music",
-  content: "border-l-content",
-  work: "border-l-work",
+const bgStyles: Record<string, string> = {
+  finance: "bg-finance/10",
+  trading: "bg-trading/10",
+  tech: "bg-tech/10",
+  spiritual: "bg-spiritual/10",
+  music: "bg-music/10",
+  content: "bg-content/10",
+  work: "bg-work/10",
 };
 
 export function Sidebar() {
-  const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
 
   return (
-    <aside
-      className={cn(
-        "fixed left-0 top-0 z-50 h-screen bg-sidebar/95 backdrop-blur-xl transition-all duration-500 flex flex-col",
-        "border-r border-border/30",
-        collapsed ? "w-[72px]" : "w-[240px]"
-      )}
-    >
-      {/* Logo Area */}
-      <div className="flex items-center justify-between h-20 px-4 border-b border-border/30">
-        {!collapsed && (
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
-                <Zap className="w-5 h-5 text-primary-foreground" />
-              </div>
-              <div className="absolute -inset-1 bg-primary/20 rounded-lg blur-md -z-10" />
-            </div>
-            <div>
-              <span className="font-display text-2xl italic text-foreground">Nexus</span>
-            </div>
-          </div>
-        )}
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className={cn(
-            "p-2.5 rounded-lg bg-muted/50 hover:bg-muted transition-all duration-300",
-            collapsed && "mx-auto"
-          )}
-        >
-          {collapsed ? (
-            <Menu className="w-4 h-4 text-foreground" />
-          ) : (
-            <X className="w-4 h-4 text-foreground" />
-          )}
-        </button>
+    <aside className="fixed left-0 top-0 z-50 h-screen w-16 bg-sidebar flex flex-col items-center py-6 border-r border-border/50">
+      {/* Logo */}
+      <div className="mb-8">
+        <div className="w-9 h-9 rounded-lg bg-foreground flex items-center justify-center">
+          <span className="text-background font-bold text-sm">N</span>
+        </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-6 overflow-y-auto">
-        <div className="space-y-1">
-          {navigationItems.map((item) => {
-            const isActive = location.pathname === item.path;
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-300 group relative",
-                  isActive
-                    ? cn("bg-muted border-l-2", borderColorMap[item.color])
-                    : "hover:bg-muted/50 border-l-2 border-l-transparent"
-                )}
-              >
-                <item.icon
-                  className={cn(
-                    "w-5 h-5 transition-all duration-300",
-                    isActive
-                      ? `text-${item.color}`
-                      : "text-muted-foreground group-hover:text-foreground"
-                  )}
-                  style={isActive ? { color: `hsl(var(--${item.color}))` } : {}}
-                />
-                {!collapsed && (
-                  <span
-                    className={cn(
-                      "text-sm font-medium transition-colors",
-                      isActive ? "text-foreground" : "text-muted-foreground group-hover:text-foreground"
-                    )}
-                  >
-                    {item.label}
-                  </span>
-                )}
-              </Link>
-            );
-          })}
-        </div>
+      <nav className="flex-1 flex flex-col items-center gap-1">
+        {navigationItems.map((item) => {
+          const isActive = location.pathname === item.path;
+          const color = item.color;
+          
+          return (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={cn(
+                "w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200 group relative",
+                isActive && color
+                  ? cn(bgStyles[color], colorStyles[color])
+                  : isActive
+                  ? "bg-accent text-foreground"
+                  : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+              )}
+              title={item.label}
+            >
+              <item.icon className="w-5 h-5" />
+              
+              {/* Tooltip */}
+              <div className="absolute left-14 px-2 py-1 bg-card border border-border rounded-md text-xs font-medium opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap">
+                {item.label}
+              </div>
+            </Link>
+          );
+        })}
       </nav>
 
-      {/* AI Agents */}
-      {!collapsed && (
-        <div className="px-3 py-4 border-t border-border/30">
-          <p className="px-3 mb-3 text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.2em]">
-            Active Agents
-          </p>
-          <div className="flex items-center gap-1 px-3">
-            {agents.map((agent, idx) => (
-              <div
-                key={agent.name}
-                className={cn(
-                  "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold cursor-pointer transition-all duration-300 hover:scale-110 hover:z-10",
-                  colorMap[agent.color]
-                )}
-                style={{ marginLeft: idx > 0 ? "-6px" : "0" }}
-                title={`${agent.name} - ${agent.role}`}
-              >
-                {agent.name[0]}
-              </div>
-            ))}
-            <span className="ml-3 text-xs text-muted-foreground">5 online</span>
-          </div>
-        </div>
-      )}
-
       {/* Bottom Actions */}
-      <div className="px-3 py-4 border-t border-border/30 space-y-2">
+      <div className="flex flex-col items-center gap-1">
         <Link
           to="/chat"
           className={cn(
-            "flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-300 group",
-            "bg-primary/10 hover:bg-primary/20 border border-primary/20",
-            collapsed && "justify-center"
+            "w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200",
+            location.pathname === "/chat"
+              ? "bg-accent text-foreground"
+              : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
           )}
+          title="AI Chat"
         >
-          <MessageSquare className="w-5 h-5 text-primary" />
-          {!collapsed && <span className="text-sm font-medium text-primary">Chat</span>}
+          <MessageSquare className="w-5 h-5" />
         </Link>
         <Link
           to="/settings"
-          className={cn(
-            "flex items-center gap-3 px-3 py-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all",
-            collapsed && "justify-center"
-          )}
+          className="w-10 h-10 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-all duration-200"
+          title="Settings"
         >
           <Settings className="w-5 h-5" />
-          {!collapsed && <span className="text-sm font-medium">Settings</span>}
         </Link>
       </div>
     </aside>
