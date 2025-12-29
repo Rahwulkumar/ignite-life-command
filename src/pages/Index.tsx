@@ -1,4 +1,5 @@
 import { MainLayout } from "@/components/layout/MainLayout";
+import { PageTransition } from "@/components/layout/PageTransition";
 import { Link } from "react-router-dom";
 import {
   Wallet,
@@ -105,7 +106,8 @@ const Index = () => {
 
   return (
     <MainLayout>
-      <div className="p-8 max-w-6xl mx-auto">
+      <PageTransition>
+        <div className="p-8 max-w-6xl mx-auto">
         {/* Header */}
         <header className="mb-12">
           <p className="text-muted-foreground text-sm mb-1">{greeting}</p>
@@ -154,8 +156,9 @@ const Index = () => {
               <p className="text-xs text-muted-foreground mt-2">{domain.change}</p>
             </Link>
           ))}
+          </div>
         </div>
-      </div>
+      </PageTransition>
     </MainLayout>
   );
 };

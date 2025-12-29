@@ -1,4 +1,5 @@
 import { MainLayout } from "@/components/layout/MainLayout";
+import { PageTransition } from "@/components/layout/PageTransition";
 import { Code2, Plus, CheckCircle2, Circle, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -26,7 +27,8 @@ const difficultyColors: Record<string, string> = {
 const TechPage = () => {
   return (
     <MainLayout>
-      <div className="p-8 max-w-6xl mx-auto">
+      <PageTransition>
+        <div className="p-8 max-w-6xl mx-auto">
         {/* Header */}
         <header className="flex items-center justify-between mb-10">
           <div className="flex items-center gap-4">
@@ -86,6 +88,7 @@ const TechPage = () => {
           </div>
         </div>
       </div>
+      </PageTransition>
     </MainLayout>
   );
 };
