@@ -1,11 +1,5 @@
 import { MainLayout } from "@/components/layout/MainLayout";
-import { WelcomeHeader } from "@/components/dashboard/WelcomeHeader";
-import { DomainCard } from "@/components/dashboard/DomainCard";
-import { QuickActions } from "@/components/dashboard/QuickActions";
-import { AgentInsights } from "@/components/dashboard/AgentInsights";
-import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
-import { StreakTracker } from "@/components/dashboard/StreakTracker";
-import { DailyLessons } from "@/components/dashboard/DailyLessons";
+import { Link } from "react-router-dom";
 import {
   Wallet,
   TrendingUp,
@@ -14,123 +8,152 @@ import {
   Music,
   Bookmark,
   Briefcase,
+  ArrowUpRight,
+  Flame,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const domains = [
   {
     icon: Wallet,
     title: "Finance",
-    description: "Track expenses, income, and budgets with AI coaching",
-    stats: [
-      { label: "This Month", value: "₦450K" },
-      { label: "Saved", value: "₦120K" },
-    ],
-    color: "finance" as const,
-    progress: 67,
-    trend: "up" as const,
+    path: "/finance",
+    color: "finance",
+    value: "₦450K",
+    label: "This month",
+    change: "+12%",
   },
   {
     icon: TrendingUp,
     title: "Trading",
-    description: "Monitor positions and pattern analysis",
-    stats: [
-      { label: "Open", value: "4" },
-      { label: "Weekly", value: "+12.5%" },
-    ],
-    color: "trading" as const,
-    progress: 82,
-    trend: "up" as const,
+    path: "/trading",
+    color: "trading",
+    value: "4",
+    label: "Open positions",
+    change: "+8.5%",
   },
   {
     icon: Code2,
-    title: "Tech & Learning",
-    description: "DSA, development, AI engineering",
-    stats: [
-      { label: "Hours", value: "24h" },
-      { label: "Solved", value: "47" },
-    ],
-    color: "tech" as const,
-    progress: 45,
+    title: "Tech",
+    path: "/tech",
+    color: "tech",
+    value: "47",
+    label: "Problems solved",
+    change: "+5 this week",
   },
   {
     icon: BookOpen,
     title: "Spiritual",
-    description: "Prayer and Bible study tracking",
-    stats: [
-      { label: "Weekly", value: "5.2h" },
-      { label: "Streak", value: "45d" },
-    ],
-    color: "spiritual" as const,
-    progress: 90,
+    path: "/spiritual",
+    color: "spiritual",
+    value: "45",
+    label: "Day streak",
+    change: "5.2h weekly",
   },
   {
     icon: Music,
     title: "Music",
-    description: "Practice sessions and progress",
-    stats: [
-      { label: "Weekly", value: "3.5h" },
-      { label: "Focus", value: "Guitar" },
-    ],
-    color: "music" as const,
-    progress: 28,
+    path: "/music",
+    color: "music",
+    value: "3.5h",
+    label: "Weekly practice",
+    change: "Guitar focus",
   },
   {
     icon: Bookmark,
     title: "Content",
-    description: "Saved reels, videos, and notes",
-    stats: [
-      { label: "Saved", value: "128" },
-      { label: "Folders", value: "12" },
-    ],
-    color: "content" as const,
+    path: "/content",
+    color: "content",
+    value: "128",
+    label: "Saved items",
+    change: "12 folders",
   },
   {
     icon: Briefcase,
     title: "Projects",
-    description: "Work and professional development",
-    stats: [
-      { label: "Active", value: "3" },
-      { label: "Done", value: "12" },
-    ],
-    color: "work" as const,
-    progress: 55,
+    path: "/projects",
+    color: "work",
+    value: "3",
+    label: "Active projects",
+    change: "12 completed",
   },
 ];
 
+const colorMap: Record<string, string> = {
+  finance: "text-finance border-finance/20 hover:border-finance/40",
+  trading: "text-trading border-trading/20 hover:border-trading/40",
+  tech: "text-tech border-tech/20 hover:border-tech/40",
+  spiritual: "text-spiritual border-spiritual/20 hover:border-spiritual/40",
+  music: "text-music border-music/20 hover:border-music/40",
+  content: "text-content border-content/20 hover:border-content/40",
+  work: "text-work border-work/20 hover:border-work/40",
+};
+
+const bgMap: Record<string, string> = {
+  finance: "bg-finance/5",
+  trading: "bg-trading/5",
+  tech: "bg-tech/5",
+  spiritual: "bg-spiritual/5",
+  music: "bg-music/5",
+  content: "bg-content/5",
+  work: "bg-work/5",
+};
+
 const Index = () => {
+  const currentHour = new Date().getHours();
+  const greeting = currentHour < 12 ? "Good morning" : currentHour < 17 ? "Good afternoon" : "Good evening";
+
   return (
     <MainLayout>
-      <div className="p-6 lg:p-10 max-w-[1600px] mx-auto">
-        <WelcomeHeader />
+      <div className="p-8 max-w-6xl mx-auto">
+        {/* Header */}
+        <header className="mb-12">
+          <p className="text-muted-foreground text-sm mb-1">{greeting}</p>
+          <h1 className="text-3xl font-semibold tracking-tight">Overview</h1>
+        </header>
 
-        <div className="grid grid-cols-12 gap-5">
-          {/* Main Content */}
-          <div className="col-span-12 lg:col-span-8 space-y-5">
-            {/* Primary Domain Cards - Bento Grid */}
-            <div className="grid grid-cols-2 gap-5">
-              {domains.slice(0, 4).map((domain, index) => (
-                <DomainCard key={domain.title} {...domain} delay={index * 80} />
-              ))}
-            </div>
-
-            {/* Secondary Row */}
-            <div className="grid grid-cols-3 gap-5">
-              {domains.slice(4).map((domain, index) => (
-                <DomainCard key={domain.title} {...domain} delay={(index + 4) * 80} />
-              ))}
-            </div>
-
-            {/* Agent Insights */}
-            <AgentInsights />
+        {/* Quick Stats */}
+        <div className="flex items-center gap-6 mb-10 p-4 bg-card/50 rounded-xl border border-border/50">
+          <div className="flex items-center gap-2">
+            <Flame className="w-5 h-5 text-trading" />
+            <span className="font-mono text-lg font-medium">45</span>
+            <span className="text-muted-foreground text-sm">day streak</span>
           </div>
-
-          {/* Right Sidebar */}
-          <div className="col-span-12 lg:col-span-4 space-y-5">
-            <QuickActions />
-            <DailyLessons />
-            <StreakTracker />
-            <ActivityFeed />
+          <div className="w-px h-6 bg-border" />
+          <div className="text-sm text-muted-foreground">
+            <span className="text-foreground font-medium">5</span> agents active
           </div>
+        </div>
+
+        {/* Domain Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {domains.map((domain) => (
+            <Link
+              key={domain.path}
+              to={domain.path}
+              className={cn(
+                "group p-6 rounded-xl border transition-all duration-200",
+                "bg-card hover:bg-card-elevated",
+                colorMap[domain.color]
+              )}
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className={cn("p-2.5 rounded-lg", bgMap[domain.color])}>
+                  <domain.icon className="w-5 h-5" />
+                </div>
+                <ArrowUpRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
+              
+              <h3 className="text-foreground font-medium mb-1">{domain.title}</h3>
+              
+              <div className="flex items-baseline gap-2">
+                <span className="font-mono text-2xl font-medium text-foreground">{domain.value}</span>
+                <span className="text-sm text-muted-foreground">{domain.label}</span>
+              </div>
+              
+              <p className="text-xs text-muted-foreground mt-2">{domain.change}</p>
+            </Link>
+          ))}
         </div>
       </div>
     </MainLayout>
