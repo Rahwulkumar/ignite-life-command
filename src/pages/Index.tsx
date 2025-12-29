@@ -5,7 +5,6 @@ import { QuickActions } from "@/components/dashboard/QuickActions";
 import { AgentInsights } from "@/components/dashboard/AgentInsights";
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { StreakTracker } from "@/components/dashboard/StreakTracker";
-import { ChatInterface } from "@/components/chat/ChatInterface";
 import { DailyLessons } from "@/components/dashboard/DailyLessons";
 import {
   Wallet,
@@ -21,32 +20,34 @@ const domains = [
   {
     icon: Wallet,
     title: "Finance",
-    description: "Track expenses, income, and budgets",
+    description: "Track expenses, income, and budgets with AI coaching",
     stats: [
-      { label: "This Month", value: "₦450,000" },
-      { label: "Saved", value: "₦120,000" },
+      { label: "This Month", value: "₦450K" },
+      { label: "Saved", value: "₦120K" },
     ],
     color: "finance" as const,
     progress: 67,
+    trend: "up" as const,
   },
   {
     icon: TrendingUp,
     title: "Trading",
-    description: "Monitor positions and patterns",
+    description: "Monitor positions and pattern analysis",
     stats: [
-      { label: "Open Positions", value: "4" },
-      { label: "This Week", value: "+12.5%" },
+      { label: "Open", value: "4" },
+      { label: "Weekly", value: "+12.5%" },
     ],
     color: "trading" as const,
     progress: 82,
+    trend: "up" as const,
   },
   {
     icon: Code2,
     title: "Tech & Learning",
     description: "DSA, development, AI engineering",
     stats: [
-      { label: "Study Hours", value: "24h" },
-      { label: "Problems Solved", value: "47" },
+      { label: "Hours", value: "24h" },
+      { label: "Solved", value: "47" },
     ],
     color: "tech" as const,
     progress: 45,
@@ -54,10 +55,10 @@ const domains = [
   {
     icon: BookOpen,
     title: "Spiritual",
-    description: "Prayer and Bible study",
+    description: "Prayer and Bible study tracking",
     stats: [
-      { label: "This Week", value: "5.2h" },
-      { label: "Streak", value: "45 days" },
+      { label: "Weekly", value: "5.2h" },
+      { label: "Streak", value: "45d" },
     ],
     color: "spiritual" as const,
     progress: 90,
@@ -67,8 +68,8 @@ const domains = [
     title: "Music",
     description: "Practice sessions and progress",
     stats: [
-      { label: "This Week", value: "3.5h" },
-      { label: "Skills", value: "Guitar" },
+      { label: "Weekly", value: "3.5h" },
+      { label: "Focus", value: "Guitar" },
     ],
     color: "music" as const,
     progress: 28,
@@ -89,7 +90,7 @@ const domains = [
     description: "Work and professional development",
     stats: [
       { label: "Active", value: "3" },
-      { label: "Completed", value: "12" },
+      { label: "Done", value: "12" },
     ],
     color: "work" as const,
     progress: 55,
@@ -99,42 +100,33 @@ const domains = [
 const Index = () => {
   return (
     <MainLayout>
-      <div className="p-8">
+      <div className="p-6 lg:p-10 max-w-[1600px] mx-auto">
         <WelcomeHeader />
 
-        <div className="grid grid-cols-12 gap-6">
-          {/* Left Column - Main Content */}
-          <div className="col-span-8 space-y-6">
-            {/* Domain Cards Grid */}
-            <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-12 gap-5">
+          {/* Main Content */}
+          <div className="col-span-12 lg:col-span-8 space-y-5">
+            {/* Primary Domain Cards - Bento Grid */}
+            <div className="grid grid-cols-2 gap-5">
               {domains.slice(0, 4).map((domain, index) => (
-                <DomainCard
-                  key={domain.title}
-                  {...domain}
-                  delay={index * 100}
-                />
+                <DomainCard key={domain.title} {...domain} delay={index * 80} />
               ))}
             </div>
 
             {/* Secondary Row */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 gap-5">
               {domains.slice(4).map((domain, index) => (
-                <DomainCard
-                  key={domain.title}
-                  {...domain}
-                  delay={(index + 4) * 100}
-                />
+                <DomainCard key={domain.title} {...domain} delay={(index + 4) * 80} />
               ))}
             </div>
 
-            {/* AI Chat Interface */}
-            <ChatInterface />
+            {/* Agent Insights */}
+            <AgentInsights />
           </div>
 
-          {/* Right Column - Sidebar Content */}
-          <div className="col-span-4 space-y-6">
+          {/* Right Sidebar */}
+          <div className="col-span-12 lg:col-span-4 space-y-5">
             <QuickActions />
-            <AgentInsights />
             <DailyLessons />
             <StreakTracker />
             <ActivityFeed />
