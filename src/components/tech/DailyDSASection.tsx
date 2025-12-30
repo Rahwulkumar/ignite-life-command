@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ExternalLink } from "lucide-react";
 import { CheckCircle2, Circle, Clock, Flame, Plus, ChevronRight, Code2, Zap, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
@@ -174,15 +175,28 @@ export function DailyDSASection({
                         )}
                       </button>
                       <div className="flex-1 min-w-0">
-                        <p className={cn(
-                          "font-medium text-sm truncate",
-                          problem.status === "completed" && "text-muted-foreground line-through"
-                        )}>
-                          {problem.title}
-                          {problem.leetcodeId && (
+                        {problem.leetcodeId ? (
+                          <a
+                            href={`https://leetcode.com/problems/${problem.title.toLowerCase().replace(/\s+/g, '-')}/`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={cn(
+                              "font-medium text-sm truncate block hover:text-tech hover:underline transition-colors",
+                              problem.status === "completed" && "text-muted-foreground line-through"
+                            )}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {problem.title}
                             <span className="ml-2 text-xs text-muted-foreground">#{problem.leetcodeId}</span>
-                          )}
-                        </p>
+                          </a>
+                        ) : (
+                          <p className={cn(
+                            "font-medium text-sm truncate",
+                            problem.status === "completed" && "text-muted-foreground line-through"
+                          )}>
+                            {problem.title}
+                          </p>
+                        )}
                         <p className="text-xs text-muted-foreground">{problem.topic}</p>
                       </div>
                       <span className={cn(
@@ -216,12 +230,22 @@ export function DailyDSASection({
                     {todaysProblem.status === "in-progress" ? "⚡ In Progress" : "Up Next"}
                   </span>
                 </div>
-                <h4 className="font-semibold text-xl">
-                  {todaysProblem.title}
-                  {todaysProblem.leetcodeId && (
-                    <span className="ml-2 text-base text-muted-foreground font-normal">#{todaysProblem.leetcodeId}</span>
-                  )}
-                </h4>
+                {todaysProblem.leetcodeId ? (
+                  <a
+                    href={`https://leetcode.com/problems/${todaysProblem.title.toLowerCase().replace(/\s+/g, '-')}/`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex items-center gap-2 hover:text-tech transition-colors"
+                  >
+                    <h4 className="font-semibold text-xl group-hover:underline underline-offset-4">
+                      {todaysProblem.title}
+                      <span className="ml-2 text-base text-muted-foreground font-normal">#{todaysProblem.leetcodeId}</span>
+                    </h4>
+                    <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-tech" />
+                  </a>
+                ) : (
+                  <h4 className="font-semibold text-xl">{todaysProblem.title}</h4>
+                )}
                 <p className="text-sm text-muted-foreground">{todaysProblem.topic}</p>
               </div>
               <span className={cn(
