@@ -5,12 +5,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PortfolioChart } from "@/components/trading/PortfolioChart";
 import { TradeJournal } from "@/components/trading/TradeJournal";
 import { WatchlistCard } from "@/components/trading/WatchlistCard";
+import { InvestmentHoldings } from "@/components/trading/InvestmentHoldings";
 import { NovaChat } from "@/components/trading/NovaChat";
 
 const stats = [
-  { label: "Portfolio", value: "$12,450" },
-  { label: "Positions", value: "4" },
-  { label: "Today", value: "+$320" },
+  { label: "Portfolio", value: "$24,850" },
+  { label: "Invested", value: "$20,325" },
+  { label: "Returns", value: "+$4,525" },
 ];
 
 const TradingPage = () => {
@@ -23,7 +24,7 @@ const TradingPage = () => {
               <TrendingUp className="w-5 h-5 text-muted-foreground" />
               <h1 className="text-4xl font-medium tracking-tight">Trading</h1>
             </div>
-            <p className="text-muted-foreground">Monitor positions, patterns, and journal trades</p>
+            <p className="text-muted-foreground">Investments, mutual funds, and trade journal</p>
           </header>
 
           <div className="grid grid-cols-3 gap-8 mb-10">
@@ -35,9 +36,10 @@ const TradingPage = () => {
             ))}
           </div>
 
-          <Tabs defaultValue="portfolio" className="space-y-6">
+          <Tabs defaultValue="investments" className="space-y-6">
             <TabsList>
-              <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
+              <TabsTrigger value="investments">Investments</TabsTrigger>
+              <TabsTrigger value="portfolio">Performance</TabsTrigger>
               <TabsTrigger value="journal">Journal</TabsTrigger>
               <TabsTrigger value="watchlist">Watchlist</TabsTrigger>
               <TabsTrigger value="nova" className="gap-2">
@@ -46,6 +48,9 @@ const TradingPage = () => {
               </TabsTrigger>
             </TabsList>
 
+            <TabsContent value="investments">
+              <InvestmentHoldings />
+            </TabsContent>
             <TabsContent value="portfolio">
               <PortfolioChart />
             </TabsContent>
