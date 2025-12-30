@@ -3,10 +3,10 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { MiniCalendar } from "@/components/home/MiniCalendar";
 import { DailyHabits, defaultHabits } from "@/components/home/DailyHabits";
+import { DevotionWidget } from "@/components/home/DevotionWidget";
 import { format } from "date-fns";
 import { Plus, BookOpen, Dumbbell, Code2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 const domainStats = [
   { icon: BookOpen, label: "Spiritual", value: 45, total: 60, unit: "day streak" },
@@ -42,6 +42,9 @@ const Index = () => {
     if (hour < 17) return "Good afternoon";
     return "Good evening";
   };
+
+  const hour = new Date().getHours();
+  const timeOfDay: "morning" | "evening" = hour < 12 ? "morning" : "evening";
 
   return (
     <MainLayout>
@@ -141,8 +144,16 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Calendar Sidebar */}
+            {/* Sidebar */}
             <div className="space-y-6">
+              {/* Devotion Widget */}
+              <DevotionWidget
+                characterName="David"
+                dayNumber={7}
+                todayScripture="1 Samuel 17"
+                timeOfDay={timeOfDay}
+              />
+
               <div className="bg-card border border-border rounded-xl p-6">
                 <MiniCalendar
                   selectedDate={selectedDate}
