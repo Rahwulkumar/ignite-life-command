@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { Code2, MessageSquare } from "lucide-react";
@@ -6,6 +7,17 @@ import { DSATracker } from "@/components/tech/DSATracker";
 import { StudyLog } from "@/components/tech/StudyLog";
 import { LearningResources } from "@/components/tech/LearningResources";
 import { AtlasChat } from "@/components/tech/AtlasChat";
+import { TechCategories } from "@/components/tech/TechCategories";
+import { CategoryDetail } from "@/components/tech/CategoryDetail";
+
+interface TechCategory {
+  id: string;
+  name: string;
+  icon: string;
+  color: string;
+  topicsCount: number;
+  completedCount: number;
+}
 
 const stats = [
   { label: "Solved", value: "47" },
@@ -14,6 +26,8 @@ const stats = [
 ];
 
 const TechPage = () => {
+  const [selectedCategory, setSelectedCategory] = useState<TechCategory | null>(null);
+
   return (
     <MainLayout>
       <PageTransition>
@@ -23,7 +37,7 @@ const TechPage = () => {
               <Code2 className="w-5 h-5 text-muted-foreground" />
               <h1 className="text-4xl font-medium tracking-tight">Tech</h1>
             </div>
-            <p className="text-muted-foreground">DSA, system design, and AI engineering</p>
+            <p className="text-muted-foreground">DSA, system design, and engineering skills</p>
           </header>
 
           <div className="grid grid-cols-3 gap-8 mb-10">
@@ -35,9 +49,10 @@ const TechPage = () => {
             ))}
           </div>
 
-          <Tabs defaultValue="problems" className="space-y-6">
+          <Tabs defaultValue="tracks" className="space-y-6">
             <TabsList>
-              <TabsTrigger value="problems">Problems</TabsTrigger>
+              <TabsTrigger value="tracks">Learning Tracks</TabsTrigger>
+              <TabsTrigger value="problems">DSA Problems</TabsTrigger>
               <TabsTrigger value="study">Study Log</TabsTrigger>
               <TabsTrigger value="resources">Resources</TabsTrigger>
               <TabsTrigger value="atlas" className="gap-2">
@@ -46,6 +61,16 @@ const TechPage = () => {
               </TabsTrigger>
             </TabsList>
 
+            <TabsContent value="tracks">
+              {selectedCategory ? (
+                <CategoryDetail 
+                  category={selectedCategory} 
+                  onBack={() => setSelectedCategory(null)} 
+                />
+              ) : (
+                <TechCategories onSelectCategory={setSelectedCategory} />
+              )}
+            </TabsContent>
             <TabsContent value="problems">
               <DSATracker />
             </TabsContent>
