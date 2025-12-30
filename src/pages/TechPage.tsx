@@ -1,16 +1,11 @@
 import { MainLayout } from "@/components/layout/MainLayout";
 import { PageTransition } from "@/components/layout/PageTransition";
-import { Code2, Plus, CheckCircle2, Circle, Clock } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-
-const problems = [
-  { id: 1, title: "Two Sum", difficulty: "Easy", status: "completed", topic: "Arrays" },
-  { id: 2, title: "Binary Search", difficulty: "Easy", status: "completed", topic: "Search" },
-  { id: 3, title: "Merge Sort", difficulty: "Medium", status: "in-progress", topic: "Sorting" },
-  { id: 4, title: "LRU Cache", difficulty: "Medium", status: "pending", topic: "Design" },
-  { id: 5, title: "Graph BFS", difficulty: "Medium", status: "pending", topic: "Graphs" },
-];
+import { Code2, MessageSquare } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DSATracker } from "@/components/tech/DSATracker";
+import { StudyLog } from "@/components/tech/StudyLog";
+import { LearningResources } from "@/components/tech/LearningResources";
+import { AtlasChat } from "@/components/tech/AtlasChat";
 
 const stats = [
   { label: "Solved", value: "47" },
@@ -22,22 +17,16 @@ const TechPage = () => {
   return (
     <MainLayout>
       <PageTransition>
-        <div className="p-10 max-w-4xl mx-auto">
-          <header className="flex items-center justify-between mb-16">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <Code2 className="w-5 h-5 text-muted-foreground" />
-                <h1 className="text-4xl font-medium tracking-tight">Tech</h1>
-              </div>
-              <p className="text-muted-foreground">DSA, development, AI engineering</p>
+        <div className="p-10 max-w-5xl mx-auto">
+          <header className="mb-10">
+            <div className="flex items-center gap-3 mb-2">
+              <Code2 className="w-5 h-5 text-muted-foreground" />
+              <h1 className="text-4xl font-medium tracking-tight">Tech</h1>
             </div>
-            <Button variant="outline" size="sm" className="gap-2">
-              <Plus className="w-4 h-4" />
-              Log Study
-            </Button>
+            <p className="text-muted-foreground">DSA, system design, and AI engineering</p>
           </header>
 
-          <div className="grid grid-cols-3 gap-8 mb-16">
+          <div className="grid grid-cols-3 gap-8 mb-10">
             {stats.map((stat) => (
               <div key={stat.label}>
                 <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
@@ -46,38 +35,30 @@ const TechPage = () => {
             ))}
           </div>
 
-          <div>
-            <h2 className="text-sm text-muted-foreground mb-6">Problem Queue</h2>
-            <div className="space-y-0">
-              {problems.map((problem) => (
-                <div
-                  key={problem.id}
-                  className="flex items-center justify-between py-4 border-b border-border/50"
-                >
-                  <div className="flex items-center gap-4">
-                    {problem.status === "completed" ? (
-                      <CheckCircle2 className="w-4 h-4 text-finance" />
-                    ) : problem.status === "in-progress" ? (
-                      <Clock className="w-4 h-4 text-trading" />
-                    ) : (
-                      <Circle className="w-4 h-4 text-muted-foreground" />
-                    )}
-                    <div>
-                      <p className="font-medium">{problem.title}</p>
-                      <p className="text-sm text-muted-foreground">{problem.topic}</p>
-                    </div>
-                  </div>
-                  <span className={cn(
-                    "text-sm",
-                    problem.difficulty === "Easy" ? "text-finance" :
-                    problem.difficulty === "Medium" ? "text-trading" : "text-destructive"
-                  )}>
-                    {problem.difficulty}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
+          <Tabs defaultValue="problems" className="space-y-6">
+            <TabsList>
+              <TabsTrigger value="problems">Problems</TabsTrigger>
+              <TabsTrigger value="study">Study Log</TabsTrigger>
+              <TabsTrigger value="resources">Resources</TabsTrigger>
+              <TabsTrigger value="atlas" className="gap-2">
+                <MessageSquare className="w-3 h-3" />
+                Atlas
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="problems">
+              <DSATracker />
+            </TabsContent>
+            <TabsContent value="study">
+              <StudyLog />
+            </TabsContent>
+            <TabsContent value="resources">
+              <LearningResources />
+            </TabsContent>
+            <TabsContent value="atlas">
+              <AtlasChat />
+            </TabsContent>
+          </Tabs>
         </div>
       </PageTransition>
     </MainLayout>
