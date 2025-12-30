@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { PageTransition } from "@/components/layout/PageTransition";
-import { Code2, Sparkles, Calendar, Flame, ChevronLeft, ChevronRight } from "lucide-react";
+import { 
+  Code2, Sparkles, Calendar, Flame, ChevronLeft, ChevronRight,
+  Zap, Target, TrendingUp, Plus
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { AtlasChat } from "@/components/tech/AtlasChat";
-import { MonthlyFocusSlot, FocusTopic, Video } from "@/components/tech/MonthlyFocusSlot";
+import { MonthlyFocusSlot, FocusTopic } from "@/components/tech/MonthlyFocusSlot";
 import { DailyDSASection, DSAProblem } from "@/components/tech/DailyDSASection";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
@@ -118,55 +121,121 @@ const TechPage = () => {
     ));
   };
 
-  // Calculate overall stats
   const totalStreak = Math.max(dsaStreak, ...focusTopics.filter(Boolean).map(t => t!.streak));
   const selectedTopics = focusTopics.filter(Boolean).map(t => t!.name);
-  const usedTopicNames = selectedTopics;
-  const availableForSelection = availableTopics.filter(t => !usedTopicNames.includes(t));
+  const availableForSelection = availableTopics.filter(t => !selectedTopics.includes(t));
+
+  // Stats
+  const completedDSA = dsaProblems.filter(p => p.status === "completed").length;
+  const totalVideos = focusTopics.reduce((sum, t) => sum + (t?.videos.length ?? 0), 0);
 
   return (
     <MainLayout>
       <PageTransition>
-        <div className="min-h-screen pb-20">
-          {/* Header */}
-          <div className="px-8 pt-8 pb-6 border-b border-border">
-            <div className="max-w-4xl mx-auto">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-tech/10 flex items-center justify-center">
-                    <Code2 className="w-5 h-5 text-tech" />
+        <div className="min-h-screen">
+          {/* Hero Header with Gradient */}
+          <div className="relative overflow-hidden">
+            {/* Gradient background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-tech/20 via-background to-background" />
+            <div className="absolute top-0 right-0 w-96 h-96 bg-tech/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+            
+            <div className="relative px-8 pt-10 pb-8">
+              <div className="max-w-5xl mx-auto">
+                {/* Top Row */}
+                <div className="flex items-start justify-between mb-8">
+                  <div className="flex items-center gap-4">
+                    <motion.div 
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      className="w-14 h-14 rounded-2xl bg-gradient-to-br from-tech to-tech/50 flex items-center justify-center shadow-lg shadow-tech/20"
+                    >
+                      <Code2 className="w-7 h-7 text-white" />
+                    </motion.div>
+                    <div>
+                      <h1 className="text-2xl font-semibold tracking-tight">Tech & Learning</h1>
+                      <p className="text-muted-foreground">Master your craft, one day at a time</p>
+                    </div>
                   </div>
-                  <div>
-                    <h1 className="text-xl font-medium">Tech & Learning</h1>
-                    <p className="text-sm text-muted-foreground">Focus on what matters</p>
-                  </div>
+
+                  <Sheet open={showAtlas} onOpenChange={setShowAtlas}>
+                    <SheetTrigger asChild>
+                      <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-foreground/5 border border-foreground/10 hover:bg-foreground/10 transition-all hover:scale-[1.02] active:scale-[0.98]">
+                        <Sparkles className="w-4 h-4 text-tech" />
+                        <span className="text-sm font-medium">Ask Atlas</span>
+                      </button>
+                    </SheetTrigger>
+                    <SheetContent className="w-full sm:max-w-lg p-0">
+                      <div className="h-full">
+                        <AtlasChat />
+                      </div>
+                    </SheetContent>
+                  </Sheet>
                 </div>
 
-                <Sheet open={showAtlas} onOpenChange={setShowAtlas}>
-                  <SheetTrigger asChild>
-                    <button className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border hover:bg-muted transition-colors">
-                      <Sparkles className="w-4 h-4" />
-                      <span className="text-sm">Ask Atlas</span>
-                    </button>
-                  </SheetTrigger>
-                  <SheetContent className="w-full sm:max-w-lg p-0">
-                    <div className="h-full">
-                      <AtlasChat />
+                {/* Stats Row */}
+                <div className="grid grid-cols-4 gap-4 mb-8">
+                  <motion.div 
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.1 }}
+                    className="p-4 rounded-xl bg-card border border-border/50"
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <Flame className="w-4 h-4 text-trading" />
+                      <span className="text-xs text-muted-foreground">Streak</span>
                     </div>
-                  </SheetContent>
-                </Sheet>
-              </div>
+                    <p className="text-2xl font-semibold">{totalStreak}<span className="text-sm text-muted-foreground ml-1">days</span></p>
+                  </motion.div>
 
-              {/* Month Selector */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
+                  <motion.div 
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.15 }}
+                    className="p-4 rounded-xl bg-card border border-border/50"
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <Target className="w-4 h-4 text-tech" />
+                      <span className="text-xs text-muted-foreground">Focus</span>
+                    </div>
+                    <p className="text-2xl font-semibold">{focusTopics.filter(Boolean).length}<span className="text-sm text-muted-foreground ml-1">/2</span></p>
+                  </motion.div>
+
+                  <motion.div 
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                    className="p-4 rounded-xl bg-card border border-border/50"
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <Zap className="w-4 h-4 text-finance" />
+                      <span className="text-xs text-muted-foreground">DSA Solved</span>
+                    </div>
+                    <p className="text-2xl font-semibold">{completedDSA}<span className="text-sm text-muted-foreground ml-1">problems</span></p>
+                  </motion.div>
+
+                  <motion.div 
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.25 }}
+                    className="p-4 rounded-xl bg-card border border-border/50"
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <TrendingUp className="w-4 h-4 text-spiritual" />
+                      <span className="text-xs text-muted-foreground">Videos</span>
+                    </div>
+                    <p className="text-2xl font-semibold">{totalVideos}<span className="text-sm text-muted-foreground ml-1">queued</span></p>
+                  </motion.div>
+                </div>
+
+                {/* Month Selector */}
+                <div className="flex items-center gap-3">
                   <button
                     onClick={() => navigateMonth(-1)}
                     className="p-2 rounded-lg hover:bg-muted transition-colors"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-muted/50">
                     <Calendar className="w-4 h-4 text-muted-foreground" />
                     <span className="font-medium">{monthName}</span>
                   </div>
@@ -177,31 +246,22 @@ const TechPage = () => {
                     <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
-
-                {totalStreak > 0 && (
-                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-trading/10 text-trading">
-                    <Flame className="w-4 h-4" />
-                    <span className="text-sm font-medium">{totalStreak} day streak</span>
-                  </div>
-                )}
               </div>
             </div>
           </div>
 
           {/* Main Content */}
-          <div className="max-w-4xl mx-auto px-8 py-8 space-y-8">
+          <div className="max-w-5xl mx-auto px-8 py-8 space-y-10">
             {/* Monthly Focus Section */}
             <section>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-sm text-muted-foreground uppercase tracking-wider">
-                  This Month's Focus
-                </h2>
-                <p className="text-xs text-muted-foreground">
-                  {focusTopics.filter(Boolean).length}/2 selected
-                </p>
+              <div className="flex items-center justify-between mb-5">
+                <div>
+                  <h2 className="text-lg font-medium mb-1">Monthly Focus</h2>
+                  <p className="text-sm text-muted-foreground">Choose 2 technologies to master this month</p>
+                </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-5">
                 {[0, 1].map((slot) => (
                   <MonthlyFocusSlot
                     key={slot}
@@ -220,6 +280,10 @@ const TechPage = () => {
 
             {/* Daily DSA Section */}
             <section>
+              <div className="mb-5">
+                <h2 className="text-lg font-medium mb-1">Daily DSA Practice</h2>
+                <p className="text-sm text-muted-foreground">Consistency beats intensity — solve one problem every day</p>
+              </div>
               <DailyDSASection
                 problems={dsaProblems}
                 streak={dsaStreak}
