@@ -7,7 +7,12 @@ import { ScriptureMemoryCard } from "@/components/spiritual/ScriptureMemoryCard"
 import { SpiritualGoalsCard } from "@/components/spiritual/SpiritualGoalsCard";
 import { SermonNotesCard } from "@/components/spiritual/SermonNotesCard";
 import { SageChat } from "@/components/spiritual/SageChat";
+import { DevotionReminderCard } from "@/components/spiritual/DevotionReminderCard";
+import { CharacterStudyCard } from "@/components/spiritual/CharacterStudyCard";
+import { SpiritualJournalCard } from "@/components/spiritual/SpiritualJournalCard";
+import { JournalEntryModal } from "@/components/spiritual/JournalEntryModal";
 import { useSpiritualGuide } from "@/hooks/useSpiritualGuide";
+import { useState } from "react";
 
 // Mock data - replace with real data from Supabase
 const mockVerses = [
@@ -51,6 +56,35 @@ const stats = [
 
 const SpiritualPage = () => {
   const { messages, isLoading, sendMessage } = useSpiritualGuide();
+  const [showDevotionReminder, setShowDevotionReminder] = useState(true);
+  const [activeTab, setActiveTab] = useState("reading");
+  const [isJournalModalOpen, setIsJournalModalOpen] = useState(false);
+  const [currentCharacter, setCurrentCharacter] = useState<{
+    name: string;
+    daysCompleted: number;
+    totalDays: number;
+    todayScripture: string;
+    lastDiscussion?: string;
+  } | undefined>(undefined);
+
+  // Determine time of day for devotion reminder
+  const hour = new Date().getHours();
+  const timeOfDay: "morning" | "evening" = hour < 12 ? "morning" : "evening";
+
+  const handleSelectCharacter = (character: { id: string; name: string; description: string }) => {
+    setCurrentCharacter({
+      name: character.name,
+      daysCompleted: 1,
+      totalDays: 30,
+      todayScripture: "1 Samuel 16:1-13",
+      lastDiscussion: undefined,
+    });
+  };
+
+  const handleStartDevotion = () => {
+    setShowDevotionReminder(false);
+    setActiveTab("reading");
+  };
 
   return (
     <MainLayout>
@@ -64,6 +98,17 @@ const SpiritualPage = () => {
             <p className="text-muted-foreground">Deepen your faith journey</p>
           </header>
 
+          {/* Devotion Reminder */}
+          {showDevotionReminder && (
+            <div className="mb-8">
+              <DevotionReminderCard
+                timeOfDay={timeOfDay}
+                onStartDevotion={handleStartDevotion}
+                onDismiss={() => setShowDevotionReminder(false)}
+              />
+            </div>
+          )}
+
           <div className="grid grid-cols-3 gap-8 mb-10">
             {stats.map((stat) => (
               <div key={stat.label}>
@@ -73,9 +118,11 @@ const SpiritualPage = () => {
             ))}
           </div>
 
-          <Tabs defaultValue="reading" className="space-y-6">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList>
               <TabsTrigger value="reading">Reading</TabsTrigger>
+              <TabsTrigger value="character">Character Study</TabsTrigger>
+              <TabsTrigger value="journal">Journal</TabsTrigger>
               <TabsTrigger value="memory">Memory</TabsTrigger>
               <TabsTrigger value="goals">Goals</TabsTrigger>
               <TabsTrigger value="notes">Notes</TabsTrigger>
@@ -92,6 +139,21 @@ const SpiritualPage = () => {
                 completedChapters={245}
                 totalChapters={1189}
                 onMarkComplete={() => console.log("Mark complete")}
+              />
+            </TabsContent>
+            <TabsContent value="character">
+              <CharacterStudyCard
+                currentCharacter={currentCharacter}
+                onSelectCharacter={handleSelectCharacter}
+                onStartDiscussion={() => setActiveTab("sage")}
+                onReadScripture={() => setActiveTab("reading")}
+              />
+            </TabsContent>
+            <TabsContent value="journal">
+              <SpiritualJournalCard
+                recentEntries={[]}
+                onNewEntry={() => setIsJournalModalOpen(true)}
+                onViewEntry={(id) => console.log("View entry:", id)}
               />
             </TabsContent>
             <TabsContent value="memory">
@@ -120,6 +182,14 @@ const SpiritualPage = () => {
               />
             </TabsContent>
           </Tabs>
+
+          {/* Journal Entry Modal */}
+          <JournalEntryModal
+            isOpen={isJournalModalOpen}
+            onClose={() => setIsJournalModalOpen(false)}
+            characterName={currentCharacter?.name}
+            onSave={(entry) => console.log("Save entry:", entry)}
+          />
         </div>
       </PageTransition>
     </MainLayout>
