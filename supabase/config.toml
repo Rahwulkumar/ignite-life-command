@@ -1,1 +1,4 @@
 project_id = "syqciavofhmztjwerpdx"
+
+[functions.spiritual-guide]
+verify_jwt = false

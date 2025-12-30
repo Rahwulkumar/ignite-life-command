@@ -14,7 +14,171 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      bible_reading_plans: {
+        Row: {
+          completed_chapters: number
+          created_at: string
+          current_book: string | null
+          current_chapter: number | null
+          id: string
+          name: string
+          total_chapters: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          completed_chapters?: number
+          created_at?: string
+          current_book?: string | null
+          current_chapter?: number | null
+          id?: string
+          name: string
+          total_chapters?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          completed_chapters?: number
+          created_at?: string
+          current_book?: string | null
+          current_chapter?: number | null
+          id?: string
+          name?: string
+          total_chapters?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      scripture_memory: {
+        Row: {
+          created_at: string
+          id: string
+          mastery_level: number
+          next_review_at: string | null
+          reference: string
+          times_reviewed: number | null
+          user_id: string | null
+          verse_text: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mastery_level?: number
+          next_review_at?: string | null
+          reference: string
+          times_reviewed?: number | null
+          user_id?: string | null
+          verse_text: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mastery_level?: number
+          next_review_at?: string | null
+          reference?: string
+          times_reviewed?: number | null
+          user_id?: string | null
+          verse_text?: string
+        }
+        Relationships: []
+      }
+      sermon_notes: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          key_takeaways: string[] | null
+          notes: string | null
+          scripture_references: string[] | null
+          speaker: string | null
+          title: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          id?: string
+          key_takeaways?: string[] | null
+          notes?: string | null
+          scripture_references?: string[] | null
+          speaker?: string | null
+          title: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          key_takeaways?: string[] | null
+          notes?: string | null
+          scripture_references?: string[] | null
+          speaker?: string | null
+          title?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      spiritual_chat_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          role: string
+          user_id: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          role: string
+          user_id?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          role?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      spiritual_goals: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_completed: boolean
+          progress: number
+          target_date: string | null
+          title: string
+          user_id: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_completed?: boolean
+          progress?: number
+          target_date?: string | null
+          title: string
+          user_id?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_completed?: boolean
+          progress?: number
+          target_date?: string | null
+          title?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
