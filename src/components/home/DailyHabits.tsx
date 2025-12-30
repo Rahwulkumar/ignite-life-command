@@ -15,18 +15,8 @@ interface DailyHabitsProps {
 }
 
 export function DailyHabits({ date, habits, onToggle }: DailyHabitsProps) {
-  const completedCount = habits.filter(h => h.completed).length;
-  
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          {date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-        </p>
-        <span className="text-xs text-muted-foreground">
-          {completedCount}/{habits.length}
-        </span>
-      </div>
+    <div className="space-y-2">
       
       <div className="space-y-2">
         {habits.map((habit) => (
