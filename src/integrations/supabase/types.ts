@@ -50,6 +50,122 @@ export type Database = {
         }
         Relationships: []
       }
+      office_chat_messages: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          role: string
+          user_id: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          role: string
+          user_id?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          role?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      office_notes: {
+        Row: {
+          content: Json | null
+          cover_image: string | null
+          created_at: string | null
+          icon: string | null
+          id: string
+          is_pinned: boolean | null
+          is_template: boolean | null
+          parent_id: string | null
+          title: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          content?: Json | null
+          cover_image?: string | null
+          created_at?: string | null
+          icon?: string | null
+          id?: string
+          is_pinned?: boolean | null
+          is_template?: boolean | null
+          parent_id?: string | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          content?: Json | null
+          cover_image?: string | null
+          created_at?: string | null
+          icon?: string | null
+          id?: string
+          is_pinned?: boolean | null
+          is_template?: boolean | null
+          parent_id?: string | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "office_notes_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "office_notes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      office_tasks: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          due_date: string | null
+          email_reference: string | null
+          id: string
+          priority: string
+          source: string | null
+          status: string
+          title: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          email_reference?: string | null
+          id?: string
+          priority?: string
+          source?: string | null
+          status?: string
+          title: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          email_reference?: string | null
+          id?: string
+          priority?: string
+          source?: string | null
+          status?: string
+          title?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       scripture_memory: {
         Row: {
           created_at: string
