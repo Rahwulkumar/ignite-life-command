@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.nova-chat]
 verify_jwt = false
+
+[functions.eve-assistant]
+verify_jwt = false
