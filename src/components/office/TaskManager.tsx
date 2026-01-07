@@ -40,7 +40,11 @@ const priorityIcons = {
   urgent: AlertTriangle,
 };
 
-export function TaskManager() {
+interface TaskManagerProps {
+  compact?: boolean;
+}
+
+export function TaskManager({ compact = false }: TaskManagerProps) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [filter, setFilter] = useState<"all" | "todo" | "in_progress" | "done">("all");
@@ -140,6 +144,47 @@ export function TaskManager() {
     in_progress: tasks.filter((t) => t.status === "in_progress").length,
     done: tasks.filter((t) => t.status === "done").length,
   };
+
+  if (compact) {
+    // Compact view for dashboard card
+    return (
+      <div className="space-y-2">
+        {tasks.slice(0, 4).map((task) => (
+          <div
+            key={task.id}
+            className="flex items-center gap-2 text-sm"
+          >
+            <button
+              onClick={() => 
+                updateTaskStatus(
+                  task.id, 
+                  task.status === "done" ? "todo" : "done"
+                )
+              }
+            >
+              {task.status === "done" ? (
+                <CheckCircle2 className="w-4 h-4 text-green-500" />
+              ) : (
+                <Circle className="w-4 h-4 text-muted-foreground" />
+              )}
+            </button>
+            <span className={cn(
+              "truncate",
+              task.status === "done" && "line-through text-muted-foreground"
+            )}>
+              {task.title}
+            </span>
+          </div>
+        ))}
+        {tasks.length === 0 && (
+          <p className="text-sm text-muted-foreground">No tasks yet</p>
+        )}
+        {tasks.length > 4 && (
+          <p className="text-xs text-muted-foreground">+{tasks.length - 4} more</p>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="h-full flex flex-col">
