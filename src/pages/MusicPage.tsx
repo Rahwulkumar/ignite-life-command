@@ -1,59 +1,71 @@
 import { MainLayout } from "@/components/layout/MainLayout";
 import { PageTransition } from "@/components/layout/PageTransition";
-import { Music, MessageSquare } from "lucide-react";
+import { Music, MessageSquare, Clock, Guitar, Flame } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PracticeTracker } from "@/components/music/PracticeTracker";
 import { RepertoireCard } from "@/components/music/RepertoireCard";
 import { AriaChat } from "@/components/music/AriaChat";
+import { DomainPageHeader } from "@/components/shared/DomainPageHeader";
+import { DomainStatsBar } from "@/components/shared/DomainStatsBar";
+import { AIChatSidebar } from "@/components/shared/AIChatSidebar";
+import { useState } from "react";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 
 const stats = [
-  { label: "Weekly", value: "3.5h" },
-  { label: "Focus", value: "Guitar" },
-  { label: "Sessions", value: "5" },
+  { icon: Clock, label: "Weekly", value: "3.5", suffix: "hours", color: "text-music" },
+  { icon: Guitar, label: "Focus", value: "Guitar", color: "text-muted-foreground" },
+  { icon: Flame, label: "Sessions", value: "5", suffix: "this week", color: "text-trading" },
+  { icon: Music, label: "Pieces", value: "12", suffix: "learning", color: "text-music" },
 ];
 
 const MusicPage = () => {
+  const [showAria, setShowAria] = useState(false);
+
   return (
     <MainLayout>
       <PageTransition>
-        <div className="p-10 max-w-5xl mx-auto">
-          <header className="mb-10">
-            <div className="flex items-center gap-3 mb-2">
-              <Music className="w-5 h-5 text-muted-foreground" />
-              <h1 className="text-4xl font-medium tracking-tight">Music</h1>
-            </div>
-            <p className="text-muted-foreground">Practice sessions, repertoire, and technique</p>
-          </header>
+        <div className="min-h-screen flex">
+          <div className="flex-1">
+            <DomainPageHeader
+              icon={Music}
+              title="Music"
+              subtitle="Practice sessions, repertoire, and technique"
+              domainColor="music"
+              action={{
+                icon: MessageSquare,
+                label: "Ask Aria",
+                onClick: () => setShowAria(true),
+              }}
+            />
 
-          <div className="grid grid-cols-3 gap-8 mb-10">
-            {stats.map((stat) => (
-              <div key={stat.label}>
-                <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
-                <p className="text-2xl font-medium tabular-nums">{stat.value}</p>
+            <DomainStatsBar stats={stats} />
+
+            <div className="px-8 pb-8">
+              <div className="max-w-5xl mx-auto">
+                <Tabs defaultValue="practice" className="space-y-6">
+                  <TabsList>
+                    <TabsTrigger value="practice">Practice</TabsTrigger>
+                    <TabsTrigger value="repertoire">Repertoire</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="practice">
+                    <PracticeTracker />
+                  </TabsContent>
+                  <TabsContent value="repertoire">
+                    <RepertoireCard />
+                  </TabsContent>
+                </Tabs>
               </div>
-            ))}
+            </div>
           </div>
 
-          <Tabs defaultValue="practice" className="space-y-6">
-            <TabsList>
-              <TabsTrigger value="practice">Practice</TabsTrigger>
-              <TabsTrigger value="repertoire">Repertoire</TabsTrigger>
-              <TabsTrigger value="aria" className="gap-2">
-                <MessageSquare className="w-3 h-3" />
-                Aria
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="practice">
-              <PracticeTracker />
-            </TabsContent>
-            <TabsContent value="repertoire">
-              <RepertoireCard />
-            </TabsContent>
-            <TabsContent value="aria">
-              <AriaChat />
-            </TabsContent>
-          </Tabs>
+          <Sheet open={showAria} onOpenChange={setShowAria}>
+            <SheetContent className="w-full sm:max-w-lg p-0">
+              <AIChatSidebar name="Aria" role="Music Instructor" domainColor="music">
+                <AriaChat />
+              </AIChatSidebar>
+            </SheetContent>
+          </Sheet>
         </div>
       </PageTransition>
     </MainLayout>
