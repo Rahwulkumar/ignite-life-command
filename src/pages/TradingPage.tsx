@@ -1,69 +1,81 @@
 import { MainLayout } from "@/components/layout/MainLayout";
 import { PageTransition } from "@/components/layout/PageTransition";
-import { TrendingUp, MessageSquare } from "lucide-react";
+import { TrendingUp, MessageSquare, DollarSign, BarChart3, Percent } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PortfolioChart } from "@/components/trading/PortfolioChart";
 import { TradeJournal } from "@/components/trading/TradeJournal";
 import { WatchlistCard } from "@/components/trading/WatchlistCard";
 import { InvestmentHoldings } from "@/components/trading/InvestmentHoldings";
 import { NovaChat } from "@/components/trading/NovaChat";
+import { DomainPageHeader } from "@/components/shared/DomainPageHeader";
+import { DomainStatsBar } from "@/components/shared/DomainStatsBar";
+import { AIChatSidebar } from "@/components/shared/AIChatSidebar";
+import { useState } from "react";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 
 const stats = [
-  { label: "Portfolio", value: "$24,850" },
-  { label: "Invested", value: "$20,325" },
-  { label: "Returns", value: "+$4,525" },
+  { icon: DollarSign, label: "Portfolio", value: "$24,850", color: "text-trading" },
+  { icon: BarChart3, label: "Invested", value: "$20,325", color: "text-muted-foreground" },
+  { icon: TrendingUp, label: "Returns", value: "+$4,525", color: "text-finance" },
+  { icon: Percent, label: "ROI", value: "+22.3%", color: "text-finance" },
 ];
 
 const TradingPage = () => {
+  const [showNova, setShowNova] = useState(false);
+
   return (
     <MainLayout>
       <PageTransition>
-        <div className="p-10 max-w-5xl mx-auto">
-          <header className="mb-10">
-            <div className="flex items-center gap-3 mb-2">
-              <TrendingUp className="w-5 h-5 text-muted-foreground" />
-              <h1 className="text-4xl font-medium tracking-tight">Trading</h1>
-            </div>
-            <p className="text-muted-foreground">Investments, mutual funds, and trade journal</p>
-          </header>
+        <div className="min-h-screen flex">
+          <div className="flex-1">
+            <DomainPageHeader
+              icon={TrendingUp}
+              title="Trading"
+              subtitle="Investments, mutual funds, and trade journal"
+              domainColor="trading"
+              action={{
+                icon: MessageSquare,
+                label: "Ask Nova",
+                onClick: () => setShowNova(true),
+              }}
+            />
 
-          <div className="grid grid-cols-3 gap-8 mb-10">
-            {stats.map((stat) => (
-              <div key={stat.label}>
-                <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
-                <p className="text-2xl font-medium tabular-nums">{stat.value}</p>
+            <DomainStatsBar stats={stats} />
+
+            <div className="px-8 pb-8">
+              <div className="max-w-5xl mx-auto">
+                <Tabs defaultValue="investments" className="space-y-6">
+                  <TabsList>
+                    <TabsTrigger value="investments">Investments</TabsTrigger>
+                    <TabsTrigger value="portfolio">Performance</TabsTrigger>
+                    <TabsTrigger value="journal">Journal</TabsTrigger>
+                    <TabsTrigger value="watchlist">Watchlist</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="investments">
+                    <InvestmentHoldings />
+                  </TabsContent>
+                  <TabsContent value="portfolio">
+                    <PortfolioChart />
+                  </TabsContent>
+                  <TabsContent value="journal">
+                    <TradeJournal />
+                  </TabsContent>
+                  <TabsContent value="watchlist">
+                    <WatchlistCard />
+                  </TabsContent>
+                </Tabs>
               </div>
-            ))}
+            </div>
           </div>
 
-          <Tabs defaultValue="investments" className="space-y-6">
-            <TabsList>
-              <TabsTrigger value="investments">Investments</TabsTrigger>
-              <TabsTrigger value="portfolio">Performance</TabsTrigger>
-              <TabsTrigger value="journal">Journal</TabsTrigger>
-              <TabsTrigger value="watchlist">Watchlist</TabsTrigger>
-              <TabsTrigger value="nova" className="gap-2">
-                <MessageSquare className="w-3 h-3" />
-                Nova
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="investments">
-              <InvestmentHoldings />
-            </TabsContent>
-            <TabsContent value="portfolio">
-              <PortfolioChart />
-            </TabsContent>
-            <TabsContent value="journal">
-              <TradeJournal />
-            </TabsContent>
-            <TabsContent value="watchlist">
-              <WatchlistCard />
-            </TabsContent>
-            <TabsContent value="nova">
-              <NovaChat />
-            </TabsContent>
-          </Tabs>
+          <Sheet open={showNova} onOpenChange={setShowNova}>
+            <SheetContent className="w-full sm:max-w-lg p-0">
+              <AIChatSidebar name="Nova" role="Trading Mentor" domainColor="trading">
+                <NovaChat />
+              </AIChatSidebar>
+            </SheetContent>
+          </Sheet>
         </div>
       </PageTransition>
     </MainLayout>

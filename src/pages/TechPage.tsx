@@ -2,15 +2,16 @@ import { useState } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { 
-  Code2, Sparkles, Calendar, Flame, ChevronLeft, ChevronRight,
-  Zap, Target, TrendingUp, Plus
+  Code2, MessageSquare, Calendar, Flame, ChevronLeft, ChevronRight,
+  Zap, Target, TrendingUp
 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
 import { AtlasChat } from "@/components/tech/AtlasChat";
 import { MonthlyFocusSlot, FocusTopic } from "@/components/tech/MonthlyFocusSlot";
 import { DailyDSASection, DSAProblem } from "@/components/tech/DailyDSASection";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { DomainPageHeader } from "@/components/shared/DomainPageHeader";
+import { DomainStatsBar } from "@/components/shared/DomainStatsBar";
+import { AIChatSidebar } from "@/components/shared/AIChatSidebar";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 
 const availableTopics = [
   "React & Next.js",
@@ -129,129 +130,57 @@ const TechPage = () => {
   const completedDSA = dsaProblems.filter(p => p.status === "completed").length;
   const totalVideos = focusTopics.reduce((sum, t) => sum + (t?.videos.length ?? 0), 0);
 
+  const stats = [
+    { icon: Flame, label: "Streak", value: totalStreak, suffix: "days", color: "text-trading" },
+    { icon: Target, label: "Focus", value: `${focusTopics.filter(Boolean).length}/2`, color: "text-tech" },
+    { icon: Zap, label: "DSA Solved", value: completedDSA, suffix: "problems", color: "text-finance" },
+    { icon: TrendingUp, label: "Videos", value: totalVideos, suffix: "queued", color: "text-spiritual" },
+  ];
+
   return (
     <MainLayout>
       <PageTransition>
         <div className="min-h-screen">
-          {/* Hero Header with Gradient */}
-          <div className="relative overflow-hidden">
-            {/* Gradient background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-tech/20 via-background to-background" />
-            <div className="absolute top-0 right-0 w-96 h-96 bg-tech/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-            
-            <div className="relative px-8 pt-10 pb-8">
-              <div className="max-w-5xl mx-auto">
-                {/* Top Row */}
-                <div className="flex items-start justify-between mb-8">
-                  <div className="flex items-center gap-4">
-                    <motion.div 
-                      initial={{ scale: 0.8, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      className="w-14 h-14 rounded-2xl bg-gradient-to-br from-tech to-tech/50 flex items-center justify-center shadow-lg shadow-tech/20"
-                    >
-                      <Code2 className="w-7 h-7 text-white" />
-                    </motion.div>
-                    <div>
-                      <h1 className="text-2xl font-semibold tracking-tight">Tech & Learning</h1>
-                      <p className="text-muted-foreground">Master your craft, one day at a time</p>
-                    </div>
-                  </div>
+          <DomainPageHeader
+            icon={Code2}
+            title="Tech & Learning"
+            subtitle="Master your craft, one day at a time"
+            domainColor="tech"
+            action={{
+              icon: MessageSquare,
+              label: "Ask Atlas",
+              onClick: () => setShowAtlas(true),
+            }}
+          />
 
-                  <Sheet open={showAtlas} onOpenChange={setShowAtlas}>
-                    <SheetTrigger asChild>
-                      <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-foreground/5 border border-foreground/10 hover:bg-foreground/10 transition-all hover:scale-[1.02] active:scale-[0.98]">
-                        <Sparkles className="w-4 h-4 text-tech" />
-                        <span className="text-sm font-medium">Ask Atlas</span>
-                      </button>
-                    </SheetTrigger>
-                    <SheetContent className="w-full sm:max-w-lg p-0">
-                      <div className="h-full">
-                        <AtlasChat />
-                      </div>
-                    </SheetContent>
-                  </Sheet>
+          <DomainStatsBar stats={stats} />
+
+          {/* Month Selector */}
+          <div className="px-8 pb-6">
+            <div className="max-w-5xl mx-auto">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => navigateMonth(-1)}
+                  className="p-2 rounded-lg hover:bg-muted transition-colors"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-muted/50">
+                  <Calendar className="w-4 h-4 text-muted-foreground" />
+                  <span className="font-medium">{monthName}</span>
                 </div>
-
-                {/* Stats Row */}
-                <div className="grid grid-cols-4 gap-4 mb-8">
-                  <motion.div 
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.1 }}
-                    className="p-4 rounded-xl bg-card border border-border/50"
-                  >
-                    <div className="flex items-center gap-2 mb-1">
-                      <Flame className="w-4 h-4 text-trading" />
-                      <span className="text-xs text-muted-foreground">Streak</span>
-                    </div>
-                    <p className="text-2xl font-semibold">{totalStreak}<span className="text-sm text-muted-foreground ml-1">days</span></p>
-                  </motion.div>
-
-                  <motion.div 
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.15 }}
-                    className="p-4 rounded-xl bg-card border border-border/50"
-                  >
-                    <div className="flex items-center gap-2 mb-1">
-                      <Target className="w-4 h-4 text-tech" />
-                      <span className="text-xs text-muted-foreground">Focus</span>
-                    </div>
-                    <p className="text-2xl font-semibold">{focusTopics.filter(Boolean).length}<span className="text-sm text-muted-foreground ml-1">/2</span></p>
-                  </motion.div>
-
-                  <motion.div 
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.2 }}
-                    className="p-4 rounded-xl bg-card border border-border/50"
-                  >
-                    <div className="flex items-center gap-2 mb-1">
-                      <Zap className="w-4 h-4 text-finance" />
-                      <span className="text-xs text-muted-foreground">DSA Solved</span>
-                    </div>
-                    <p className="text-2xl font-semibold">{completedDSA}<span className="text-sm text-muted-foreground ml-1">problems</span></p>
-                  </motion.div>
-
-                  <motion.div 
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.25 }}
-                    className="p-4 rounded-xl bg-card border border-border/50"
-                  >
-                    <div className="flex items-center gap-2 mb-1">
-                      <TrendingUp className="w-4 h-4 text-spiritual" />
-                      <span className="text-xs text-muted-foreground">Videos</span>
-                    </div>
-                    <p className="text-2xl font-semibold">{totalVideos}<span className="text-sm text-muted-foreground ml-1">queued</span></p>
-                  </motion.div>
-                </div>
-
-                {/* Month Selector */}
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => navigateMonth(-1)}
-                    className="p-2 rounded-lg hover:bg-muted transition-colors"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                  <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-muted/50">
-                    <Calendar className="w-4 h-4 text-muted-foreground" />
-                    <span className="font-medium">{monthName}</span>
-                  </div>
-                  <button
-                    onClick={() => navigateMonth(1)}
-                    className="p-2 rounded-lg hover:bg-muted transition-colors"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
+                <button
+                  onClick={() => navigateMonth(1)}
+                  className="p-2 rounded-lg hover:bg-muted transition-colors"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
               </div>
             </div>
           </div>
 
           {/* Main Content */}
-          <div className="max-w-5xl mx-auto px-8 py-8 space-y-10">
+          <div className="max-w-5xl mx-auto px-8 pb-8 space-y-10">
             {/* Monthly Focus Section */}
             <section>
               <div className="flex items-center justify-between mb-5">
@@ -293,6 +222,14 @@ const TechPage = () => {
               />
             </section>
           </div>
+
+          <Sheet open={showAtlas} onOpenChange={setShowAtlas}>
+            <SheetContent className="w-full sm:max-w-lg p-0">
+              <AIChatSidebar name="Atlas" role="Tech Mentor" domainColor="tech">
+                <AtlasChat />
+              </AIChatSidebar>
+            </SheetContent>
+          </Sheet>
         </div>
       </PageTransition>
     </MainLayout>

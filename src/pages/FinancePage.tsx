@@ -1,64 +1,76 @@
 import { MainLayout } from "@/components/layout/MainLayout";
 import { PageTransition } from "@/components/layout/PageTransition";
-import { Wallet, MessageSquare } from "lucide-react";
+import { Wallet, MessageSquare, TrendingDown, PiggyBank, CreditCard } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ExpenseTracker } from "@/components/finance/ExpenseTracker";
 import { BudgetOverview } from "@/components/finance/BudgetOverview";
 import { InvestmentTracker } from "@/components/finance/InvestmentTracker";
 import { MarcusChat } from "@/components/finance/MarcusChat";
+import { DomainPageHeader } from "@/components/shared/DomainPageHeader";
+import { DomainStatsBar } from "@/components/shared/DomainStatsBar";
+import { AIChatSidebar } from "@/components/shared/AIChatSidebar";
+import { useState } from "react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const stats = [
-  { label: "Balance", value: "₦1,250,000" },
-  { label: "Spending", value: "₦450,000" },
-  { label: "Savings", value: "₦120,000" },
+  { icon: Wallet, label: "Balance", value: "₦1.25M", color: "text-finance" },
+  { icon: TrendingDown, label: "Spending", value: "₦450K", suffix: "this month", color: "text-destructive" },
+  { icon: PiggyBank, label: "Savings", value: "₦120K", suffix: "goal", color: "text-finance" },
+  { icon: CreditCard, label: "Transactions", value: "48", suffix: "this month", color: "text-muted-foreground" },
 ];
 
 const FinancePage = () => {
+  const [showMarcus, setShowMarcus] = useState(false);
+
   return (
     <MainLayout>
       <PageTransition>
-        <div className="p-10 max-w-5xl mx-auto">
-          <header className="mb-10">
-            <div className="flex items-center gap-3 mb-2">
-              <Wallet className="w-5 h-5 text-muted-foreground" />
-              <h1 className="text-4xl font-medium tracking-tight">Finance</h1>
-            </div>
-            <p className="text-muted-foreground">Track expenses, budgets, and investments</p>
-          </header>
+        <div className="min-h-screen flex">
+          <div className="flex-1">
+            <DomainPageHeader
+              icon={Wallet}
+              title="Finance"
+              subtitle="Track expenses, budgets, and investments"
+              domainColor="finance"
+              action={{
+                icon: MessageSquare,
+                label: "Ask Marcus",
+                onClick: () => setShowMarcus(true),
+              }}
+            />
 
-          <div className="grid grid-cols-3 gap-8 mb-10">
-            {stats.map((stat) => (
-              <div key={stat.label}>
-                <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
-                <p className="text-2xl font-medium tabular-nums">{stat.value}</p>
+            <DomainStatsBar stats={stats} />
+
+            <div className="px-8 pb-8">
+              <div className="max-w-5xl mx-auto">
+                <Tabs defaultValue="transactions" className="space-y-6">
+                  <TabsList>
+                    <TabsTrigger value="transactions">Transactions</TabsTrigger>
+                    <TabsTrigger value="budgets">Budgets</TabsTrigger>
+                    <TabsTrigger value="investments">Investments</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="transactions">
+                    <ExpenseTracker />
+                  </TabsContent>
+                  <TabsContent value="budgets">
+                    <BudgetOverview />
+                  </TabsContent>
+                  <TabsContent value="investments">
+                    <InvestmentTracker />
+                  </TabsContent>
+                </Tabs>
               </div>
-            ))}
+            </div>
           </div>
 
-          <Tabs defaultValue="transactions" className="space-y-6">
-            <TabsList>
-              <TabsTrigger value="transactions">Transactions</TabsTrigger>
-              <TabsTrigger value="budgets">Budgets</TabsTrigger>
-              <TabsTrigger value="investments">Investments</TabsTrigger>
-              <TabsTrigger value="marcus" className="gap-2">
-                <MessageSquare className="w-3 h-3" />
-                Marcus
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="transactions">
-              <ExpenseTracker />
-            </TabsContent>
-            <TabsContent value="budgets">
-              <BudgetOverview />
-            </TabsContent>
-            <TabsContent value="investments">
-              <InvestmentTracker />
-            </TabsContent>
-            <TabsContent value="marcus">
-              <MarcusChat />
-            </TabsContent>
-          </Tabs>
+          <Sheet open={showMarcus} onOpenChange={setShowMarcus}>
+            <SheetContent className="w-full sm:max-w-lg p-0">
+              <AIChatSidebar name="Marcus" role="Finance Coach" domainColor="finance">
+                <MarcusChat />
+              </AIChatSidebar>
+            </SheetContent>
+          </Sheet>
         </div>
       </PageTransition>
     </MainLayout>

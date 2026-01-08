@@ -1,6 +1,6 @@
 import { MainLayout } from "@/components/layout/MainLayout";
 import { PageTransition } from "@/components/layout/PageTransition";
-import { BookOpen, MessageSquare } from "lucide-react";
+import { BookOpen, MessageSquare, Flame, Heart, BookMarked } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BibleReadingCard } from "@/components/spiritual/BibleReadingCard";
 import { ScriptureMemoryCard } from "@/components/spiritual/ScriptureMemoryCard";
@@ -12,7 +12,11 @@ import { CharacterStudyCard } from "@/components/spiritual/CharacterStudyCard";
 import { SpiritualJournalCard } from "@/components/spiritual/SpiritualJournalCard";
 import { JournalEntryModal } from "@/components/spiritual/JournalEntryModal";
 import { useSpiritualGuide } from "@/hooks/useSpiritualGuide";
+import { DomainPageHeader } from "@/components/shared/DomainPageHeader";
+import { DomainStatsBar } from "@/components/shared/DomainStatsBar";
+import { AIChatSidebar } from "@/components/shared/AIChatSidebar";
 import { useState } from "react";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 
 // Mock data - replace with real data from Supabase
 const mockVerses = [
@@ -49,9 +53,10 @@ const mockNotes = [
 ];
 
 const stats = [
-  { label: "Chapters", value: "245" },
-  { label: "Verses", value: "18" },
-  { label: "Streak", value: "7d" },
+  { icon: BookOpen, label: "Chapters", value: "245", suffix: "read", color: "text-spiritual" },
+  { icon: BookMarked, label: "Verses", value: "18", suffix: "memorized", color: "text-spiritual" },
+  { icon: Flame, label: "Streak", value: "7", suffix: "days", color: "text-trading" },
+  { icon: Heart, label: "Goals", value: "3", suffix: "active", color: "text-music" },
 ];
 
 const SpiritualPage = () => {
@@ -59,6 +64,7 @@ const SpiritualPage = () => {
   const [showDevotionReminder, setShowDevotionReminder] = useState(true);
   const [activeTab, setActiveTab] = useState("reading");
   const [isJournalModalOpen, setIsJournalModalOpen] = useState(false);
+  const [showSage, setShowSage] = useState(false);
   const [currentCharacter, setCurrentCharacter] = useState<{
     name: string;
     daysCompleted: number;
@@ -89,107 +95,111 @@ const SpiritualPage = () => {
   return (
     <MainLayout>
       <PageTransition>
-        <div className="p-10 max-w-5xl mx-auto">
-          <header className="mb-10">
-            <div className="flex items-center gap-3 mb-2">
-              <BookOpen className="w-5 h-5 text-muted-foreground" />
-              <h1 className="text-4xl font-medium tracking-tight">Spiritual</h1>
-            </div>
-            <p className="text-muted-foreground">Deepen your faith journey</p>
-          </header>
+        <div className="min-h-screen flex">
+          <div className="flex-1">
+            <DomainPageHeader
+              icon={BookOpen}
+              title="Spiritual"
+              subtitle="Deepen your faith journey"
+              domainColor="spiritual"
+              action={{
+                icon: MessageSquare,
+                label: "Ask Sage",
+                onClick: () => setShowSage(true),
+              }}
+            />
 
-          {/* Devotion Reminder */}
-          {showDevotionReminder && (
-            <div className="mb-8">
-              <DevotionReminderCard
-                timeOfDay={timeOfDay}
-                onStartDevotion={handleStartDevotion}
-                onDismiss={() => setShowDevotionReminder(false)}
-              />
-            </div>
-          )}
+            <DomainStatsBar stats={stats} />
 
-          <div className="grid grid-cols-3 gap-8 mb-10">
-            {stats.map((stat) => (
-              <div key={stat.label}>
-                <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
-                <p className="text-2xl font-medium tabular-nums">{stat.value}</p>
+            <div className="px-8 pb-8">
+              <div className="max-w-5xl mx-auto">
+                {/* Devotion Reminder */}
+                {showDevotionReminder && (
+                  <div className="mb-8">
+                    <DevotionReminderCard
+                      timeOfDay={timeOfDay}
+                      onStartDevotion={handleStartDevotion}
+                      onDismiss={() => setShowDevotionReminder(false)}
+                    />
+                  </div>
+                )}
+
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+                  <TabsList>
+                    <TabsTrigger value="reading">Reading</TabsTrigger>
+                    <TabsTrigger value="character">Character Study</TabsTrigger>
+                    <TabsTrigger value="journal">Journal</TabsTrigger>
+                    <TabsTrigger value="memory">Memory</TabsTrigger>
+                    <TabsTrigger value="goals">Goals</TabsTrigger>
+                    <TabsTrigger value="notes">Notes</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="reading">
+                    <BibleReadingCard
+                      currentBook="Romans"
+                      currentChapter={8}
+                      completedChapters={245}
+                      totalChapters={1189}
+                      onMarkComplete={() => console.log("Mark complete")}
+                    />
+                  </TabsContent>
+                  <TabsContent value="character">
+                    <CharacterStudyCard
+                      currentCharacter={currentCharacter}
+                      onSelectCharacter={handleSelectCharacter}
+                      onStartDiscussion={() => setShowSage(true)}
+                      onReadScripture={() => setActiveTab("reading")}
+                    />
+                  </TabsContent>
+                  <TabsContent value="journal">
+                    <SpiritualJournalCard
+                      recentEntries={[]}
+                      onNewEntry={() => setIsJournalModalOpen(true)}
+                      onViewEntry={(id) => console.log("View entry:", id)}
+                    />
+                  </TabsContent>
+                  <TabsContent value="memory">
+                    <ScriptureMemoryCard
+                      verses={mockVerses}
+                      onReviewComplete={(id, correct) => console.log("Review:", id, correct)}
+                    />
+                  </TabsContent>
+                  <TabsContent value="goals">
+                    <SpiritualGoalsCard
+                      goals={mockGoals}
+                      onAddGoal={() => console.log("Add goal")}
+                    />
+                  </TabsContent>
+                  <TabsContent value="notes">
+                    <SermonNotesCard
+                      notes={mockNotes}
+                      onAddNote={() => console.log("Add note")}
+                    />
+                  </TabsContent>
+                </Tabs>
+
+                {/* Journal Entry Modal */}
+                <JournalEntryModal
+                  isOpen={isJournalModalOpen}
+                  onClose={() => setIsJournalModalOpen(false)}
+                  characterName={currentCharacter?.name}
+                  onSave={(entry) => console.log("Save entry:", entry)}
+                />
               </div>
-            ))}
+            </div>
           </div>
 
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList>
-              <TabsTrigger value="reading">Reading</TabsTrigger>
-              <TabsTrigger value="character">Character Study</TabsTrigger>
-              <TabsTrigger value="journal">Journal</TabsTrigger>
-              <TabsTrigger value="memory">Memory</TabsTrigger>
-              <TabsTrigger value="goals">Goals</TabsTrigger>
-              <TabsTrigger value="notes">Notes</TabsTrigger>
-              <TabsTrigger value="sage" className="gap-2">
-                <MessageSquare className="w-3 h-3" />
-                Sage
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="reading">
-              <BibleReadingCard
-                currentBook="Romans"
-                currentChapter={8}
-                completedChapters={245}
-                totalChapters={1189}
-                onMarkComplete={() => console.log("Mark complete")}
-              />
-            </TabsContent>
-            <TabsContent value="character">
-              <CharacterStudyCard
-                currentCharacter={currentCharacter}
-                onSelectCharacter={handleSelectCharacter}
-                onStartDiscussion={() => setActiveTab("sage")}
-                onReadScripture={() => setActiveTab("reading")}
-              />
-            </TabsContent>
-            <TabsContent value="journal">
-              <SpiritualJournalCard
-                recentEntries={[]}
-                onNewEntry={() => setIsJournalModalOpen(true)}
-                onViewEntry={(id) => console.log("View entry:", id)}
-              />
-            </TabsContent>
-            <TabsContent value="memory">
-              <ScriptureMemoryCard
-                verses={mockVerses}
-                onReviewComplete={(id, correct) => console.log("Review:", id, correct)}
-              />
-            </TabsContent>
-            <TabsContent value="goals">
-              <SpiritualGoalsCard
-                goals={mockGoals}
-                onAddGoal={() => console.log("Add goal")}
-              />
-            </TabsContent>
-            <TabsContent value="notes">
-              <SermonNotesCard
-                notes={mockNotes}
-                onAddNote={() => console.log("Add note")}
-              />
-            </TabsContent>
-            <TabsContent value="sage">
-              <SageChat
-                messages={messages}
-                onSendMessage={sendMessage}
-                isLoading={isLoading}
-              />
-            </TabsContent>
-          </Tabs>
-
-          {/* Journal Entry Modal */}
-          <JournalEntryModal
-            isOpen={isJournalModalOpen}
-            onClose={() => setIsJournalModalOpen(false)}
-            characterName={currentCharacter?.name}
-            onSave={(entry) => console.log("Save entry:", entry)}
-          />
+          <Sheet open={showSage} onOpenChange={setShowSage}>
+            <SheetContent className="w-full sm:max-w-lg p-0">
+              <AIChatSidebar name="Sage" role="Spiritual Guide" domainColor="spiritual">
+                <SageChat
+                  messages={messages}
+                  onSendMessage={sendMessage}
+                  isLoading={isLoading}
+                />
+              </AIChatSidebar>
+            </SheetContent>
+          </Sheet>
         </div>
       </PageTransition>
     </MainLayout>
