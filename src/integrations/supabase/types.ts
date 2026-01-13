@@ -50,6 +50,39 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_reports: {
+        Row: {
+          activities: Json | null
+          ai_summary: string | null
+          created_at: string | null
+          domain_breakdown: Json | null
+          id: string
+          report_date: string
+          total_minutes: number | null
+          user_id: string | null
+        }
+        Insert: {
+          activities?: Json | null
+          ai_summary?: string | null
+          created_at?: string | null
+          domain_breakdown?: Json | null
+          id?: string
+          report_date: string
+          total_minutes?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          activities?: Json | null
+          ai_summary?: string | null
+          created_at?: string | null
+          domain_breakdown?: Json | null
+          id?: string
+          report_date?: string
+          total_minutes?: number | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       office_chat_messages: {
         Row: {
           content: string
@@ -291,6 +324,42 @@ export type Database = {
           progress?: number
           target_date?: string | null
           title?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      time_sessions: {
+        Row: {
+          activity: string
+          created_at: string | null
+          domain: string
+          duration_minutes: number | null
+          ended_at: string | null
+          id: string
+          notes: string | null
+          started_at: string
+          user_id: string | null
+        }
+        Insert: {
+          activity: string
+          created_at?: string | null
+          domain: string
+          duration_minutes?: number | null
+          ended_at?: string | null
+          id?: string
+          notes?: string | null
+          started_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          activity?: string
+          created_at?: string | null
+          domain?: string
+          duration_minutes?: number | null
+          ended_at?: string | null
+          id?: string
+          notes?: string | null
+          started_at?: string
           user_id?: string | null
         }
         Relationships: []
