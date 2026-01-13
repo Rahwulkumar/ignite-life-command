@@ -1,47 +1,198 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { 
-  Building2, 
-  CheckSquare, 
   FileText, 
-  Sparkles, 
-  ArrowLeft, 
-  Clock, 
+  CheckSquare, 
+  Send, 
+  Loader2,
+  ArrowLeft,
+  Sparkles,
+  Mail,
   Calendar,
-  Zap,
-  Target,
-  ChevronRight
+  MessageSquare,
+  ChevronRight,
+  User
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { TaskManager } from "@/components/office/TaskManager";
 import { NotesPanel } from "@/components/office/NotesPanel";
-import { EveChat } from "@/components/office/EveChat";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
-import { DomainStatsBar } from "@/components/shared/DomainStatsBar";
+
+interface Message {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  created_at: string;
+}
+
+const quickCommands = [
+  { label: "What should I focus on today?", icon: Sparkles },
+  { label: "Summarize my pending tasks", icon: CheckSquare },
+  { label: "Help me draft an email", icon: Mail },
+];
 
 export default function OfficePage() {
-  const [view, setView] = useState<"dashboard" | "notes" | "tasks">("dashboard");
+  const [view, setView] = useState<"command" | "notes" | "tasks">("command");
+  const [notesOpen, setNotesOpen] = useState(false);
+  const [tasksOpen, setTasksOpen] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const [taskCount, setTaskCount] = useState(0);
   const [noteCount, setNoteCount] = useState(0);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    async function fetchCounts() {
-      const [tasksRes, notesRes] = await Promise.all([
-        supabase.from("office_tasks").select("id", { count: "exact" }),
-        supabase.from("office_notes").select("id", { count: "exact" }),
-      ]);
-      setTaskCount(tasksRes.count || 0);
-      setNoteCount(notesRes.count || 0);
-    }
+    fetchMessages();
     fetchCounts();
-
     const interval = setInterval(() => setCurrentTime(new Date()), 60000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  async function fetchCounts() {
+    const [tasksRes, notesRes] = await Promise.all([
+      supabase.from("office_tasks").select("id", { count: "exact" }).eq("status", "todo"),
+      supabase.from("office_notes").select("id", { count: "exact" }),
+    ]);
+    setTaskCount(tasksRes.count || 0);
+    setNoteCount(notesRes.count || 0);
+  }
+
+  async function fetchMessages() {
+    const { data, error } = await supabase
+      .from("office_chat_messages")
+      .select("*")
+      .order("created_at", { ascending: true })
+      .limit(50);
+
+    if (!error && data) {
+      setMessages(data.map(m => ({
+        ...m,
+        role: m.role as "user" | "assistant"
+      })));
+    }
+  }
+
+  async function sendMessage(content: string) {
+    if (!content.trim() || isLoading) return;
+
+    const userMessage: Message = {
+      id: crypto.randomUUID(),
+      role: "user",
+      content: content.trim(),
+      created_at: new Date().toISOString(),
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+    setIsLoading(true);
+
+    await supabase.from("office_chat_messages").insert({
+      role: "user",
+      content: content.trim(),
+    });
+
+    try {
+      const response = await supabase.functions.invoke("eve-assistant", {
+        body: {
+          messages: [...messages, userMessage].map((m) => ({
+            role: m.role,
+            content: m.content,
+          })),
+        },
+      });
+
+      if (response.error) throw response.error;
+
+      const reader = response.data.getReader();
+      const decoder = new TextDecoder();
+      let assistantContent = "";
+
+      const assistantMessage: Message = {
+        id: crypto.randomUUID(),
+        role: "assistant",
+        content: "",
+        created_at: new Date().toISOString(),
+      };
+
+      setMessages((prev) => [...prev, assistantMessage]);
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split("\n");
+
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            const data = line.slice(6);
+            if (data === "[DONE]") continue;
+
+            try {
+              const parsed = JSON.parse(data);
+              const content = parsed.choices?.[0]?.delta?.content || "";
+              assistantContent += content;
+
+              setMessages((prev) =>
+                prev.map((m) =>
+                  m.id === assistantMessage.id
+                    ? { ...m, content: assistantContent }
+                    : m
+                )
+              );
+            } catch {
+              // Ignore parse errors
+            }
+          }
+        }
+      }
+
+      await supabase.from("office_chat_messages").insert({
+        role: "assistant",
+        content: assistantContent,
+      });
+    } catch (error) {
+      console.error("Error:", error);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          role: "assistant",
+          content: "I encountered an error. Please try again.",
+          created_at: new Date().toISOString(),
+        },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    sendMessage(input);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage(input);
+    }
+  };
 
   const greeting = () => {
     const hour = currentTime.getHours();
@@ -50,18 +201,17 @@ export default function OfficePage() {
     return "Good evening";
   };
 
-  const formattedDate = currentTime.toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
+  const formattedTime = currentTime.toLocaleTimeString("en-US", { 
+    hour: "numeric", 
+    minute: "2-digit",
+    hour12: true 
   });
 
-  const stats = [
-    { icon: CheckSquare, label: "Open Tasks", value: taskCount, color: "text-tech" },
-    { icon: FileText, label: "Notes", value: noteCount, color: "text-trading" },
-    { icon: Target, label: "Focus Score", value: "87%", color: "text-finance" },
-    { icon: Clock, label: "Time", value: currentTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }), color: "text-muted-foreground" },
-  ];
+  const formattedDate = currentTime.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "short",
+    day: "numeric",
+  });
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -73,24 +223,21 @@ export default function OfficePage() {
             {view === "notes" ? (
               <motion.div
                 key="notes"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.2 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
                 className="h-screen flex flex-col"
               >
-                <header className="border-b border-border px-6 py-3 flex items-center gap-3 bg-background/80 backdrop-blur-sm">
+                <header className="border-b border-border px-6 py-3 flex items-center gap-3">
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => setView("dashboard")}
+                    onClick={() => setView("command")}
                     className="gap-2 text-muted-foreground hover:text-foreground"
                   >
                     <ArrowLeft className="w-4 h-4" />
                     Back
                   </Button>
-                  <div className="h-4 w-px bg-border" />
-                  <span className="text-sm font-medium">Notes</span>
                 </header>
                 <div className="flex-1 overflow-hidden">
                   <NotesPanel />
@@ -99,24 +246,21 @@ export default function OfficePage() {
             ) : view === "tasks" ? (
               <motion.div
                 key="tasks"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.2 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
                 className="h-screen flex flex-col"
               >
-                <header className="border-b border-border px-6 py-3 flex items-center gap-3 bg-background/80 backdrop-blur-sm">
+                <header className="border-b border-border px-6 py-3 flex items-center gap-3">
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => setView("dashboard")}
+                    onClick={() => setView("command")}
                     className="gap-2 text-muted-foreground hover:text-foreground"
                   >
                     <ArrowLeft className="w-4 h-4" />
                     Back
                   </Button>
-                  <div className="h-4 w-px bg-border" />
-                  <span className="text-sm font-medium">Task Manager</span>
                 </header>
                 <div className="flex-1 overflow-hidden">
                   <TaskManager />
@@ -124,138 +268,206 @@ export default function OfficePage() {
               </motion.div>
             ) : (
               <motion.div
-                key="dashboard"
+                key="command"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="h-screen flex"
+                className="h-screen flex flex-col"
               >
-                {/* Main Content Area */}
-                <div className="flex-1 flex flex-col overflow-hidden">
-                  {/* Hero Header */}
-                  <div className="relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-br from-work/20 via-background to-background" />
-                    <div className="absolute top-0 right-0 w-96 h-96 bg-work/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-                    
-                    <div className="relative px-8 pt-10 pb-8">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-4">
-                          <motion.div 
-                            initial={{ scale: 0.8, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            className="w-14 h-14 rounded-2xl bg-gradient-to-br from-work to-work/50 flex items-center justify-center shadow-lg shadow-work/20"
+                {/* Minimal Header */}
+                <header className="px-8 py-6 flex items-center justify-between border-b border-border/50">
+                  <div className="flex items-center gap-4">
+                    <span className="text-muted-foreground text-sm">{formattedDate}</span>
+                    <span className="text-muted-foreground/50">·</span>
+                    <span className="text-muted-foreground text-sm">{formattedTime}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setView("notes")}
+                      className="flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-colors"
+                    >
+                      <FileText className="w-4 h-4" />
+                      <span>Notes</span>
+                      <span className="text-xs text-muted-foreground/70">{noteCount}</span>
+                    </button>
+                    <button
+                      onClick={() => setView("tasks")}
+                      className="flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-colors"
+                    >
+                      <CheckSquare className="w-4 h-4" />
+                      <span>Tasks</span>
+                      <span className="text-xs text-muted-foreground/70">{taskCount}</span>
+                    </button>
+                  </div>
+                </header>
+
+                {/* Eve Command Center */}
+                <div className="flex-1 flex flex-col max-w-3xl mx-auto w-full px-6 py-8">
+                  {messages.length === 0 ? (
+                    /* Empty State - Centered Greeting */
+                    <div className="flex-1 flex flex-col items-center justify-center">
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-center mb-12"
+                      >
+                        <h1 className="text-4xl font-light tracking-tight mb-2">
+                          {greeting()}
+                        </h1>
+                        <p className="text-muted-foreground">
+                          How can I help you today?
+                        </p>
+                      </motion.div>
+
+                      {/* Quick Commands */}
+                      <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                        className="w-full max-w-lg space-y-2"
+                      >
+                        {quickCommands.map((cmd, i) => (
+                          <button
+                            key={i}
+                            onClick={() => sendMessage(cmd.label)}
+                            className="w-full flex items-center gap-3 px-4 py-3 text-left text-sm border border-border/50 rounded-xl hover:bg-muted/30 hover:border-border transition-all group"
                           >
-                            <Building2 className="w-7 h-7 text-white" />
+                            <cmd.icon className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                            <span className="text-muted-foreground group-hover:text-foreground transition-colors">
+                              {cmd.label}
+                            </span>
+                            <ChevronRight className="w-4 h-4 text-muted-foreground/50 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+                          </button>
+                        ))}
+                      </motion.div>
+
+                      {/* Microsoft 365 Connection Prompt */}
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.3 }}
+                        className="mt-16 text-center"
+                      >
+                        <p className="text-xs text-muted-foreground/60 mb-2">
+                          Connect your work accounts for personalized insights
+                        </p>
+                        <div className="flex items-center justify-center gap-3">
+                          <button 
+                            disabled
+                            className="flex items-center gap-2 px-3 py-1.5 text-xs text-muted-foreground/50 border border-border/30 rounded-lg cursor-not-allowed"
+                          >
+                            <Mail className="w-3 h-3" />
+                            Outlook
+                          </button>
+                          <button 
+                            disabled
+                            className="flex items-center gap-2 px-3 py-1.5 text-xs text-muted-foreground/50 border border-border/30 rounded-lg cursor-not-allowed"
+                          >
+                            <MessageSquare className="w-3 h-3" />
+                            Teams
+                          </button>
+                          <button 
+                            disabled
+                            className="flex items-center gap-2 px-3 py-1.5 text-xs text-muted-foreground/50 border border-border/30 rounded-lg cursor-not-allowed"
+                          >
+                            <Calendar className="w-3 h-3" />
+                            Calendar
+                          </button>
+                        </div>
+                        <p className="text-xs text-muted-foreground/40 mt-2">Coming soon</p>
+                      </motion.div>
+                    </div>
+                  ) : (
+                    /* Chat Messages */
+                    <ScrollArea className="flex-1 -mx-6 px-6" ref={scrollRef}>
+                      <div className="space-y-6 py-4">
+                        {messages.map((message) => (
+                          <motion.div
+                            key={message.id}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className={cn(
+                              "flex gap-4",
+                              message.role === "user" && "flex-row-reverse"
+                            )}
+                          >
+                            <div
+                              className={cn(
+                                "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
+                                message.role === "assistant"
+                                  ? "bg-muted"
+                                  : "bg-foreground/10"
+                              )}
+                            >
+                              {message.role === "assistant" ? (
+                                <Sparkles className="w-4 h-4 text-muted-foreground" />
+                              ) : (
+                                <User className="w-4 h-4 text-muted-foreground" />
+                              )}
+                            </div>
+                            <div
+                              className={cn(
+                                "flex-1 max-w-[80%]",
+                                message.role === "user" && "text-right"
+                              )}
+                            >
+                              <div
+                                className={cn(
+                                  "inline-block rounded-2xl px-4 py-3 text-sm",
+                                  message.role === "assistant"
+                                    ? "bg-muted text-foreground"
+                                    : "bg-foreground text-background"
+                                )}
+                              >
+                                <p className="whitespace-pre-wrap leading-relaxed">
+                                  {message.content}
+                                </p>
+                              </div>
+                            </div>
                           </motion.div>
-                          <div>
-                            <p className="text-sm text-muted-foreground mb-0.5">{formattedDate}</p>
-                            <h1 className="text-2xl font-semibold tracking-tight">{greeting()}</h1>
+                        ))}
+                        {isLoading && messages[messages.length - 1]?.role === "user" && (
+                          <div className="flex gap-4">
+                            <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+                              <Sparkles className="w-4 h-4 text-muted-foreground" />
+                            </div>
+                            <div className="bg-muted rounded-2xl px-4 py-3">
+                              <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                            </div>
                           </div>
-                        </div>
+                        )}
                       </div>
-                    </div>
-                  </div>
+                    </ScrollArea>
+                  )}
 
-                  <DomainStatsBar stats={stats} />
-
-                  {/* Cards Grid */}
-                  <div className="flex-1 px-8 pb-8 overflow-auto">
-                    <div className="max-w-5xl mx-auto">
-                      <div className="grid grid-cols-2 gap-6">
-                        {/* Notes Card */}
-                        <motion.button
-                          onClick={() => setView("notes")}
-                          className="group relative p-6 rounded-2xl border border-border/50 bg-card hover:border-trading/40 transition-all text-left overflow-hidden"
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                        >
-                          <div className="absolute inset-0 bg-gradient-to-br from-trading/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                          <div className="relative">
-                            <div className="flex items-start justify-between mb-6">
-                              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-trading/20 to-trading/10 flex items-center justify-center">
-                                <FileText className="w-7 h-7 text-trading" />
-                              </div>
-                              <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-trading group-hover:translate-x-1 transition-all" />
-                            </div>
-                            <h3 className="text-lg font-semibold mb-2">Notes</h3>
-                            <p className="text-sm text-muted-foreground leading-relaxed">
-                              Notion-style editor for documents, meeting notes, and ideas
-                            </p>
-                            <div className="mt-4 pt-4 border-t border-border/50">
-                              <span className="text-xs text-muted-foreground">{noteCount} pages</span>
-                            </div>
-                          </div>
-                        </motion.button>
-
-                        {/* Tasks Card */}
-                        <motion.button
-                          onClick={() => setView("tasks")}
-                          className="group relative p-6 rounded-2xl border border-border/50 bg-card hover:border-tech/40 transition-all text-left overflow-hidden"
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                        >
-                          <div className="absolute inset-0 bg-gradient-to-br from-tech/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                          <div className="relative">
-                            <div className="flex items-start justify-between mb-6">
-                              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-tech/20 to-tech/10 flex items-center justify-center">
-                                <CheckSquare className="w-7 h-7 text-tech" />
-                              </div>
-                              <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-tech group-hover:translate-x-1 transition-all" />
-                            </div>
-                            <h3 className="text-lg font-semibold mb-2">Tasks</h3>
-                            <p className="text-sm text-muted-foreground leading-relaxed">
-                              Track priorities, deadlines, and action items
-                            </p>
-                            <div className="mt-4 pt-4 border-t border-border/50">
-                              <span className="text-xs text-muted-foreground">{taskCount} active</span>
-                            </div>
-                          </div>
-                        </motion.button>
-
-                        {/* Quick Actions Card */}
-                        <div className="col-span-2 p-6 rounded-2xl border border-border/50 bg-card">
-                          <div className="flex items-center gap-2 mb-4">
-                            <Zap className="w-4 h-4 text-muted-foreground" />
-                            <h3 className="text-sm font-medium text-muted-foreground">Quick Actions</h3>
-                          </div>
-                          <div className="flex gap-3">
-                            <QuickActionButton 
-                              icon={FileText} 
-                              label="New Note" 
-                              onClick={() => setView("notes")} 
-                            />
-                            <QuickActionButton 
-                              icon={CheckSquare} 
-                              label="Add Task" 
-                              onClick={() => setView("tasks")} 
-                            />
-                            <QuickActionButton 
-                              icon={Calendar} 
-                              label="Schedule" 
-                              onClick={() => {}} 
-                              disabled
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Eve Chat Sidebar */}
-                <div className="w-[380px] border-l border-border flex flex-col bg-card/30">
-                  <div className="px-5 py-4 border-b border-border flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-work/20 to-work/10 flex items-center justify-center">
-                      <Sparkles className="w-4 h-4 text-work" />
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-medium">Eve</h3>
-                      <p className="text-xs text-muted-foreground">Executive Assistant</p>
-                    </div>
-                  </div>
-                  <div className="flex-1 overflow-hidden">
-                    <EveChat />
+                  {/* Input Area */}
+                  <div className="pt-4 mt-auto">
+                    <form onSubmit={handleSubmit} className="relative">
+                      <Textarea
+                        ref={inputRef}
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        placeholder="Ask Eve anything..."
+                        className="min-h-[56px] max-h-[200px] resize-none pr-14 rounded-2xl border-border/50 bg-muted/30 focus:bg-muted/50 transition-colors"
+                        rows={1}
+                      />
+                      <Button 
+                        type="submit" 
+                        size="icon"
+                        disabled={!input.trim() || isLoading}
+                        className="absolute right-2 bottom-2 rounded-xl"
+                      >
+                        {isLoading ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Send className="w-4 h-4" />
+                        )}
+                      </Button>
+                    </form>
+                    <p className="text-center text-xs text-muted-foreground/50 mt-3">
+                      Eve can make mistakes. Verify important information.
+                    </p>
                   </div>
                 </div>
               </motion.div>
@@ -264,33 +476,5 @@ export default function OfficePage() {
         </PageTransition>
       </main>
     </div>
-  );
-}
-
-function QuickActionButton({ 
-  icon: Icon, 
-  label, 
-  onClick,
-  disabled = false
-}: { 
-  icon: any; 
-  label: string; 
-  onClick: () => void;
-  disabled?: boolean;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className={cn(
-        "flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border/50 bg-background/50 transition-all text-sm",
-        disabled 
-          ? "opacity-50 cursor-not-allowed" 
-          : "hover:bg-muted hover:border-muted-foreground/20"
-      )}
-    >
-      <Icon className="w-4 h-4 text-muted-foreground" />
-      <span>{label}</span>
-    </button>
   );
 }
