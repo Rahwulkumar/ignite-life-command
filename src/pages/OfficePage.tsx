@@ -1,212 +1,131 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   FileText, 
-  CheckSquare, 
-  Send, 
-  Loader2,
-  ArrowLeft,
-  Sparkles,
-  Mail,
-  Calendar,
-  MessageSquare,
-  ChevronRight,
-  User
+  Clock,
+  BarChart3
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { TaskManager } from "@/components/office/TaskManager";
 import { NotesPanel } from "@/components/office/NotesPanel";
+import { WorkspaceSidebar } from "@/components/office/WorkspaceSidebar";
+import { EveFloatingWidget } from "@/components/shared/EveFloatingWidget";
+import { TimerWidget } from "@/components/shared/TimerWidget";
+import { EveningReportModal } from "@/components/shared/EveningReportModal";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { useTimeTracker } from "@/hooks/useTimeTracker";
 
-interface Message {
+interface Note {
   id: string;
-  role: "user" | "assistant";
-  content: string;
+  title: string;
+  icon: string;
+  is_pinned: boolean;
+  content: any;
   created_at: string;
+  updated_at: string;
 }
 
-const quickCommands = [
-  { label: "What should I focus on today?", icon: Sparkles },
-  { label: "Summarize my pending tasks", icon: CheckSquare },
-  { label: "Help me draft an email", icon: Mail },
-];
-
 export default function OfficePage() {
-  const [view, setView] = useState<"command" | "notes" | "tasks">("command");
-  const [notesOpen, setNotesOpen] = useState(false);
-  const [tasksOpen, setTasksOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [taskCount, setTaskCount] = useState(0);
-  const [noteCount, setNoteCount] = useState(0);
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
+  const [activeView, setActiveView] = useState<'notes' | 'tasks' | 'daily-log'>('notes');
+  const [isLoading, setIsLoading] = useState(true);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const { getTodayStats } = useTimeTracker();
   const [currentTime, setCurrentTime] = useState(new Date());
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    fetchMessages();
-    fetchCounts();
+    fetchNotes();
     const interval = setInterval(() => setCurrentTime(new Date()), 60000);
     return () => clearInterval(interval);
   }, []);
 
+  // Check for evening report time (9 PM)
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    const hour = currentTime.getHours();
+    const hasShownToday = localStorage.getItem('lastReportDate') === new Date().toDateString();
+    
+    if (hour >= 21 && !hasShownToday) {
+      const stats = getTodayStats();
+      if (stats.totalMinutes > 0) {
+        setShowReportModal(true);
+        localStorage.setItem('lastReportDate', new Date().toDateString());
+      }
     }
-  }, [messages]);
+  }, [currentTime]);
 
-  async function fetchCounts() {
-    const [tasksRes, notesRes] = await Promise.all([
-      supabase.from("office_tasks").select("id", { count: "exact" }).eq("status", "todo"),
-      supabase.from("office_notes").select("id", { count: "exact" }),
-    ]);
-    setTaskCount(tasksRes.count || 0);
-    setNoteCount(notesRes.count || 0);
-  }
-
-  async function fetchMessages() {
+  async function fetchNotes() {
     const { data, error } = await supabase
-      .from("office_chat_messages")
+      .from("office_notes")
       .select("*")
-      .order("created_at", { ascending: true })
-      .limit(50);
+      .order("is_pinned", { ascending: false })
+      .order("updated_at", { ascending: false });
 
     if (!error && data) {
-      setMessages(data.map(m => ({
-        ...m,
-        role: m.role as "user" | "assistant"
-      })));
-    }
-  }
-
-  async function sendMessage(content: string) {
-    if (!content.trim() || isLoading) return;
-
-    const userMessage: Message = {
-      id: crypto.randomUUID(),
-      role: "user",
-      content: content.trim(),
-      created_at: new Date().toISOString(),
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
-    setInput("");
-    setIsLoading(true);
-
-    await supabase.from("office_chat_messages").insert({
-      role: "user",
-      content: content.trim(),
-    });
-
-    try {
-      const response = await supabase.functions.invoke("eve-assistant", {
-        body: {
-          messages: [...messages, userMessage].map((m) => ({
-            role: m.role,
-            content: m.content,
-          })),
-        },
-      });
-
-      if (response.error) throw response.error;
-
-      const reader = response.data.getReader();
-      const decoder = new TextDecoder();
-      let assistantContent = "";
-
-      const assistantMessage: Message = {
-        id: crypto.randomUUID(),
-        role: "assistant",
-        content: "",
-        created_at: new Date().toISOString(),
-      };
-
-      setMessages((prev) => [...prev, assistantMessage]);
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value);
-        const lines = chunk.split("\n");
-
-        for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            const data = line.slice(6);
-            if (data === "[DONE]") continue;
-
-            try {
-              const parsed = JSON.parse(data);
-              const content = parsed.choices?.[0]?.delta?.content || "";
-              assistantContent += content;
-
-              setMessages((prev) =>
-                prev.map((m) =>
-                  m.id === assistantMessage.id
-                    ? { ...m, content: assistantContent }
-                    : m
-                )
-              );
-            } catch {
-              // Ignore parse errors
-            }
-          }
-        }
+      setNotes(data as Note[]);
+      if (data.length > 0 && !selectedNoteId) {
+        setSelectedNoteId(data[0].id);
       }
+    }
+    setIsLoading(false);
+  }
 
-      await supabase.from("office_chat_messages").insert({
-        role: "assistant",
-        content: assistantContent,
-      });
-    } catch (error) {
-      console.error("Error:", error);
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: crypto.randomUUID(),
-          role: "assistant",
-          content: "I encountered an error. Please try again.",
-          created_at: new Date().toISOString(),
-        },
-      ]);
-    } finally {
-      setIsLoading(false);
+  async function createNote() {
+    const { data, error } = await supabase
+      .from("office_notes")
+      .insert({
+        title: "Untitled",
+        icon: "📝",
+        content: {},
+      })
+      .select()
+      .single();
+
+    if (!error && data) {
+      setNotes((prev) => [data as Note, ...prev]);
+      setSelectedNoteId(data.id);
+      setActiveView('notes');
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    sendMessage(input);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage(input);
+  async function deleteNote(id: string) {
+    await supabase.from("office_notes").delete().eq("id", id);
+    setNotes((prev) => prev.filter((n) => n.id !== id));
+    if (selectedNoteId === id) {
+      const remaining = notes.filter((n) => n.id !== id);
+      setSelectedNoteId(remaining.length > 0 ? remaining[0].id : null);
     }
-  };
+  }
 
-  const greeting = () => {
-    const hour = currentTime.getHours();
-    if (hour < 12) return "Good morning";
-    if (hour < 17) return "Good afternoon";
-    return "Good evening";
-  };
+  async function togglePin(id: string) {
+    const note = notes.find((n) => n.id === id);
+    if (!note) return;
 
-  const formattedTime = currentTime.toLocaleTimeString("en-US", { 
-    hour: "numeric", 
-    minute: "2-digit",
-    hour12: true 
-  });
+    const newPinned = !note.is_pinned;
+    await supabase
+      .from("office_notes")
+      .update({ is_pinned: newPinned })
+      .eq("id", id);
 
+    setNotes((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, is_pinned: newPinned } : n))
+    );
+  }
+
+  async function updateNote(id: string, updates: Partial<Note>) {
+    await supabase
+      .from("office_notes")
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq("id", id);
+
+    setNotes((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, ...updates } : n))
+    );
+  }
+
+  const selectedNote = notes.find((n) => n.id === selectedNoteId);
   const formattedDate = currentTime.toLocaleDateString("en-US", {
     weekday: "long",
     month: "short",
@@ -217,264 +136,180 @@ export default function OfficePage() {
     <div className="min-h-screen bg-background flex">
       <Sidebar />
       
-      <main className="flex-1 ml-16">
+      <main className="flex-1 ml-16 flex">
         <PageTransition>
-          <AnimatePresence mode="wait">
-            {view === "notes" ? (
-              <motion.div
-                key="notes"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="h-screen flex flex-col"
-              >
-                <header className="border-b border-border px-6 py-3 flex items-center gap-3">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setView("command")}
-                    className="gap-2 text-muted-foreground hover:text-foreground"
+          {/* Workspace Sidebar */}
+          <WorkspaceSidebar
+            notes={notes}
+            selectedNoteId={selectedNoteId}
+            onSelectNote={setSelectedNoteId}
+            onCreateNote={createNote}
+            onDeleteNote={deleteNote}
+            onTogglePin={togglePin}
+            activeView={activeView}
+            onChangeView={setActiveView}
+          />
+
+          {/* Main Content Area */}
+          <div className="flex-1 flex flex-col h-screen">
+            {/* Minimal Header */}
+            <header className="px-6 py-3 flex items-center justify-between border-b border-border/50">
+              <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                <span>{formattedDate}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <TimerWidget />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-2"
+                  onClick={() => setShowReportModal(true)}
+                >
+                  <BarChart3 className="w-4 h-4" />
+                  Daily Report
+                </Button>
+              </div>
+            </header>
+
+            {/* Content */}
+            <div className="flex-1 overflow-hidden">
+              <AnimatePresence mode="wait">
+                {activeView === 'tasks' ? (
+                  <motion.div
+                    key="tasks"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="h-full"
                   >
-                    <ArrowLeft className="w-4 h-4" />
-                    Back
-                  </Button>
-                </header>
-                <div className="flex-1 overflow-hidden">
-                  <NotesPanel />
-                </div>
-              </motion.div>
-            ) : view === "tasks" ? (
-              <motion.div
-                key="tasks"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="h-screen flex flex-col"
-              >
-                <header className="border-b border-border px-6 py-3 flex items-center gap-3">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setView("command")}
-                    className="gap-2 text-muted-foreground hover:text-foreground"
+                    <TaskManager />
+                  </motion.div>
+                ) : activeView === 'daily-log' ? (
+                  <motion.div
+                    key="daily-log"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="h-full p-8"
                   >
-                    <ArrowLeft className="w-4 h-4" />
-                    Back
-                  </Button>
-                </header>
-                <div className="flex-1 overflow-hidden">
-                  <TaskManager />
-                </div>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="command"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="h-screen flex flex-col"
-              >
-                {/* Minimal Header */}
-                <header className="px-8 py-6 flex items-center justify-between border-b border-border/50">
-                  <div className="flex items-center gap-4">
-                    <span className="text-muted-foreground text-sm">{formattedDate}</span>
-                    <span className="text-muted-foreground/50">·</span>
-                    <span className="text-muted-foreground text-sm">{formattedTime}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setView("notes")}
-                      className="flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-colors"
-                    >
-                      <FileText className="w-4 h-4" />
-                      <span>Notes</span>
-                      <span className="text-xs text-muted-foreground/70">{noteCount}</span>
-                    </button>
-                    <button
-                      onClick={() => setView("tasks")}
-                      className="flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-colors"
-                    >
-                      <CheckSquare className="w-4 h-4" />
-                      <span>Tasks</span>
-                      <span className="text-xs text-muted-foreground/70">{taskCount}</span>
-                    </button>
-                  </div>
-                </header>
-
-                {/* Eve Command Center */}
-                <div className="flex-1 flex flex-col max-w-3xl mx-auto w-full px-6 py-8">
-                  {messages.length === 0 ? (
-                    /* Empty State - Centered Greeting */
-                    <div className="flex-1 flex flex-col items-center justify-center">
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-center mb-12"
-                      >
-                        <h1 className="text-4xl font-light tracking-tight mb-2">
-                          {greeting()}
-                        </h1>
-                        <p className="text-muted-foreground">
-                          How can I help you today?
-                        </p>
-                      </motion.div>
-
-                      {/* Quick Commands */}
-                      <motion.div 
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1 }}
-                        className="w-full max-w-lg space-y-2"
-                      >
-                        {quickCommands.map((cmd, i) => (
-                          <button
-                            key={i}
-                            onClick={() => sendMessage(cmd.label)}
-                            className="w-full flex items-center gap-3 px-4 py-3 text-left text-sm border border-border/50 rounded-xl hover:bg-muted/30 hover:border-border transition-all group"
-                          >
-                            <cmd.icon className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-                            <span className="text-muted-foreground group-hover:text-foreground transition-colors">
-                              {cmd.label}
-                            </span>
-                            <ChevronRight className="w-4 h-4 text-muted-foreground/50 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
-                          </button>
-                        ))}
-                      </motion.div>
-
-                      {/* Microsoft 365 Connection Prompt */}
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.3 }}
-                        className="mt-16 text-center"
-                      >
-                        <p className="text-xs text-muted-foreground/60 mb-2">
-                          Connect your work accounts for personalized insights
-                        </p>
-                        <div className="flex items-center justify-center gap-3">
-                          <button 
-                            disabled
-                            className="flex items-center gap-2 px-3 py-1.5 text-xs text-muted-foreground/50 border border-border/30 rounded-lg cursor-not-allowed"
-                          >
-                            <Mail className="w-3 h-3" />
-                            Outlook
-                          </button>
-                          <button 
-                            disabled
-                            className="flex items-center gap-2 px-3 py-1.5 text-xs text-muted-foreground/50 border border-border/30 rounded-lg cursor-not-allowed"
-                          >
-                            <MessageSquare className="w-3 h-3" />
-                            Teams
-                          </button>
-                          <button 
-                            disabled
-                            className="flex items-center gap-2 px-3 py-1.5 text-xs text-muted-foreground/50 border border-border/30 rounded-lg cursor-not-allowed"
-                          >
-                            <Calendar className="w-3 h-3" />
-                            Calendar
-                          </button>
-                        </div>
-                        <p className="text-xs text-muted-foreground/40 mt-2">Coming soon</p>
-                      </motion.div>
-                    </div>
-                  ) : (
-                    /* Chat Messages */
-                    <ScrollArea className="flex-1 -mx-6 px-6" ref={scrollRef}>
-                      <div className="space-y-6 py-4">
-                        {messages.map((message) => (
-                          <motion.div
-                            key={message.id}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className={cn(
-                              "flex gap-4",
-                              message.role === "user" && "flex-row-reverse"
-                            )}
-                          >
-                            <div
-                              className={cn(
-                                "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
-                                message.role === "assistant"
-                                  ? "bg-muted"
-                                  : "bg-foreground/10"
-                              )}
-                            >
-                              {message.role === "assistant" ? (
-                                <Sparkles className="w-4 h-4 text-muted-foreground" />
-                              ) : (
-                                <User className="w-4 h-4 text-muted-foreground" />
-                              )}
-                            </div>
-                            <div
-                              className={cn(
-                                "flex-1 max-w-[80%]",
-                                message.role === "user" && "text-right"
-                              )}
-                            >
-                              <div
-                                className={cn(
-                                  "inline-block rounded-2xl px-4 py-3 text-sm",
-                                  message.role === "assistant"
-                                    ? "bg-muted text-foreground"
-                                    : "bg-foreground text-background"
-                                )}
-                              >
-                                <p className="whitespace-pre-wrap leading-relaxed">
-                                  {message.content}
-                                </p>
-                              </div>
-                            </div>
-                          </motion.div>
-                        ))}
-                        {isLoading && messages[messages.length - 1]?.role === "user" && (
-                          <div className="flex gap-4">
-                            <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-                              <Sparkles className="w-4 h-4 text-muted-foreground" />
-                            </div>
-                            <div className="bg-muted rounded-2xl px-4 py-3">
-                              <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </ScrollArea>
-                  )}
-
-                  {/* Input Area */}
-                  <div className="pt-4 mt-auto">
-                    <form onSubmit={handleSubmit} className="relative">
-                      <Textarea
-                        ref={inputRef}
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        placeholder="Ask Eve anything..."
-                        className="min-h-[56px] max-h-[200px] resize-none pr-14 rounded-2xl border-border/50 bg-muted/30 focus:bg-muted/50 transition-colors"
-                        rows={1}
+                    <DailyLogView />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="notes"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="h-full"
+                  >
+                    {selectedNote ? (
+                      <NotesPanel 
+                        initialNoteId={selectedNoteId}
+                        onNoteChange={(id) => setSelectedNoteId(id)}
+                        embedded
                       />
-                      <Button 
-                        type="submit" 
-                        size="icon"
-                        disabled={!input.trim() || isLoading}
-                        className="absolute right-2 bottom-2 rounded-xl"
-                      >
-                        {isLoading ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <Send className="w-4 h-4" />
-                        )}
-                      </Button>
-                    </form>
-                    <p className="text-center text-xs text-muted-foreground/50 mt-3">
-                      Eve can make mistakes. Verify important information.
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                    ) : (
+                      <div className="h-full flex items-center justify-center text-muted-foreground">
+                        <div className="text-center">
+                          <FileText className="w-12 h-12 mx-auto mb-4 opacity-30" />
+                          <p>Select a page or create a new one</p>
+                          <Button 
+                            variant="outline" 
+                            className="mt-4"
+                            onClick={createNote}
+                          >
+                            Create Page
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
         </PageTransition>
       </main>
+
+      {/* Eve Floating Widget */}
+      <EveFloatingWidget />
+
+      {/* Evening Report Modal */}
+      <EveningReportModal 
+        open={showReportModal} 
+        onOpenChange={setShowReportModal}
+      />
+    </div>
+  );
+}
+
+// Daily Log View Component
+function DailyLogView() {
+  const { todaySessions, getTodayStats } = useTimeTracker();
+  const stats = getTodayStats();
+
+  const formatTime = (minutes: number) => {
+    const hrs = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    if (hrs > 0) return `${hrs}h ${mins}m`;
+    return `${mins}m`;
+  };
+
+  return (
+    <div className="max-w-2xl mx-auto">
+      <div className="mb-8">
+        <h1 className="text-2xl font-semibold mb-2">Daily Log</h1>
+        <p className="text-muted-foreground">
+          {new Date().toLocaleDateString("en-US", {
+            weekday: "long",
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+          })}
+        </p>
+      </div>
+
+      {/* Today's Summary */}
+      <div className="glass rounded-xl p-6 mb-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Clock className="w-5 h-5 text-primary" />
+          <h2 className="font-medium">Time Tracked</h2>
+        </div>
+        <p className="text-3xl font-bold">{formatTime(stats.totalMinutes)}</p>
+      </div>
+
+      {/* Activity Log */}
+      <div className="space-y-4">
+        <h2 className="font-medium text-muted-foreground">Activities</h2>
+        {todaySessions.length > 0 ? (
+          <div className="space-y-2">
+            {todaySessions
+              .filter((s) => s.duration_minutes)
+              .map((session) => (
+                <div
+                  key={session.id}
+                  className="flex items-center justify-between p-4 bg-muted/30 rounded-lg"
+                >
+                  <div>
+                    <p className="font-medium capitalize">{session.activity}</p>
+                    <p className="text-sm text-muted-foreground capitalize">
+                      {session.domain}
+                    </p>
+                  </div>
+                  <span className="text-sm font-mono">
+                    {formatTime(session.duration_minutes || 0)}
+                  </span>
+                </div>
+              ))}
+          </div>
+        ) : (
+          <div className="text-center py-12 text-muted-foreground">
+            <Clock className="w-10 h-10 mx-auto mb-3 opacity-30" />
+            <p>No activities logged today.</p>
+            <p className="text-sm mt-1">Start a timer to track your progress!</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

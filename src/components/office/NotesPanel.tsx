@@ -22,9 +22,15 @@ interface Note {
   updated_at: string;
 }
 
-export function NotesPanel() {
+interface NotesPanelProps {
+  initialNoteId?: string | null;
+  onNoteChange?: (id: string) => void;
+  embedded?: boolean;
+}
+
+export function NotesPanel({ initialNoteId, onNoteChange, embedded = false }: NotesPanelProps) {
   const [notes, setNotes] = useState<Note[]>([]);
-  const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
+  const [selectedNoteId, setSelectedNoteId] = useState<string | null>(initialNoteId || null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -101,6 +107,29 @@ export function NotesPanel() {
   }
 
   const selectedNote = notes.find((n) => n.id === selectedNoteId);
+
+  const handleSelectNote = (id: string) => {
+    setSelectedNoteId(id);
+    onNoteChange?.(id);
+  };
+
+  // If embedded, only show editor without sidebar
+  if (embedded) {
+    return (
+      <div className="h-full">
+        {selectedNote ? (
+          <NotionEditor
+            note={selectedNote}
+            onUpdate={(updates) => updateNote(selectedNote.id, updates)}
+          />
+        ) : (
+          <div className="flex-1 flex items-center justify-center text-muted-foreground">
+            <p>Select a note</p>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-full">
