@@ -10,7 +10,6 @@ import {
   Bookmark,
   Briefcase,
   MessageSquare,
-  Building2,
 } from "lucide-react";
 
 const navigationItems = [
@@ -22,7 +21,6 @@ const navigationItems = [
   { icon: Music, label: "Music", path: "/music" },
   { icon: Bookmark, label: "Content", path: "/content" },
   { icon: Briefcase, label: "Projects", path: "/projects" },
-  { icon: Building2, label: "Office", path: "/office" },
 ];
 
 export function Sidebar() {
