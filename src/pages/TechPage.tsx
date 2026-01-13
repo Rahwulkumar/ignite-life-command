@@ -1,54 +1,28 @@
 import { useState } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { PageTransition } from "@/components/layout/PageTransition";
-import { 
-  Code2, MessageSquare, Calendar, Flame, ChevronLeft, ChevronRight,
-  Zap, Target, TrendingUp
-} from "lucide-react";
+import { Code2, MessageSquare, Flame, Zap, Target, TrendingUp, Clock } from "lucide-react";
 import { AtlasChat } from "@/components/tech/AtlasChat";
 import { MonthlyFocusSlot, FocusTopic } from "@/components/tech/MonthlyFocusSlot";
-import { DailyDSASection, DSAProblem } from "@/components/tech/DailyDSASection";
 import { DomainPageHeader } from "@/components/shared/DomainPageHeader";
 import { DomainStatsBar } from "@/components/shared/DomainStatsBar";
 import { AIChatSidebar } from "@/components/shared/AIChatSidebar";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { WeeklyGoals } from "@/components/tech/WeeklyGoals";
+import { EnhancedDSATracker } from "@/components/tech/EnhancedDSATracker";
+import { TechRoadmapView } from "@/components/tech/TechRoadmapView";
+import { EnhancedStudyLog } from "@/components/tech/EnhancedStudyLog";
+import { EnhancedResources } from "@/components/tech/EnhancedResources";
 
 const availableTopics = [
-  "React & Next.js",
-  "TypeScript",
-  "Node.js",
-  "Python",
-  "AI/ML",
-  "System Design",
-  "DevOps",
-  "Databases",
-  "Mobile Dev",
-  "Web3",
-];
-
-const initialProblems: DSAProblem[] = [
-  { id: "1", title: "Two Sum", difficulty: "Easy", status: "completed", topic: "Arrays", leetcodeId: 1, completedAt: new Date().toISOString() },
-  { id: "2", title: "Valid Parentheses", difficulty: "Easy", status: "completed", topic: "Stack", leetcodeId: 20 },
-  { id: "3", title: "Merge Intervals", difficulty: "Medium", status: "in-progress", topic: "Arrays", leetcodeId: 56 },
-  { id: "4", title: "LRU Cache", difficulty: "Medium", status: "pending", topic: "Design", leetcodeId: 146 },
-  { id: "5", title: "Binary Tree Level Order", difficulty: "Medium", status: "pending", topic: "Trees", leetcodeId: 102 },
-  { id: "6", title: "Word Search II", difficulty: "Hard", status: "pending", topic: "Trie", leetcodeId: 212 },
+  "React & Next.js", "TypeScript", "Node.js", "Python", "AI/ML",
+  "System Design", "DevOps", "Databases", "Mobile Dev", "Web3",
 ];
 
 const TechPage = () => {
-  const [currentMonth, setCurrentMonth] = useState(new Date());
   const [focusTopics, setFocusTopics] = useState<(FocusTopic | null)[]>([null, null]);
-  const [dsaProblems, setDsaProblems] = useState<DSAProblem[]>(initialProblems);
-  const [dsaStreak, setDsaStreak] = useState(7);
   const [showAtlas, setShowAtlas] = useState(false);
-
-  const monthName = currentMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" });
-
-  const navigateMonth = (direction: number) => {
-    const newDate = new Date(currentMonth);
-    newDate.setMonth(newDate.getMonth() + direction);
-    setCurrentMonth(newDate);
-  };
 
   const handleSelectTopic = (slot: number, name: string) => {
     const newTopic: FocusTopic = {
@@ -106,35 +80,14 @@ const TechPage = () => {
     return topic?.dailyPractice.includes(new Date().toDateString()) ?? false;
   };
 
-  const handleAddDSAProblem = (problem: Omit<DSAProblem, "id" | "status">) => {
-    setDsaProblems([...dsaProblems, { ...problem, id: Date.now().toString(), status: "pending" }]);
-  };
-
-  const handleCompleteDSA = (id: string) => {
-    setDsaProblems(dsaProblems.map(p => 
-      p.id === id ? { ...p, status: "completed", completedAt: new Date().toISOString() } : p
-    ));
-  };
-
-  const handleStartDSA = (id: string) => {
-    setDsaProblems(dsaProblems.map(p => 
-      p.id === id ? { ...p, status: "in-progress" } : p
-    ));
-  };
-
-  const totalStreak = Math.max(dsaStreak, ...focusTopics.filter(Boolean).map(t => t!.streak));
   const selectedTopics = focusTopics.filter(Boolean).map(t => t!.name);
   const availableForSelection = availableTopics.filter(t => !selectedTopics.includes(t));
 
-  // Stats
-  const completedDSA = dsaProblems.filter(p => p.status === "completed").length;
-  const totalVideos = focusTopics.reduce((sum, t) => sum + (t?.videos.length ?? 0), 0);
-
   const stats = [
-    { icon: Flame, label: "Streak", value: totalStreak, suffix: "days", color: "text-trading" },
+    { icon: Flame, label: "Streak", value: 7, suffix: "days", color: "text-trading" },
     { icon: Target, label: "Focus", value: `${focusTopics.filter(Boolean).length}/2`, color: "text-tech" },
-    { icon: Zap, label: "DSA Solved", value: completedDSA, suffix: "problems", color: "text-finance" },
-    { icon: TrendingUp, label: "Videos", value: totalVideos, suffix: "queued", color: "text-spiritual" },
+    { icon: Zap, label: "DSA Solved", value: 24, suffix: "problems", color: "text-finance" },
+    { icon: Clock, label: "This Week", value: "16.5", suffix: "hours", color: "text-spiritual" },
   ];
 
   return (
@@ -155,72 +108,63 @@ const TechPage = () => {
 
           <DomainStatsBar stats={stats} />
 
-          {/* Month Selector */}
-          <div className="px-8 pb-6">
-            <div className="max-w-5xl mx-auto">
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => navigateMonth(-1)}
-                  className="p-2 rounded-lg hover:bg-muted transition-colors"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-                <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-muted/50">
-                  <Calendar className="w-4 h-4 text-muted-foreground" />
-                  <span className="font-medium">{monthName}</span>
+          <div className="max-w-5xl mx-auto px-8 pb-8">
+            <Tabs defaultValue="focus" className="w-full">
+              <TabsList className="w-full justify-start bg-transparent border-b border-border rounded-none h-auto p-0 mb-6">
+                <TabsTrigger value="focus" className="rounded-none border-b-2 border-transparent data-[state=active]:border-tech data-[state=active]:bg-transparent px-4 py-3">
+                  Focus
+                </TabsTrigger>
+                <TabsTrigger value="dsa" className="rounded-none border-b-2 border-transparent data-[state=active]:border-tech data-[state=active]:bg-transparent px-4 py-3">
+                  DSA
+                </TabsTrigger>
+                <TabsTrigger value="roadmap" className="rounded-none border-b-2 border-transparent data-[state=active]:border-tech data-[state=active]:bg-transparent px-4 py-3">
+                  Roadmap
+                </TabsTrigger>
+                <TabsTrigger value="study" className="rounded-none border-b-2 border-transparent data-[state=active]:border-tech data-[state=active]:bg-transparent px-4 py-3">
+                  Study Log
+                </TabsTrigger>
+                <TabsTrigger value="resources" className="rounded-none border-b-2 border-transparent data-[state=active]:border-tech data-[state=active]:bg-transparent px-4 py-3">
+                  Resources
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="focus" className="space-y-8 mt-0">
+                <div className="grid grid-cols-2 gap-5">
+                  {[0, 1].map((slot) => (
+                    <MonthlyFocusSlot
+                      key={slot}
+                      slot={slot + 1}
+                      topic={focusTopics[slot]}
+                      availableTopics={availableForSelection}
+                      onSelectTopic={(name) => handleSelectTopic(slot, name)}
+                      onAddVideo={handleAddVideo}
+                      onToggleVideo={handleToggleVideo}
+                      onLogPractice={handleLogPractice}
+                      hasPracticedToday={focusTopics[slot] ? hasPracticedToday(focusTopics[slot]!.id) : false}
+                    />
+                  ))}
                 </div>
-                <button
-                  onClick={() => navigateMonth(1)}
-                  className="p-2 rounded-lg hover:bg-muted transition-colors"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Main Content */}
-          <div className="max-w-5xl mx-auto px-8 pb-8 space-y-10">
-            {/* Monthly Focus Section */}
-            <section>
-              <div className="flex items-center justify-between mb-5">
-                <div>
-                  <h2 className="text-lg font-medium mb-1">Monthly Focus</h2>
-                  <p className="text-sm text-muted-foreground">Choose 2 technologies to master this month</p>
+                <div className="p-5 rounded-xl border border-border/50 bg-card">
+                  <WeeklyGoals />
                 </div>
-              </div>
+              </TabsContent>
 
-              <div className="grid grid-cols-2 gap-5">
-                {[0, 1].map((slot) => (
-                  <MonthlyFocusSlot
-                    key={slot}
-                    slot={slot + 1}
-                    topic={focusTopics[slot]}
-                    availableTopics={availableForSelection}
-                    onSelectTopic={(name) => handleSelectTopic(slot, name)}
-                    onAddVideo={handleAddVideo}
-                    onToggleVideo={handleToggleVideo}
-                    onLogPractice={handleLogPractice}
-                    hasPracticedToday={focusTopics[slot] ? hasPracticedToday(focusTopics[slot]!.id) : false}
-                  />
-                ))}
-              </div>
-            </section>
+              <TabsContent value="dsa" className="mt-0">
+                <EnhancedDSATracker />
+              </TabsContent>
 
-            {/* Daily DSA Section */}
-            <section>
-              <div className="mb-5">
-                <h2 className="text-lg font-medium mb-1">Daily DSA Practice</h2>
-                <p className="text-sm text-muted-foreground">Consistency beats intensity — solve one problem every day</p>
-              </div>
-              <DailyDSASection
-                problems={dsaProblems}
-                streak={dsaStreak}
-                onAddProblem={handleAddDSAProblem}
-                onCompleteProblem={handleCompleteDSA}
-                onStartProblem={handleStartDSA}
-              />
-            </section>
+              <TabsContent value="roadmap" className="mt-0">
+                <TechRoadmapView />
+              </TabsContent>
+
+              <TabsContent value="study" className="mt-0">
+                <EnhancedStudyLog />
+              </TabsContent>
+
+              <TabsContent value="resources" className="mt-0">
+                <EnhancedResources />
+              </TabsContent>
+            </Tabs>
           </div>
 
           <Sheet open={showAtlas} onOpenChange={setShowAtlas}>
