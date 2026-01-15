@@ -12,12 +12,49 @@ interface DailyHabitsProps {
   date: Date;
   habits: Habit[];
   onToggle: (id: string) => void;
+  compact?: boolean;
 }
 
-export function DailyHabits({ date, habits, onToggle }: DailyHabitsProps) {
+export function DailyHabits({ date, habits, onToggle, compact = false }: DailyHabitsProps) {
+  if (compact) {
+    return (
+      <div className="grid grid-cols-2 gap-1.5">
+        {habits.map((habit) => (
+          <button
+            key={habit.id}
+            onClick={() => onToggle(habit.id)}
+            className={cn(
+              "flex items-center gap-2 p-2 rounded-lg transition-all text-left",
+              "hover:bg-muted/50",
+              habit.completed && "opacity-60"
+            )}
+          >
+            <div className={cn(
+              "w-6 h-6 rounded-full flex items-center justify-center transition-colors flex-shrink-0",
+              habit.completed 
+                ? "bg-primary/10 text-primary" 
+                : "bg-muted text-muted-foreground"
+            )}>
+              {habit.completed ? (
+                <Check className="w-3 h-3" />
+              ) : (
+                <habit.icon className="w-3 h-3" />
+              )}
+            </div>
+            <span className={cn(
+              "text-xs truncate",
+              habit.completed && "line-through text-muted-foreground"
+            )}>
+              {habit.label}
+            </span>
+          </button>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-2">
-      
       <div className="space-y-2">
         {habits.map((habit) => (
           <button

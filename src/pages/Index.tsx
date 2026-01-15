@@ -38,7 +38,7 @@ const weeklyData = [
 
 const focusItems = [
   { icon: Code2, title: "DSA Practice", subtitle: "3 problems remaining", href: "/tech", color: "tech" },
-  { icon: TrendingUp, title: "Market Analysis", subtitle: "Review watchlist", href: "/trading", color: "trading" },
+  { icon: TrendingUp, title: "Market Analysis", subtitle: "Review watchlist", href: "/investments", color: "trading" },
   { icon: Music, title: "Piano Practice", subtitle: "30 min session", href: "/music", color: "music" },
 ];
 
@@ -79,192 +79,191 @@ const Index = () => {
   return (
     <MainLayout>
       <PageTransition>
-        <div className="min-h-screen">
-          {/* Header */}
-          <header className="px-8 pt-10 pb-6">
-            <div className="max-w-6xl mx-auto">
-              <div className="flex items-start justify-between">
+        <div className="h-[calc(100vh-4rem)] overflow-hidden flex flex-col">
+          {/* Compact Header */}
+          <header className="px-6 pt-4 pb-3 flex-shrink-0">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
                 <div>
-                  <motion.p
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-sm text-muted-foreground mb-1"
-                  >
-                    {format(currentTime, "EEEE, MMMM d")}
-                  </motion.p>
                   <motion.h1
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.05 }}
-                    className="text-3xl font-semibold tracking-tight"
+                    className="text-xl font-semibold tracking-tight"
                   >
                     {greeting()}
                   </motion.h1>
+                  <motion.p
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.05 }}
+                    className="text-xs text-muted-foreground"
+                  >
+                    {format(currentTime, "EEEE, MMMM d")}
+                  </motion.p>
                 </div>
-                
-                {/* Streak Badge */}
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.1 }}
-                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-card border border-border/50"
-                >
-                  <Flame className="w-4 h-4 text-trading" />
-                  <span className="text-sm font-medium">7 day streak</span>
-                </motion.div>
               </div>
+              
+              {/* Streak Badge */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.1 }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card border border-border/50 text-xs"
+              >
+                <Flame className="w-3.5 h-3.5 text-trading" />
+                <span className="font-medium">7 day streak</span>
+              </motion.div>
             </div>
           </header>
 
-          {/* Domain Progress Section */}
-          <section className="px-8 py-6">
-            <div className="max-w-6xl mx-auto">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.15 }}
-                className="bg-card border border-border/50 rounded-2xl p-6"
-              >
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-2">
-                    <Target className="w-4 h-4 text-muted-foreground" />
-                    <h2 className="font-medium">Progress This Month</h2>
+          {/* Main Content Grid - Fills remaining space */}
+          <div className="flex-1 px-6 pb-4 overflow-hidden">
+            <div className="h-full grid grid-cols-12 gap-3">
+              {/* Left Column */}
+              <div className="col-span-7 flex flex-col gap-3 overflow-hidden">
+                {/* Progress Rings - Compact */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="bg-card border border-border/50 rounded-xl p-4 flex-shrink-0"
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Target className="w-3.5 h-3.5 text-muted-foreground" />
+                      <h2 className="text-sm font-medium">Monthly Progress</h2>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground">
+                      {format(currentTime, "MMMM yyyy")}
+                    </p>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    {format(currentTime, "MMMM yyyy")}
-                  </p>
-                </div>
-                <div className="flex justify-around">
-                  {domainProgress.map((domain, i) => (
-                    <DomainProgressRing
-                      key={domain.label}
-                      {...domain}
-                      delay={0.2 + i * 0.1}
-                    />
-                  ))}
-                </div>
-              </motion.div>
-            </div>
-          </section>
+                  <div className="flex justify-around">
+                    {domainProgress.map((domain, i) => (
+                      <DomainProgressRing
+                        key={domain.label}
+                        {...domain}
+                        delay={0.15 + i * 0.05}
+                        compact
+                      />
+                    ))}
+                  </div>
+                </motion.div>
 
-          {/* Main Grid */}
-          <section className="px-8 pb-8">
-            <div className="max-w-6xl mx-auto">
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                {/* Left Column - Habits & Focus */}
-                <div className="lg:col-span-7 space-y-6">
-                  {/* Today's Habits */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.25 }}
-                    className="bg-card border border-border/50 rounded-2xl p-6"
-                  >
-                    <div className="flex items-center justify-between mb-6">
-                      <div className="flex items-center gap-3">
-                        <h2 className="font-medium">Today's Habits</h2>
-                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-muted text-xs">
-                          <Zap className="w-3 h-3" />
-                          {completedHabits}/{habits.length}
-                        </div>
-                      </div>
-                      {/* Mini Progress Bar */}
-                      <div className="w-24 h-1.5 rounded-full bg-muted overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${habitProgress}%` }}
-                          transition={{ delay: 0.4, duration: 0.6 }}
-                          className="h-full bg-foreground rounded-full"
-                        />
+                {/* Today's Habits - Compact */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.15 }}
+                  className="bg-card border border-border/50 rounded-xl p-4 flex-1 min-h-0 overflow-hidden"
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-sm font-medium">Today's Habits</h2>
+                      <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-muted text-[10px]">
+                        <Zap className="w-2.5 h-2.5" />
+                        {completedHabits}/{habits.length}
                       </div>
                     </div>
-                    <DailyHabits
-                      date={selectedDate}
-                      habits={habits}
-                      onToggle={toggleHabit}
-                    />
-                  </motion.div>
-
-                  {/* Focus Today */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                    className="bg-card border border-border/50 rounded-2xl p-6"
-                  >
-                    <h2 className="font-medium mb-4">Focus Today</h2>
-                    <div className="space-y-3">
-                      {focusItems.map((item, i) => (
-                        <FocusCard key={item.title} {...item} delay={0.35 + i * 0.05} />
-                      ))}
+                    <div className="w-16 h-1 rounded-full bg-muted overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${habitProgress}%` }}
+                        transition={{ delay: 0.3, duration: 0.5 }}
+                        className="h-full bg-foreground rounded-full"
+                      />
                     </div>
-                  </motion.div>
-                </div>
+                  </div>
+                  <DailyHabits
+                    date={selectedDate}
+                    habits={habits}
+                    onToggle={toggleHabit}
+                    compact
+                  />
+                </motion.div>
 
-                {/* Right Column - Sidebar */}
-                <div className="lg:col-span-5 space-y-6">
-                  {/* Devotion Widget */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.35 }}
-                  >
-                    <DevotionWidget
-                      characterName="David"
-                      dayNumber={7}
-                      todayScripture="1 Samuel 17"
-                      timeOfDay={timeOfDay}
-                    />
-                  </motion.div>
+                {/* Focus Today - Horizontal */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="bg-card border border-border/50 rounded-xl p-4 flex-shrink-0"
+                >
+                  <h2 className="text-sm font-medium mb-3">Focus Today</h2>
+                  <div className="grid grid-cols-3 gap-2">
+                    {focusItems.map((item, i) => (
+                      <FocusCard key={item.title} {...item} delay={0.25 + i * 0.03} compact />
+                    ))}
+                  </div>
+                </motion.div>
+              </div>
 
-                  {/* Calendar */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
-                    className="bg-card border border-border/50 rounded-2xl p-6"
-                  >
-                    <MiniCalendar
-                      selectedDate={selectedDate}
-                      onSelectDate={setSelectedDate}
-                      completedDates={completedDates}
-                    />
-                  </motion.div>
+              {/* Right Column */}
+              <div className="col-span-5 flex flex-col gap-3 overflow-hidden">
+                {/* Devotion Widget */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.15 }}
+                  className="flex-shrink-0"
+                >
+                  <DevotionWidget
+                    characterName="David"
+                    dayNumber={7}
+                    todayScripture="1 Samuel 17"
+                    timeOfDay={timeOfDay}
+                    compact
+                  />
+                </motion.div>
 
-                  {/* Weekly Overview */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.45 }}
-                    className="bg-card border border-border/50 rounded-2xl p-6"
-                  >
-                    <WeeklyOverview
-                      data={weeklyData}
-                      maxValue={6}
-                      label="Habits Completed"
-                    />
-                  </motion.div>
+                {/* Calendar - Compact */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="bg-card border border-border/50 rounded-xl p-3 flex-1 min-h-0"
+                >
+                  <MiniCalendar
+                    selectedDate={selectedDate}
+                    onSelectDate={setSelectedDate}
+                    completedDates={completedDates}
+                    compact
+                  />
+                </motion.div>
 
-                  {/* Quick Stats */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 }}
-                    className="grid grid-cols-2 gap-4"
-                  >
-                    <div className="bg-card border border-border/50 rounded-xl p-4 text-center">
-                      <p className="text-2xl font-semibold">28</p>
-                      <p className="text-xs text-muted-foreground">Tasks Done</p>
-                    </div>
-                    <div className="bg-card border border-border/50 rounded-xl p-4 text-center">
-                      <p className="text-2xl font-semibold">92%</p>
-                      <p className="text-xs text-muted-foreground">Consistency</p>
-                    </div>
-                  </motion.div>
-                </div>
+                {/* Weekly Overview + Quick Stats Combined */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.25 }}
+                  className="bg-card border border-border/50 rounded-xl p-3 flex-shrink-0"
+                >
+                  <WeeklyOverview
+                    data={weeklyData}
+                    maxValue={6}
+                    label="Habits Completed"
+                    compact
+                  />
+                </motion.div>
+
+                {/* Quick Stats - Inline */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="grid grid-cols-2 gap-2 flex-shrink-0"
+                >
+                  <div className="bg-card border border-border/50 rounded-lg p-3 text-center">
+                    <p className="text-lg font-semibold">28</p>
+                    <p className="text-[10px] text-muted-foreground">Tasks Done</p>
+                  </div>
+                  <div className="bg-card border border-border/50 rounded-lg p-3 text-center">
+                    <p className="text-lg font-semibold">92%</p>
+                    <p className="text-[10px] text-muted-foreground">Consistency</p>
+                  </div>
+                </motion.div>
               </div>
             </div>
-          </section>
+          </div>
         </div>
       </PageTransition>
     </MainLayout>
