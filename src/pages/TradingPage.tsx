@@ -30,8 +30,8 @@ const TradingPage = () => {
           <div className="flex-1">
             <DomainPageHeader
               icon={TrendingUp}
-              title="Trading"
-              subtitle="Investments, mutual funds, and trade journal"
+              title="Investments"
+              subtitle="Portfolio, mutual funds, and investment journal"
               domainColor="trading"
               action={{
                 icon: MessageSquare,
@@ -71,7 +71,7 @@ const TradingPage = () => {
 
           <Sheet open={showNova} onOpenChange={setShowNova}>
             <SheetContent className="w-full sm:max-w-lg p-0">
-              <AIChatSidebar name="Nova" role="Trading Mentor" domainColor="trading">
+              <AIChatSidebar name="Nova" role="Investment Mentor" domainColor="trading">
                 <NovaChat />
               </AIChatSidebar>
             </SheetContent>

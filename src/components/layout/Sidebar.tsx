@@ -15,7 +15,7 @@ import {
 const navigationItems = [
   { icon: LayoutDashboard, label: "Overview", path: "/" },
   { icon: Wallet, label: "Finance", path: "/finance" },
-  { icon: TrendingUp, label: "Trading", path: "/trading" },
+  { icon: TrendingUp, label: "Investments", path: "/investments" },
   { icon: Code2, label: "Tech", path: "/tech" },
   { icon: BookOpen, label: "Spiritual", path: "/spiritual" },
   { icon: Music, label: "Music", path: "/music" },
