@@ -1,26 +1,27 @@
 import { useState, useEffect } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { PageTransition } from "@/components/layout/PageTransition";
-import { GlowWidget, StatWidget, ProgressWidget } from "@/components/dashboard/widgets/GlowWidget";
-import { DomainLinkCard } from "@/components/dashboard/widgets/DomainLinkCard";
-import { HabitGrid } from "@/components/dashboard/widgets/HabitGrid";
+import { HeroHeader } from "@/components/dashboard/widgets/HeroHeader";
+import { MetricCard } from "@/components/dashboard/widgets/MetricCard";
+import { GoalProgress } from "@/components/dashboard/widgets/GoalProgress";
+import { QuickAccessGrid } from "@/components/dashboard/widgets/QuickAccessGrid";
+import { HabitTracker } from "@/components/dashboard/widgets/HabitTracker";
+import { ActivityChart } from "@/components/dashboard/widgets/ActivityChart";
+import { InsightCard } from "@/components/dashboard/widgets/InsightCard";
 import { DevotionBanner } from "@/components/dashboard/widgets/DevotionBanner";
-import { WeekBarChart } from "@/components/dashboard/widgets/WeekBarChart";
 import { defaultHabits } from "@/components/home/DailyHabits";
-import { format } from "date-fns";
 import { 
   BookOpen, 
   Dumbbell, 
   Code2, 
-  Flame, 
   TrendingUp, 
   Music,
   Wallet,
   CheckCircle2,
   Target,
-  Zap
+  Lightbulb,
+  GraduationCap
 } from "lucide-react";
-import { motion } from "framer-motion";
 
 const weeklyData = [
   { day: "M", value: 3, isToday: false },
@@ -30,6 +31,41 @@ const weeklyData = [
   { day: "F", value: 4, isToday: false },
   { day: "S", value: 2, isToday: false },
   { day: "S", value: 5, isToday: true },
+];
+
+const quickAccessItems = [
+  {
+    icon: Wallet,
+    title: "Finance",
+    subtitle: "Budget & expenses",
+    href: "/finance",
+    color: "finance",
+    metric: { label: "Spent this month", value: "$2,340" }
+  },
+  {
+    icon: TrendingUp,
+    title: "Investments",
+    subtitle: "Portfolio tracking",
+    href: "/investments",
+    color: "trading",
+    metric: { label: "Total return", value: "+12.4%" }
+  },
+  {
+    icon: Music,
+    title: "Music",
+    subtitle: "Practice & learn",
+    href: "/music",
+    color: "music",
+    metric: { label: "Hours this week", value: "8.5" }
+  },
+  {
+    icon: Code2,
+    title: "Tech",
+    subtitle: "Skills & certs",
+    href: "/tech",
+    color: "tech",
+    metric: { label: "Skills tracked", value: "24" }
+  },
 ];
 
 const Index = () => {
@@ -47,91 +83,46 @@ const Index = () => {
     );
   };
 
-  const greeting = () => {
-    const hour = currentTime.getHours();
-    if (hour < 12) return "Good morning";
-    if (hour < 17) return "Good afternoon";
-    return "Good evening";
-  };
-
   const hour = currentTime.getHours();
   const timeOfDay: "morning" | "evening" = hour < 12 ? "morning" : "evening";
-  const completedHabits = habits.filter((h) => h.completed).length;
 
   return (
     <MainLayout>
       <PageTransition>
-        <div className="min-h-screen px-6 py-6 max-w-7xl mx-auto">
-          {/* Header Section */}
-          <header className="mb-8">
-            <div className="flex items-start justify-between">
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                <h1 className="text-3xl font-semibold tracking-tight mb-1">
-                  {greeting()}
-                </h1>
-                <p className="text-muted-foreground">
-                  {format(currentTime, "EEEE, MMMM d, yyyy")}
-                </p>
-              </motion.div>
-              
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.2, duration: 0.4 }}
-                className="flex items-center gap-3"
-              >
-                {/* Streak Badge */}
-                <div className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-card border border-border/50">
-                  <div className="relative">
-                    <Flame className="w-5 h-5 text-trading" />
-                    <div className="absolute inset-0 animate-ping">
-                      <Flame className="w-5 h-5 text-trading opacity-30" />
-                    </div>
-                  </div>
-                  <span className="text-sm font-semibold">7 Day Streak</span>
-                </div>
-              </motion.div>
-            </div>
-          </header>
+        <div className="min-h-screen px-6 py-6 max-w-7xl mx-auto space-y-6">
+          {/* Hero Header */}
+          <HeroHeader currentTime={currentTime} />
 
-          {/* Stats Row */}
-          <div className="grid grid-cols-4 gap-4 mb-6">
-            <StatWidget
+          {/* Metrics Row */}
+          <div className="grid grid-cols-4 gap-4">
+            <MetricCard
               icon={CheckCircle2}
               label="Tasks Completed"
               value={28}
-              subtext="This month"
+              change={{ value: 12, positive: true }}
               color="finance"
-              trend={{ value: 12, positive: true }}
               delay={0.1}
             />
-            <StatWidget
+            <MetricCard
               icon={Target}
-              label="Goals Progress"
-              value="78%"
-              subtext="4 of 5 on track"
+              label="Goals On Track"
+              value="4/5"
               color="tech"
               delay={0.15}
             />
-            <StatWidget
-              icon={Zap}
-              label="Productivity Score"
-              value={92}
-              subtext="Excellent"
-              color="trading"
-              trend={{ value: 5, positive: true }}
-              delay={0.2}
-            />
-            <StatWidget
+            <MetricCard
               icon={BookOpen}
               label="Study Hours"
-              value="14.5"
-              subtext="This week"
+              value="14.5h"
+              change={{ value: 8, positive: true }}
               color="spiritual"
+              delay={0.2}
+            />
+            <MetricCard
+              icon={GraduationCap}
+              label="Skills Growing"
+              value={12}
+              color="music"
               delay={0.25}
             />
           </div>
@@ -140,102 +131,48 @@ const Index = () => {
           <div className="grid grid-cols-12 gap-6">
             {/* Left Column - 8 cols */}
             <div className="col-span-8 space-y-6">
-              {/* Daily Habits Widget */}
-              <GlowWidget delay={0.3} className="p-6">
-                <div className="flex items-center justify-between mb-5">
-                  <div className="flex items-center gap-3">
-                    <h2 className="text-lg font-semibold">Daily Habits</h2>
-                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-muted text-xs font-medium">
-                      <Zap className="w-3 h-3" />
-                      {completedHabits}/{habits.length}
-                    </div>
-                  </div>
-                  <div className="w-32 h-2 rounded-full bg-muted overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${(completedHabits / habits.length) * 100}%` }}
-                      transition={{ delay: 0.5, duration: 0.8 }}
-                      className="h-full bg-foreground rounded-full"
-                    />
-                  </div>
-                </div>
-                <HabitGrid 
-                  habits={habits} 
-                  onToggle={toggleHabit}
-                  delay={0.4}
-                />
-              </GlowWidget>
+              {/* Habit Tracker */}
+              <HabitTracker
+                habits={habits}
+                onToggle={toggleHabit}
+                delay={0.3}
+              />
 
-              {/* Domain Progress Cards */}
+              {/* Goal Progress Row */}
               <div className="grid grid-cols-3 gap-4">
-                <ProgressWidget
+                <GoalProgress
                   icon={BookOpen}
-                  title="Spiritual"
+                  title="Devotional"
                   current={45}
-                  total={60}
-                  unit="days devotion"
+                  target={60}
+                  unit="days streak"
                   color="spiritual"
+                  href="/spiritual"
                   delay={0.35}
                 />
-                <ProgressWidget
+                <GoalProgress
                   icon={Dumbbell}
                   title="Fitness"
                   current={4}
-                  total={6}
-                  unit="workouts/week"
+                  target={6}
+                  unit="workouts / week"
                   color="finance"
                   delay={0.4}
                 />
-                <ProgressWidget
+                <GoalProgress
                   icon={Code2}
-                  title="Tech Skills"
+                  title="Coding"
                   current={12}
-                  total={20}
+                  target={20}
                   unit="problems solved"
                   color="tech"
+                  href="/tech"
                   delay={0.45}
                 />
               </div>
 
-              {/* Quick Access Domains */}
-              <div className="grid grid-cols-3 gap-4">
-                <DomainLinkCard
-                  icon={Wallet}
-                  title="Finance"
-                  description="Track expenses & budgets"
-                  href="/finance"
-                  color="finance"
-                  stats={[
-                    { label: "Spent", value: "$2,340" },
-                    { label: "Budget", value: "68%" }
-                  ]}
-                  delay={0.5}
-                />
-                <DomainLinkCard
-                  icon={TrendingUp}
-                  title="Investments"
-                  description="Portfolio & mutual funds"
-                  href="/investments"
-                  color="trading"
-                  stats={[
-                    { label: "Total", value: "$45.2K" },
-                    { label: "Return", value: "+12%" }
-                  ]}
-                  delay={0.55}
-                />
-                <DomainLinkCard
-                  icon={Music}
-                  title="Music"
-                  description="Practice & repertoire"
-                  href="/music"
-                  color="music"
-                  stats={[
-                    { label: "Hours", value: "8.5" },
-                    { label: "Pieces", value: "12" }
-                  ]}
-                  delay={0.6}
-                />
-              </div>
+              {/* Quick Access Grid */}
+              <QuickAccessGrid items={quickAccessItems} delay={0.5} />
             </div>
 
             {/* Right Column - 4 cols */}
@@ -249,50 +186,22 @@ const Index = () => {
                 delay={0.3}
               />
 
-              {/* Weekly Activity Chart */}
-              <GlowWidget delay={0.4} className="p-5">
-                <WeekBarChart
-                  data={weeklyData}
-                  maxValue={6}
-                  label="Weekly Activity"
-                  delay={0.45}
-                />
-              </GlowWidget>
+              {/* Activity Chart */}
+              <ActivityChart
+                data={weeklyData}
+                maxValue={6}
+                title="Weekly Activity"
+                delay={0.4}
+              />
 
-              {/* Quick Stats Grid */}
-              <div className="grid grid-cols-2 gap-3">
-                <motion.div
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.55, duration: 0.4 }}
-                  className="p-4 rounded-2xl bg-card border border-border/50 text-center"
-                >
-                  <p className="text-2xl font-semibold">156</p>
-                  <p className="text-xs text-muted-foreground mt-1">Total Tasks</p>
-                </motion.div>
-                <motion.div
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.6, duration: 0.4 }}
-                  className="p-4 rounded-2xl bg-card border border-border/50 text-center"
-                >
-                  <p className="text-2xl font-semibold">94%</p>
-                  <p className="text-xs text-muted-foreground mt-1">Consistency</p>
-                </motion.div>
-              </div>
-
-              {/* Tech Domain Card */}
-              <DomainLinkCard
-                icon={Code2}
-                title="Tech & Learning"
-                description="Skills, certs & research"
-                href="/tech"
-                color="tech"
-                stats={[
-                  { label: "Skills", value: "24" },
-                  { label: "Certs", value: "3" }
-                ]}
-                delay={0.65}
+              {/* Insight Card */}
+              <InsightCard
+                icon={Lightbulb}
+                title="Great momentum!"
+                description="You've been consistent this week. Keep up the devotional streak!"
+                action={{ label: "View insights", href: "/spiritual" }}
+                color="trading"
+                delay={0.5}
               />
             </div>
           </div>
