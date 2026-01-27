@@ -39,7 +39,6 @@ const quickAccessItems = [
     title: "Finance",
     subtitle: "Budget & expenses",
     href: "/finance",
-    color: "finance",
     metric: { label: "Spent this month", value: "$2,340" }
   },
   {
@@ -47,7 +46,6 @@ const quickAccessItems = [
     title: "Investments",
     subtitle: "Portfolio tracking",
     href: "/investments",
-    color: "trading",
     metric: { label: "Total return", value: "+12.4%" }
   },
   {
@@ -55,7 +53,6 @@ const quickAccessItems = [
     title: "Music",
     subtitle: "Practice & learn",
     href: "/music",
-    color: "music",
     metric: { label: "Hours this week", value: "8.5" }
   },
   {
@@ -63,7 +60,6 @@ const quickAccessItems = [
     title: "Tech",
     subtitle: "Skills & certs",
     href: "/tech",
-    color: "tech",
     metric: { label: "Skills tracked", value: "24" }
   },
 ];
@@ -73,7 +69,7 @@ const Index = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
-    const interval = setInterval(() => setCurrentTime(new Date()), 1000);
+    const interval = setInterval(() => setCurrentTime(new Date()), 60000);
     return () => clearInterval(interval);
   }, []);
 
@@ -89,47 +85,40 @@ const Index = () => {
   return (
     <MainLayout>
       <PageTransition>
-        <div className="min-h-screen px-6 py-6 max-w-7xl mx-auto space-y-5">
+        <div className="min-h-screen px-6 py-4 max-w-6xl mx-auto">
           <HeroHeader currentTime={currentTime} />
 
-          {/* Metrics Row */}
-          <div className="grid grid-cols-4 gap-3">
+          {/* Metrics */}
+          <div className="grid grid-cols-4 gap-3 mt-6">
             <MetricCard
               icon={CheckCircle2}
               label="Tasks Completed"
               value={28}
               change={{ value: 12, positive: true }}
-              color="finance"
             />
             <MetricCard
               icon={Target}
               label="Goals On Track"
               value="4/5"
-              color="tech"
             />
             <MetricCard
               icon={BookOpen}
               label="Study Hours"
               value="14.5h"
               change={{ value: 8, positive: true }}
-              color="spiritual"
             />
             <MetricCard
               icon={GraduationCap}
               label="Skills Growing"
               value={12}
-              color="music"
             />
           </div>
 
-          {/* Main Content Grid */}
-          <div className="grid grid-cols-12 gap-5">
-            {/* Left Column - 8 cols */}
-            <div className="col-span-8 space-y-5">
-              <HabitTracker
-                habits={habits}
-                onToggle={toggleHabit}
-              />
+          {/* Main Grid */}
+          <div className="grid grid-cols-12 gap-4 mt-6">
+            {/* Left */}
+            <div className="col-span-8 space-y-4">
+              <HabitTracker habits={habits} onToggle={toggleHabit} />
 
               <div className="grid grid-cols-3 gap-3">
                 <GoalProgress
@@ -138,7 +127,6 @@ const Index = () => {
                   current={45}
                   target={60}
                   unit="days streak"
-                  color="spiritual"
                   href="/spiritual"
                 />
                 <GoalProgress
@@ -147,7 +135,6 @@ const Index = () => {
                   current={4}
                   target={6}
                   unit="workouts / week"
-                  color="finance"
                 />
                 <GoalProgress
                   icon={Code2}
@@ -155,7 +142,6 @@ const Index = () => {
                   current={12}
                   target={20}
                   unit="problems solved"
-                  color="tech"
                   href="/tech"
                 />
               </div>
@@ -163,8 +149,8 @@ const Index = () => {
               <QuickAccessGrid items={quickAccessItems} />
             </div>
 
-            {/* Right Column - 4 cols */}
-            <div className="col-span-4 space-y-5">
+            {/* Right */}
+            <div className="col-span-4 space-y-4">
               <DevotionBanner
                 characterName="David"
                 dayNumber={7}
@@ -180,10 +166,9 @@ const Index = () => {
 
               <InsightCard
                 icon={Lightbulb}
-                title="Great momentum!"
+                title="Great momentum"
                 description="You've been consistent this week. Keep up the devotional streak!"
                 action={{ label: "View insights", href: "/spiritual" }}
-                color="trading"
               />
             </div>
           </div>
