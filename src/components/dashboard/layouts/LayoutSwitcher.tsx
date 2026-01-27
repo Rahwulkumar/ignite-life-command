@@ -1,8 +1,8 @@
-import { LayoutGrid, Layers, Target } from "lucide-react";
+import { LayoutGrid, Layers, Target, Newspaper, Minus } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-export type LayoutStyle = "bento" | "hero" | "rows";
+export type LayoutStyle = "bento" | "hero" | "rows" | "magazine" | "minimal";
 
 interface LayoutSwitcherProps {
   currentLayout: LayoutStyle;
@@ -10,9 +10,11 @@ interface LayoutSwitcherProps {
 }
 
 const layouts = [
-  { id: "bento" as const, icon: LayoutGrid, label: "Dynamic Bento" },
-  { id: "hero" as const, icon: Target, label: "Hero Focus" },
-  { id: "rows" as const, icon: Layers, label: "Clean Rows" },
+  { id: "bento" as const, icon: LayoutGrid, label: "Bento" },
+  { id: "hero" as const, icon: Target, label: "Hero" },
+  { id: "rows" as const, icon: Layers, label: "Rows" },
+  { id: "magazine" as const, icon: Newspaper, label: "Magazine" },
+  { id: "minimal" as const, icon: Minus, label: "Minimal" },
 ];
 
 export function LayoutSwitcher({ currentLayout, onLayoutChange }: LayoutSwitcherProps) {

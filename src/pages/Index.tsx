@@ -7,6 +7,8 @@ import { LayoutSwitcher, LayoutStyle } from "@/components/dashboard/layouts/Layo
 import { BentoLayout } from "@/components/dashboard/layouts/BentoLayout";
 import { HeroLayout } from "@/components/dashboard/layouts/HeroLayout";
 import { RowsLayout } from "@/components/dashboard/layouts/RowsLayout";
+import { MagazineLayout } from "@/components/dashboard/layouts/MagazineLayout";
+import { MinimalLayout } from "@/components/dashboard/layouts/MinimalLayout";
 import { defaultHabits } from "@/components/home/DailyHabits";
 import { 
   Code2, 
@@ -114,6 +116,12 @@ const Index = () => {
               )}
               {currentLayout === "rows" && (
                 <RowsLayout key="rows" {...layoutProps} />
+              )}
+              {currentLayout === "magazine" && (
+                <MagazineLayout key="magazine" {...layoutProps} />
+              )}
+              {currentLayout === "minimal" && (
+                <MinimalLayout key="minimal" {...layoutProps} />
               )}
             </AnimatePresence>
           </motion.div>
