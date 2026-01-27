@@ -3,12 +3,14 @@ import { motion } from "framer-motion";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { HeroHeader } from "@/components/dashboard/widgets/HeroHeader";
+import { DomainNavigation } from "@/components/dashboard/DomainNavigation";
 import { ZenLayout } from "@/components/dashboard/layouts/ZenLayout";
 import { defaultHabits } from "@/components/home/DailyHabits";
 import { 
-  BookOpen, 
-  Bookmark, 
-  Briefcase,
+  Code2, 
+  TrendingUp, 
+  Music,
+  Wallet,
 } from "lucide-react";
 
 const weeklyData = [
@@ -23,25 +25,32 @@ const weeklyData = [
 
 const quickAccessItems = [
   {
-    icon: BookOpen,
-    title: "Spiritual",
-    subtitle: "Faith & devotion",
-    href: "/spiritual",
-    metric: { label: "Day streak", value: "45" }
+    icon: Wallet,
+    title: "Finance",
+    subtitle: "Budget & expenses",
+    href: "/finance",
+    metric: { label: "Spent this month", value: "$2,340" }
   },
   {
-    icon: Bookmark,
-    title: "Content",
-    subtitle: "Curated media",
-    href: "/content",
-    metric: { label: "Items saved", value: "128" }
+    icon: TrendingUp,
+    title: "Investments",
+    subtitle: "Portfolio tracking",
+    href: "/investments",
+    metric: { label: "Total return", value: "+12.4%" }
   },
   {
-    icon: Briefcase,
-    title: "Projects",
-    subtitle: "Active work",
-    href: "/projects",
-    metric: { label: "In progress", value: "3" }
+    icon: Music,
+    title: "Music",
+    subtitle: "Practice & learn",
+    href: "/music",
+    metric: { label: "Hours this week", value: "8.5" }
+  },
+  {
+    icon: Code2,
+    title: "Tech",
+    subtitle: "Skills & certs",
+    href: "/tech",
+    metric: { label: "Skills tracked", value: "24" }
   },
 ];
 
@@ -75,6 +84,11 @@ const Index = () => {
             transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
             className="relative z-10 -mt-24"
           >
+            {/* Domain navigation */}
+            <div className="flex justify-end mb-4">
+              <DomainNavigation />
+            </div>
+
             {/* Dashboard content */}
             <ZenLayout
               habits={habits}
