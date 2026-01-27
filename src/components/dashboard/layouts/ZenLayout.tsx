@@ -109,29 +109,6 @@ export function ZenLayout({ habits, onToggleHabit, weeklyData, quickAccessItems,
       variants={zenStagger}
       className="relative space-y-8"
     >
-      {/* Zen header */}
-      <motion.div variants={gentleDrop} className="relative py-6 text-center">
-        <div className="inline-flex flex-col items-center gap-2">
-          <motion.div
-            animate={{ rotate: [0, 5, -5, 0] }}
-            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          >
-            <Leaf className="w-5 h-5 text-emerald-500/60" />
-          </motion.div>
-          <div className="flex items-center gap-4">
-            <span className="text-stone-500/40 text-xl">—</span>
-            <span className="text-lg font-light tracking-[0.3em] text-stone-300/90 uppercase">Today</span>
-            <span className="text-stone-500/40 text-xl">—</span>
-          </div>
-          <motion.span 
-            animate={{ opacity: [0.3, 0.6, 0.3] }}
-            transition={{ duration: 5, repeat: Infinity }}
-            className="text-xs text-stone-500/50 tracking-widest"
-          >
-            静かな一日
-          </motion.span>
-        </div>
-      </motion.div>
 
       {/* Main habit tracker */}
       <motion.div variants={inkBrush}>
