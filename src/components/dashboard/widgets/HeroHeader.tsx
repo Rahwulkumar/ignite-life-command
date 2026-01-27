@@ -57,7 +57,7 @@ export function HeroHeader({ currentTime }: HeroHeaderProps) {
             <motion.img 
               src={currentBg}
               alt=""
-              className="h-[120%] w-full object-cover object-center"
+              className="h-[130%] w-full object-cover object-top"
               animate={{ 
                 scale: [1, 1.05, 1],
                 y: [0, -5, 0],
@@ -74,8 +74,8 @@ export function HeroHeader({ currentTime }: HeroHeaderProps) {
         
         {/* Multi-layer gradient for smooth transition */}
         <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/50 to-background/30 z-10" />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/20 to-background z-10" />
-        <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background via-background/95 to-transparent z-10" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/40 to-background z-10" />
+        <div className="absolute bottom-0 left-0 right-0 h-56 bg-gradient-to-t from-background to-transparent z-10" />
       </div>
 
       {/* Content */}
