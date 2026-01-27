@@ -83,41 +83,26 @@ export function MagazineLayout({ habits, onToggleHabit, weeklyData, quickAccessI
       animate="show"
       exit={{ opacity: 0, y: 20 }}
       variants={staggerContainer}
-      className="space-y-6"
+      className="space-y-3"
     >
-      {/* Editorial header section */}
-      <motion.div variants={slideUp} className="text-center mb-8">
-        <motion.div 
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-foreground/5 border border-foreground/10 mb-4"
-          whileHover={{ scale: 1.05 }}
-        >
-          <Sparkles className="w-3.5 h-3.5 text-foreground/60" />
-          <span className="text-xs font-medium text-foreground/60 uppercase tracking-wider">Daily Overview</span>
-        </motion.div>
-      </motion.div>
 
       {/* Feature story - full width devotion */}
       <motion.div variants={slideUp}>
-        <div className="relative overflow-hidden rounded-2xl border border-foreground/10 bg-gradient-to-br from-foreground/5 to-transparent p-1">
-          <div className="rounded-xl overflow-hidden">
-            <DevotionBanner
-              characterName="David"
-              dayNumber={7}
-              todayScripture="1 Samuel 17"
-              timeOfDay={timeOfDay}
-              className="border-0 bg-card/50 backdrop-blur-sm"
-            />
-          </div>
-        </div>
+        <DevotionBanner
+          characterName="David"
+          dayNumber={7}
+          todayScripture="1 Samuel 17"
+          timeOfDay={timeOfDay}
+        />
       </motion.div>
 
       {/* Two-column magazine spread */}
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-2 gap-3">
         {/* Left column */}
-        <motion.div variants={slideFromLeft} className="space-y-4">
-          <div className="p-4 rounded-xl border border-foreground/10 bg-card/50">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">Progress Metrics</h3>
-            <div className="space-y-3">
+        <motion.div variants={slideFromLeft} className="space-y-2">
+          <div className="p-3 rounded-xl border border-foreground/10 bg-card/50">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Progress Metrics</h3>
+            <div className="space-y-2">
               <MetricCard
                 icon={CheckCircle2}
                 label="Tasks Completed"
@@ -138,10 +123,10 @@ export function MagazineLayout({ habits, onToggleHabit, weeklyData, quickAccessI
         </motion.div>
 
         {/* Right column */}
-        <motion.div variants={slideFromRight} className="space-y-4">
-          <div className="p-4 rounded-xl border border-foreground/10 bg-card/50">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">Growth Areas</h3>
-            <div className="space-y-3">
+        <motion.div variants={slideFromRight} className="space-y-2">
+          <div className="p-3 rounded-xl border border-foreground/10 bg-card/50">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Growth Areas</h3>
+            <div className="space-y-2">
               <MetricCard
                 icon={BookOpen}
                 label="Study Hours"
@@ -168,9 +153,9 @@ export function MagazineLayout({ habits, onToggleHabit, weeklyData, quickAccessI
 
       {/* Goals strip */}
       <motion.div variants={slideUp}>
-        <div className="p-4 rounded-xl border border-foreground/10 bg-card/50">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">Active Goals</h3>
-          <div className="grid grid-cols-3 gap-4">
+        <div className="p-3 rounded-xl border border-foreground/10 bg-card/50">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Active Goals</h3>
+          <div className="grid grid-cols-3 gap-2">
             <GoalProgress
               icon={BookOpen}
               title="Devotional"
@@ -202,7 +187,7 @@ export function MagazineLayout({ habits, onToggleHabit, weeklyData, quickAccessI
       </motion.div>
 
       {/* Quick access with insight */}
-      <motion.div variants={slideUp} className="grid grid-cols-4 gap-4">
+      <motion.div variants={slideUp} className="grid grid-cols-4 gap-2">
         <div className="col-span-3">
           <QuickAccessGrid items={quickAccessItems} />
         </div>
