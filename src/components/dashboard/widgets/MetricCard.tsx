@@ -6,11 +6,10 @@ interface MetricCardProps {
   label: string;
   value: string | number;
   change?: { value: number; positive: boolean };
-  color?: string;
   index?: number;
 }
 
-export function MetricCard({ icon: Icon, label, value, change, color = "foreground", index = 0 }: MetricCardProps) {
+export function MetricCard({ icon: Icon, label, value, change, index = 0 }: MetricCardProps) {
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -20,14 +19,11 @@ export function MetricCard({ icon: Icon, label, value, change, color = "foregrou
       className="rounded-lg border border-border bg-card p-4 transition-colors hover:border-border/80"
     >
       <div className="flex items-center justify-between mb-3">
-        <div 
-          className="w-8 h-8 rounded-md flex items-center justify-center"
-          style={{ background: `hsl(var(--${color}) / 0.1)` }}
-        >
-          <Icon className="w-4 h-4" style={{ color: `hsl(var(--${color}))` }} />
+        <div className="w-8 h-8 rounded-md flex items-center justify-center bg-muted">
+          <Icon className="w-4 h-4 text-foreground" />
         </div>
         {change && (
-          <span className={`flex items-center gap-1 text-xs font-medium ${change.positive ? "text-finance" : "text-destructive"}`}>
+          <span className={`flex items-center gap-1 text-xs font-medium ${change.positive ? "text-emerald-400" : "text-rose-400"}`}>
             {change.positive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
             {change.positive ? "+" : ""}{change.value}%
           </span>
