@@ -2,6 +2,15 @@ import { motion } from "framer-motion";
 import { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+// Import header images
+import headerFinance from "@/assets/header-finance.jpg";
+import headerTrading from "@/assets/header-trading.jpg";
+import headerTech from "@/assets/header-tech.jpg";
+import headerSpiritual from "@/assets/header-spiritual.jpg";
+import headerMusic from "@/assets/header-music.jpg";
+import headerContent from "@/assets/header-content.jpg";
+import headerProjects from "@/assets/header-projects.jpg";
+
 interface DomainPageHeaderProps {
   icon: LucideIcon;
   title: string;
@@ -21,6 +30,7 @@ const colorConfig = {
     iconGradient: "from-finance to-finance/50",
     shadow: "shadow-finance/20",
     text: "text-finance",
+    headerImage: headerFinance,
   },
   trading: {
     gradient: "from-trading/20 via-background to-background",
@@ -28,6 +38,7 @@ const colorConfig = {
     iconGradient: "from-trading to-trading/50",
     shadow: "shadow-trading/20",
     text: "text-trading",
+    headerImage: headerTrading,
   },
   tech: {
     gradient: "from-tech/20 via-background to-background",
@@ -35,6 +46,7 @@ const colorConfig = {
     iconGradient: "from-tech to-tech/50",
     shadow: "shadow-tech/20",
     text: "text-tech",
+    headerImage: headerTech,
   },
   spiritual: {
     gradient: "from-spiritual/20 via-background to-background",
@@ -42,6 +54,7 @@ const colorConfig = {
     iconGradient: "from-spiritual to-spiritual/50",
     shadow: "shadow-spiritual/20",
     text: "text-spiritual",
+    headerImage: headerSpiritual,
   },
   music: {
     gradient: "from-music/20 via-background to-background",
@@ -49,6 +62,7 @@ const colorConfig = {
     iconGradient: "from-music to-music/50",
     shadow: "shadow-music/20",
     text: "text-music",
+    headerImage: headerMusic,
   },
   content: {
     gradient: "from-content/20 via-background to-background",
@@ -56,6 +70,7 @@ const colorConfig = {
     iconGradient: "from-content to-content/50",
     shadow: "shadow-content/20",
     text: "text-content",
+    headerImage: headerContent,
   },
   work: {
     gradient: "from-work/20 via-background to-background",
@@ -63,6 +78,7 @@ const colorConfig = {
     iconGradient: "from-work to-work/50",
     shadow: "shadow-work/20",
     text: "text-work",
+    headerImage: headerProjects,
   },
 };
 
@@ -76,12 +92,35 @@ export function DomainPageHeader({
   const config = colorConfig[domainColor];
 
   return (
-    <div className="relative overflow-hidden">
-      {/* Gradient background */}
-      <div className={cn("absolute inset-0 bg-gradient-to-br", config.gradient)} />
-      <div className={cn("absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2", config.orb)} />
+    <div className="relative overflow-hidden pt-14">
+      {/* Animated background image */}
+      <div className="absolute inset-0 z-0">
+        <motion.img
+          src={config.headerImage}
+          alt=""
+          className="h-full w-full object-cover object-center"
+          initial={{ opacity: 0, scale: 1.05 }}
+          animate={{ 
+            opacity: 1,
+            scale: [1, 1.03, 1],
+            x: [0, 5, 0],
+          }}
+          transition={{ 
+            opacity: { duration: 0.6 },
+            scale: { duration: 25, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" },
+            x: { duration: 25, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" },
+          }}
+        />
+        
+        {/* Gradient overlays */}
+        <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/60 to-background/40 z-10" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-transparent to-background z-10" />
+      </div>
       
-      <div className="relative px-8 pt-10 pb-8">
+      {/* Decorative orb */}
+      <div className={cn("absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 z-10", config.orb)} />
+      
+      <div className="relative px-8 pt-10 pb-8 z-20">
         <div className="max-w-5xl mx-auto">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-4">
@@ -97,19 +136,36 @@ export function DomainPageHeader({
                 <Icon className="w-7 h-7 text-white" />
               </motion.div>
               <div>
-                <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-                <p className="text-muted-foreground">{subtitle}</p>
+                <motion.h1 
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="text-2xl font-semibold tracking-tight"
+                >
+                  {title}
+                </motion.h1>
+                <motion.p 
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="text-muted-foreground"
+                >
+                  {subtitle}
+                </motion.p>
               </div>
             </div>
 
             {action && (
-              <button 
+              <motion.button 
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 }}
                 onClick={action.onClick}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-foreground/5 border border-foreground/10 hover:bg-foreground/10 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-background/70 backdrop-blur-sm border border-foreground/10 hover:bg-background/90 transition-all hover:scale-[1.02] active:scale-[0.98]"
               >
                 <action.icon className={cn("w-4 h-4", config.text)} />
                 <span className="text-sm font-medium">{action.label}</span>
-              </button>
+              </motion.button>
             )}
           </div>
         </div>
