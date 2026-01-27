@@ -1,5 +1,6 @@
 import { LucideIcon } from "lucide-react";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 
 interface GoalProgressProps {
   icon: LucideIcon;
@@ -7,7 +8,9 @@ interface GoalProgressProps {
   current: number;
   target: number;
   unit: string;
+  color?: string;
   href?: string;
+  index?: number;
 }
 
 export function GoalProgress({ 
@@ -16,14 +19,21 @@ export function GoalProgress({
   current, 
   target, 
   unit, 
-  href 
+  color = "foreground",
+  href,
+  index = 0
 }: GoalProgressProps) {
   const percentage = Math.min((current / target) * 100, 100);
   
   const content = (
     <>
       <div className="flex items-center gap-2 mb-3">
-        <Icon className="w-4 h-4 text-muted-foreground" />
+        <div 
+          className="w-7 h-7 rounded-md flex items-center justify-center"
+          style={{ background: `hsl(var(--${color}) / 0.1)` }}
+        >
+          <Icon className="w-3.5 h-3.5" style={{ color: `hsl(var(--${color}))` }} />
+        </div>
         <span className="text-sm font-medium">{title}</span>
       </div>
       
@@ -33,20 +43,30 @@ export function GoalProgress({
       </div>
       <p className="text-xs text-muted-foreground mb-3">{unit}</p>
       
-      <div className="h-1.5 rounded-full bg-muted">
-        <div
-          className="h-full rounded-full bg-foreground transition-all duration-300"
-          style={{ width: `${percentage}%` }}
+      <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+        <motion.div
+          className="h-full rounded-full"
+          style={{ background: `hsl(var(--${color}))` }}
+          initial={{ width: 0 }}
+          animate={{ width: `${percentage}%` }}
+          transition={{ duration: 0.6, delay: 0.2 + index * 0.1, ease: "easeOut" }}
         />
       </div>
     </>
   );
 
-  const className = "block rounded-lg border border-border bg-card p-4 hover:bg-accent/50 transition-colors";
-
-  if (href) {
-    return <Link to={href} className={className}>{content}</Link>;
-  }
-
-  return <div className={className}>{content}</div>;
+  const Wrapper = href ? motion(Link) : motion.div;
+  
+  return (
+    <Wrapper
+      to={href as string}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: 0.15 + index * 0.05, ease: "easeOut" }}
+      whileHover={{ y: -2 }}
+      className="block rounded-lg border border-border bg-card p-4 hover:border-border/80 transition-colors"
+    >
+      {content}
+    </Wrapper>
+  );
 }

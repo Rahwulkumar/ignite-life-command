@@ -1,5 +1,6 @@
 import { BookOpen, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 
 interface DevotionBannerProps {
   characterName?: string;
@@ -17,24 +18,38 @@ export function DevotionBanner({
   const label = timeOfDay === "morning" ? "Morning Devotion" : "Evening Devotion";
 
   return (
-    <Link 
-      to="/spiritual" 
-      className="group block rounded-lg border border-border bg-card p-4 hover:bg-accent/50 transition-colors"
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
+      whileHover={{ scale: 1.01 }}
     >
-      <p className="text-xs text-muted-foreground mb-2">{label}</p>
-      
-      <div className="flex items-center justify-between mb-3">
-        <div>
-          <h3 className="font-medium">{characterName}</h3>
-          <p className="text-xs text-muted-foreground">Day {dayNumber}</p>
+      <Link 
+        to="/spiritual" 
+        className="group block rounded-lg border p-4 transition-colors"
+        style={{
+          borderColor: `hsl(var(--spiritual) / 0.2)`,
+          background: `hsl(var(--spiritual) / 0.03)`
+        }}
+      >
+        <div className="flex items-center gap-1.5 mb-3">
+          <span className="w-1.5 h-1.5 rounded-full bg-spiritual" />
+          <p className="text-xs text-spiritual font-medium">{label}</p>
         </div>
-        <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
-      </div>
-      
-      <div className="flex items-center gap-2 pt-3 border-t border-border">
-        <BookOpen className="w-3.5 h-3.5 text-muted-foreground" />
-        <span className="text-sm">{todayScripture}</span>
-      </div>
-    </Link>
+        
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <h3 className="font-medium">{characterName}</h3>
+            <p className="text-xs text-muted-foreground">Character Study · Day {dayNumber}</p>
+          </div>
+          <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
+        </div>
+        
+        <div className="flex items-center gap-2 pt-3 border-t" style={{ borderColor: `hsl(var(--spiritual) / 0.1)` }}>
+          <BookOpen className="w-3.5 h-3.5 text-spiritual" />
+          <span className="text-sm">{todayScripture}</span>
+        </div>
+      </Link>
+    </motion.div>
   );
 }

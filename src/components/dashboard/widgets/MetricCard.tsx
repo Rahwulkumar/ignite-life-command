@@ -1,19 +1,33 @@
 import { LucideIcon, TrendingUp, TrendingDown } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface MetricCardProps {
   icon: LucideIcon;
   label: string;
   value: string | number;
   change?: { value: number; positive: boolean };
+  color?: string;
+  index?: number;
 }
 
-export function MetricCard({ icon: Icon, label, value, change }: MetricCardProps) {
+export function MetricCard({ icon: Icon, label, value, change, color = "foreground", index = 0 }: MetricCardProps) {
   return (
-    <div className="rounded-lg border border-border bg-card p-4">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: index * 0.05, ease: "easeOut" }}
+      whileHover={{ y: -2 }}
+      className="rounded-lg border border-border bg-card p-4 transition-colors hover:border-border/80"
+    >
       <div className="flex items-center justify-between mb-3">
-        <Icon className="w-4 h-4 text-muted-foreground" />
+        <div 
+          className="w-8 h-8 rounded-md flex items-center justify-center"
+          style={{ background: `hsl(var(--${color}) / 0.1)` }}
+        >
+          <Icon className="w-4 h-4" style={{ color: `hsl(var(--${color}))` }} />
+        </div>
         {change && (
-          <span className={`flex items-center gap-1 text-xs ${change.positive ? "text-foreground" : "text-muted-foreground"}`}>
+          <span className={`flex items-center gap-1 text-xs font-medium ${change.positive ? "text-finance" : "text-destructive"}`}>
             {change.positive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
             {change.positive ? "+" : ""}{change.value}%
           </span>
@@ -21,6 +35,6 @@ export function MetricCard({ icon: Icon, label, value, change }: MetricCardProps
       </div>
       <p className="text-xl font-semibold tracking-tight">{value}</p>
       <p className="text-xs text-muted-foreground mt-1">{label}</p>
-    </div>
+    </motion.div>
   );
 }

@@ -39,6 +39,7 @@ const quickAccessItems = [
     title: "Finance",
     subtitle: "Budget & expenses",
     href: "/finance",
+    color: "finance",
     metric: { label: "Spent this month", value: "$2,340" }
   },
   {
@@ -46,6 +47,7 @@ const quickAccessItems = [
     title: "Investments",
     subtitle: "Portfolio tracking",
     href: "/investments",
+    color: "trading",
     metric: { label: "Total return", value: "+12.4%" }
   },
   {
@@ -53,6 +55,7 @@ const quickAccessItems = [
     title: "Music",
     subtitle: "Practice & learn",
     href: "/music",
+    color: "music",
     metric: { label: "Hours this week", value: "8.5" }
   },
   {
@@ -60,6 +63,7 @@ const quickAccessItems = [
     title: "Tech",
     subtitle: "Skills & certs",
     href: "/tech",
+    color: "tech",
     metric: { label: "Skills tracked", value: "24" }
   },
 ];
@@ -95,22 +99,30 @@ const Index = () => {
               label="Tasks Completed"
               value={28}
               change={{ value: 12, positive: true }}
+              color="finance"
+              index={0}
             />
             <MetricCard
               icon={Target}
               label="Goals On Track"
               value="4/5"
+              color="tech"
+              index={1}
             />
             <MetricCard
               icon={BookOpen}
               label="Study Hours"
               value="14.5h"
               change={{ value: 8, positive: true }}
+              color="spiritual"
+              index={2}
             />
             <MetricCard
               icon={GraduationCap}
               label="Skills Growing"
               value={12}
+              color="music"
+              index={3}
             />
           </div>
 
@@ -127,7 +139,9 @@ const Index = () => {
                   current={45}
                   target={60}
                   unit="days streak"
+                  color="spiritual"
                   href="/spiritual"
+                  index={0}
                 />
                 <GoalProgress
                   icon={Dumbbell}
@@ -135,6 +149,8 @@ const Index = () => {
                   current={4}
                   target={6}
                   unit="workouts / week"
+                  color="finance"
+                  index={1}
                 />
                 <GoalProgress
                   icon={Code2}
@@ -142,7 +158,9 @@ const Index = () => {
                   current={12}
                   target={20}
                   unit="problems solved"
+                  color="tech"
                   href="/tech"
+                  index={2}
                 />
               </div>
 
@@ -168,6 +186,7 @@ const Index = () => {
                 icon={Lightbulb}
                 title="Great momentum"
                 description="You've been consistent this week. Keep up the devotional streak!"
+                color="trading"
                 action={{ label: "View insights", href: "/spiritual" }}
               />
             </div>
