@@ -89,26 +89,23 @@ const Index = () => {
   return (
     <MainLayout>
       <PageTransition>
-        <div className="min-h-screen px-6 py-6 max-w-7xl mx-auto space-y-6">
-          {/* Hero Header */}
+        <div className="min-h-screen px-6 py-6 max-w-7xl mx-auto space-y-5">
           <HeroHeader currentTime={currentTime} />
 
           {/* Metrics Row */}
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-4 gap-3">
             <MetricCard
               icon={CheckCircle2}
               label="Tasks Completed"
               value={28}
               change={{ value: 12, positive: true }}
               color="finance"
-              delay={0.1}
             />
             <MetricCard
               icon={Target}
               label="Goals On Track"
               value="4/5"
               color="tech"
-              delay={0.15}
             />
             <MetricCard
               icon={BookOpen}
@@ -116,30 +113,25 @@ const Index = () => {
               value="14.5h"
               change={{ value: 8, positive: true }}
               color="spiritual"
-              delay={0.2}
             />
             <MetricCard
               icon={GraduationCap}
               label="Skills Growing"
               value={12}
               color="music"
-              delay={0.25}
             />
           </div>
 
           {/* Main Content Grid */}
-          <div className="grid grid-cols-12 gap-6">
+          <div className="grid grid-cols-12 gap-5">
             {/* Left Column - 8 cols */}
-            <div className="col-span-8 space-y-6">
-              {/* Habit Tracker */}
+            <div className="col-span-8 space-y-5">
               <HabitTracker
                 habits={habits}
                 onToggle={toggleHabit}
-                delay={0.3}
               />
 
-              {/* Goal Progress Row */}
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-3 gap-3">
                 <GoalProgress
                   icon={BookOpen}
                   title="Devotional"
@@ -148,7 +140,6 @@ const Index = () => {
                   unit="days streak"
                   color="spiritual"
                   href="/spiritual"
-                  delay={0.35}
                 />
                 <GoalProgress
                   icon={Dumbbell}
@@ -157,7 +148,6 @@ const Index = () => {
                   target={6}
                   unit="workouts / week"
                   color="finance"
-                  delay={0.4}
                 />
                 <GoalProgress
                   icon={Code2}
@@ -167,41 +157,33 @@ const Index = () => {
                   unit="problems solved"
                   color="tech"
                   href="/tech"
-                  delay={0.45}
                 />
               </div>
 
-              {/* Quick Access Grid */}
-              <QuickAccessGrid items={quickAccessItems} delay={0.5} />
+              <QuickAccessGrid items={quickAccessItems} />
             </div>
 
             {/* Right Column - 4 cols */}
-            <div className="col-span-4 space-y-6">
-              {/* Devotion Banner */}
+            <div className="col-span-4 space-y-5">
               <DevotionBanner
                 characterName="David"
                 dayNumber={7}
                 todayScripture="1 Samuel 17"
                 timeOfDay={timeOfDay}
-                delay={0.3}
               />
 
-              {/* Activity Chart */}
               <ActivityChart
                 data={weeklyData}
                 maxValue={6}
                 title="Weekly Activity"
-                delay={0.4}
               />
 
-              {/* Insight Card */}
               <InsightCard
                 icon={Lightbulb}
                 title="Great momentum!"
                 description="You've been consistent this week. Keep up the devotional streak!"
                 action={{ label: "View insights", href: "/spiritual" }}
                 color="trading"
-                delay={0.5}
               />
             </div>
           </div>
