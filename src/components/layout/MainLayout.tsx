@@ -1,5 +1,4 @@
 import { ReactNode } from "react";
-import { Sidebar } from "./Sidebar";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -8,8 +7,7 @@ interface MainLayoutProps {
 export function MainLayout({ children }: MainLayoutProps) {
   return (
     <div className="min-h-screen bg-background">
-      <Sidebar />
-      <main className="ml-16 min-h-screen">
+      <main className="min-h-screen">
         {children}
       </main>
     </div>
