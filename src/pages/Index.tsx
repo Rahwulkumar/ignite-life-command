@@ -94,8 +94,16 @@ const Index = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.7, ease: "easeOut" }}
-            className="-mt-6 relative z-10 bg-background"
+            className="-mt-6 relative z-10"
           >
+
+          {/* Full-bleed scrim so the header image never bleeds behind cards */}
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 left-1/2 w-screen -translate-x-1/2 bg-background z-0"
+          />
+
+          <div className="relative z-10">
 
           {/* Metrics */}
           <div className="grid grid-cols-4 gap-3 pt-2 relative z-20">
@@ -187,6 +195,7 @@ const Index = () => {
                 action={{ label: "View insights", href: "/spiritual" }}
               />
             </div>
+          </div>
           </div>
           </motion.div>
         </div>
