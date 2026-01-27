@@ -8,7 +8,6 @@ interface GoalProgressProps {
   current: number;
   target: number;
   unit: string;
-  color?: string;
   href?: string;
   index?: number;
 }
@@ -19,7 +18,6 @@ export function GoalProgress({
   current, 
   target, 
   unit, 
-  color = "foreground",
   href,
   index = 0
 }: GoalProgressProps) {
@@ -28,11 +26,8 @@ export function GoalProgress({
   const content = (
     <>
       <div className="flex items-center gap-2 mb-3">
-        <div 
-          className="w-7 h-7 rounded-md flex items-center justify-center"
-          style={{ background: `hsl(var(--${color}) / 0.1)` }}
-        >
-          <Icon className="w-3.5 h-3.5" style={{ color: `hsl(var(--${color}))` }} />
+        <div className="w-7 h-7 rounded-md flex items-center justify-center bg-muted">
+          <Icon className="w-3.5 h-3.5 text-foreground" />
         </div>
         <span className="text-sm font-medium">{title}</span>
       </div>
@@ -45,8 +40,7 @@ export function GoalProgress({
       
       <div className="h-1.5 rounded-full bg-muted overflow-hidden">
         <motion.div
-          className="h-full rounded-full"
-          style={{ background: `hsl(var(--${color}))` }}
+          className="h-full rounded-full bg-foreground/70"
           initial={{ width: 0 }}
           animate={{ width: `${percentage}%` }}
           transition={{ duration: 0.6, delay: 0.2 + index * 0.1, ease: "easeOut" }}

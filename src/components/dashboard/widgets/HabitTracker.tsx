@@ -39,7 +39,7 @@ export function HabitTracker({ habits, onToggle }: HabitTrackerProps) {
           animate={{ scale: 1, opacity: 1 }}
           className={cn(
             "text-sm font-semibold tabular-nums px-2 py-0.5 rounded",
-            percentage === 100 ? "bg-finance/10 text-finance" : "text-muted-foreground"
+            percentage === 100 ? "bg-emerald-500/10 text-emerald-400" : "text-muted-foreground"
           )}
         >
           {percentage}%

@@ -42,18 +42,18 @@
 
     --radius: 0.5rem;
 
-    /* Minimal accent - single blue */
-    --accent-blue: 220 70% 55%;
+    /* Minimal accent - refined slate blue */
+    --accent-blue: 220 25% 50%;
 
-    /* Domain colors - subtle, desaturated */
-    --finance: 145 45% 45%;
-    --trading: 35 70% 50%;
-    --tech: 215 60% 55%;
-    --spiritual: 265 40% 55%;
-    --spiritual-glow: 265 50% 70%;
-    --music: 330 50% 50%;
-    --content: 185 50% 45%;
-    --work: 40 60% 50%;
+    /* Domain colors - refined, muted earth & jewel tones */
+    --finance: 160 20% 45%;
+    --trading: 24 20% 55%;
+    --tech: 210 25% 55%;
+    --spiritual: 230 20% 55%;
+    --spiritual-glow: 230 25% 65%;
+    --music: 350 20% 55%;
+    --content: 180 20% 50%;
+    --work: 45 20% 55%;
 
     /* Sidebar */
     --sidebar-background: 0 0% 4%;

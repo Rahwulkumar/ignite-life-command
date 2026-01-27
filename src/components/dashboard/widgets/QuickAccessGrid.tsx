@@ -7,7 +7,6 @@ interface QuickAccessItem {
   title: string;
   subtitle: string;
   href: string;
-  color?: string;
   metric?: { label: string; value: string | number };
 }
 
@@ -31,14 +30,8 @@ export function QuickAccessGrid({ items }: QuickAccessGridProps) {
             className="group block rounded-lg border border-border bg-card p-4 hover:border-border/80 transition-all"
           >
             <div className="flex items-center justify-between mb-3">
-              <div 
-                className="w-8 h-8 rounded-md flex items-center justify-center"
-                style={{ background: `hsl(var(--${item.color || 'muted-foreground'}) / 0.1)` }}
-              >
-                <item.icon 
-                  className="w-4 h-4" 
-                  style={{ color: `hsl(var(--${item.color || 'muted-foreground'}))` }} 
-                />
+              <div className="w-8 h-8 rounded-md flex items-center justify-center bg-muted">
+                <item.icon className="w-4 h-4 text-foreground" />
               </div>
               <ArrowUpRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
@@ -48,12 +41,7 @@ export function QuickAccessGrid({ items }: QuickAccessGridProps) {
             
             {item.metric && (
               <div className="mt-3 pt-3 border-t border-border">
-                <p 
-                  className="text-lg font-semibold tabular-nums"
-                  style={{ color: `hsl(var(--${item.color || 'foreground'}))` }}
-                >
-                  {item.metric.value}
-                </p>
+                <p className="text-lg font-semibold tabular-nums">{item.metric.value}</p>
                 <p className="text-xs text-muted-foreground">{item.metric.label}</p>
               </div>
             )}

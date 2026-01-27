@@ -26,15 +26,11 @@ export function DevotionBanner({
     >
       <Link 
         to="/spiritual" 
-        className="group block rounded-lg border p-4 transition-colors"
-        style={{
-          borderColor: `hsl(var(--spiritual) / 0.2)`,
-          background: `hsl(var(--spiritual) / 0.03)`
-        }}
+        className="group block rounded-lg border border-border bg-card p-4 transition-colors hover:border-border/80"
       >
         <div className="flex items-center gap-1.5 mb-3">
-          <span className="w-1.5 h-1.5 rounded-full bg-spiritual" />
-          <p className="text-xs text-spiritual font-medium">{label}</p>
+          <span className="w-1.5 h-1.5 rounded-full bg-foreground/50" />
+          <p className="text-xs text-muted-foreground font-medium">{label}</p>
         </div>
         
         <div className="flex items-center justify-between mb-3">
@@ -45,8 +41,8 @@ export function DevotionBanner({
           <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
         </div>
         
-        <div className="flex items-center gap-2 pt-3 border-t" style={{ borderColor: `hsl(var(--spiritual) / 0.1)` }}>
-          <BookOpen className="w-3.5 h-3.5 text-spiritual" />
+        <div className="flex items-center gap-2 pt-3 border-t border-border">
+          <BookOpen className="w-3.5 h-3.5 text-muted-foreground" />
           <span className="text-sm">{todayScripture}</span>
         </div>
       </Link>
