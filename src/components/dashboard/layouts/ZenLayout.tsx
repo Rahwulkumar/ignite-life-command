@@ -234,11 +234,6 @@ export function ZenLayout({ habits, onToggleHabit, weeklyData, quickAccessItems,
         </motion.div>
       </motion.div>
 
-      {/* Quick access */}
-      <motion.div variants={gentleDrop}>
-        <QuickAccessGrid items={quickAccessItems} />
-      </motion.div>
-
       <motion.div variants={gentleDrop} className="h-10" />
     </motion.div>
   );
