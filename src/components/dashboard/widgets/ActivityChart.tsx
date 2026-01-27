@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 interface DayData {
   day: string;
@@ -16,7 +17,12 @@ export function ActivityChart({ data, maxValue, title }: ActivityChartProps) {
   const total = data.reduce((acc, d) => acc + d.value, 0);
   
   return (
-    <div className="rounded-lg border border-border bg-card p-4">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: 0.2, ease: "easeOut" }}
+      className="rounded-lg border border-border bg-card p-4"
+    >
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-medium text-sm">{title}</h3>
         <span className="text-xs text-muted-foreground">Total: {total}</span>
@@ -27,26 +33,34 @@ export function ActivityChart({ data, maxValue, title }: ActivityChartProps) {
           const height = (day.value / maxValue) * 100;
           
           return (
-            <div key={i} className="flex-1 flex flex-col items-center gap-1.5">
+            <motion.div 
+              key={i} 
+              className="flex-1 flex flex-col items-center gap-1.5"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 + i * 0.05 }}
+            >
               <div className="w-full h-12 flex items-end">
-                <div
+                <motion.div
                   className={cn(
-                    "w-full rounded-sm transition-all",
-                    day.isToday ? "bg-foreground" : "bg-muted"
+                    "w-full rounded-sm",
+                    day.isToday ? "bg-tech" : "bg-muted"
                   )}
-                  style={{ height: `${Math.max(height, 8)}%` }}
+                  initial={{ height: 0 }}
+                  animate={{ height: `${Math.max(height, 8)}%` }}
+                  transition={{ duration: 0.5, delay: 0.4 + i * 0.05, ease: "easeOut" }}
                 />
               </div>
               <span className={cn(
                 "text-[10px]",
-                day.isToday ? "font-medium text-foreground" : "text-muted-foreground"
+                day.isToday ? "font-medium text-tech" : "text-muted-foreground"
               )}>
                 {day.day}
               </span>
-            </div>
+            </motion.div>
           );
         })}
       </div>
-    </div>
+    </motion.div>
   );
 }

@@ -1,4 +1,5 @@
 import { format } from "date-fns";
+import { motion } from "framer-motion";
 
 interface HeroHeaderProps {
   currentTime: Date;
@@ -14,7 +15,12 @@ export function HeroHeader({ currentTime }: HeroHeaderProps) {
   };
 
   return (
-    <header className="flex items-center justify-between py-4">
+    <motion.header 
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="flex items-center justify-between py-4"
+    >
       <div>
         <p className="text-sm text-muted-foreground mb-1">
           {format(currentTime, "EEEE, MMMM d")}
@@ -23,16 +29,20 @@ export function HeroHeader({ currentTime }: HeroHeaderProps) {
       </div>
 
       <div className="flex items-center gap-6 text-sm">
-        <div>
-          <span className="text-muted-foreground">Streak</span>
-          <span className="ml-2 font-medium">7 days</span>
-        </div>
-        <div className="h-4 w-px bg-border" />
-        <div>
-          <span className="text-muted-foreground">Focus</span>
-          <span className="ml-2 font-medium">92%</span>
-        </div>
+        <motion.div 
+          whileHover={{ scale: 1.02 }}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-trading/10"
+        >
+          <span className="text-trading text-xs">●</span>
+          <span className="font-medium">7 day streak</span>
+        </motion.div>
+        <motion.div 
+          whileHover={{ scale: 1.02 }}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-tech/10"
+        >
+          <span className="font-medium">92% focus</span>
+        </motion.div>
       </div>
-    </header>
+    </motion.header>
   );
 }
