@@ -1,13 +1,34 @@
 import { format } from "date-fns";
-import { motion } from "framer-motion";
-import natureHeaderBg from "@/assets/nature-header-bg.jpg";
+import { motion, AnimatePresence } from "framer-motion";
+import headerDawn from "@/assets/header-dawn.jpg";
+import headerDay from "@/assets/nature-header-bg.jpg";
+import headerSunset from "@/assets/header-sunset.jpg";
+import headerNight from "@/assets/header-night.jpg";
 
 interface HeroHeaderProps {
   currentTime: Date;
 }
 
+type TimeOfDay = "dawn" | "day" | "sunset" | "night";
+
+const getTimeOfDay = (hour: number): TimeOfDay => {
+  if (hour >= 5 && hour < 8) return "dawn";
+  if (hour >= 8 && hour < 17) return "day";
+  if (hour >= 17 && hour < 20) return "sunset";
+  return "night";
+};
+
+const backgrounds: Record<TimeOfDay, string> = {
+  dawn: headerDawn,
+  day: headerDay,
+  sunset: headerSunset,
+  night: headerNight,
+};
+
 export function HeroHeader({ currentTime }: HeroHeaderProps) {
   const hour = currentTime.getHours();
+  const timeOfDay = getTimeOfDay(hour);
+  const currentBg = backgrounds[timeOfDay];
   
   const getGreeting = () => {
     if (hour < 12) return "Good morning";
@@ -22,36 +43,43 @@ export function HeroHeader({ currentTime }: HeroHeaderProps) {
       transition={{ duration: 0.6, ease: "easeOut" }}
       className="relative overflow-visible -mx-6 -mt-4 px-6 pt-6 pb-16"
     >
-      {/* Animated nature background with extended fade */}
-      <motion.div 
-        className="absolute inset-0 z-0"
-        initial={{ scale: 1.1, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 1.2, ease: "easeOut" }}
-      >
-        <motion.img 
-          src={natureHeaderBg}
-          alt=""
-          className="h-[120%] w-full object-cover object-center"
-          animate={{ 
-            scale: [1, 1.05, 1],
-            y: [0, -5, 0],
-          }}
-          transition={{ 
-            duration: 25, 
-            repeat: Infinity, 
-            repeatType: "reverse",
-            ease: "easeInOut" 
-          }}
-        />
+      {/* Animated nature background with time-based switching */}
+      <div className="absolute inset-0 z-0">
+        <AnimatePresence mode="sync">
+          <motion.div
+            key={timeOfDay}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.5, ease: "easeInOut" }}
+            className="absolute inset-0"
+          >
+            <motion.img 
+              src={currentBg}
+              alt=""
+              className="h-[120%] w-full object-cover object-center"
+              animate={{ 
+                scale: [1, 1.05, 1],
+                y: [0, -5, 0],
+              }}
+              transition={{ 
+                duration: 25, 
+                repeat: Infinity, 
+                repeatType: "reverse",
+                ease: "easeInOut" 
+              }}
+            />
+          </motion.div>
+        </AnimatePresence>
+        
         {/* Multi-layer gradient for smooth transition */}
-        <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/60 to-background/40" />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background" />
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background via-background/80 to-transparent" />
-      </motion.div>
+        <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/60 to-background/40 z-10" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background z-10" />
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background via-background/80 to-transparent z-10" />
+      </div>
 
       {/* Content */}
-      <div className="relative z-10 flex items-center justify-between">
+      <div className="relative z-20 flex items-center justify-between">
         <div>
           <motion.p 
             initial={{ opacity: 0, y: 8 }}
