@@ -9,9 +9,10 @@ import { HeroLayout } from "@/components/dashboard/layouts/HeroLayout";
 import { RowsLayout } from "@/components/dashboard/layouts/RowsLayout";
 import { MagazineLayout } from "@/components/dashboard/layouts/MagazineLayout";
 import { MinimalLayout } from "@/components/dashboard/layouts/MinimalLayout";
-import { SakuraLayout } from "@/components/dashboard/layouts/SakuraLayout";
-import { NeonLayout } from "@/components/dashboard/layouts/NeonLayout";
-import { GhibliLayout } from "@/components/dashboard/layouts/GhibliLayout";
+import { RetroLayout } from "@/components/dashboard/layouts/RetroLayout";
+import { CozyLayout } from "@/components/dashboard/layouts/CozyLayout";
+import { GothicLayout } from "@/components/dashboard/layouts/GothicLayout";
+import { ZenLayout } from "@/components/dashboard/layouts/ZenLayout";
 import { defaultHabits } from "@/components/home/DailyHabits";
 import { 
   Code2, 
@@ -126,14 +127,17 @@ const Index = () => {
               {currentLayout === "minimal" && (
                 <MinimalLayout key="minimal" {...layoutProps} />
               )}
-              {currentLayout === "sakura" && (
-                <SakuraLayout key="sakura" {...layoutProps} />
+              {currentLayout === "retro" && (
+                <RetroLayout key="retro" {...layoutProps} />
               )}
-              {currentLayout === "neon" && (
-                <NeonLayout key="neon" {...layoutProps} />
+              {currentLayout === "cozy" && (
+                <CozyLayout key="cozy" {...layoutProps} />
               )}
-              {currentLayout === "ghibli" && (
-                <GhibliLayout key="ghibli" {...layoutProps} />
+              {currentLayout === "gothic" && (
+                <GothicLayout key="gothic" {...layoutProps} />
+              )}
+              {currentLayout === "zen" && (
+                <ZenLayout key="zen" {...layoutProps} />
               )}
             </AnimatePresence>
           </motion.div>
