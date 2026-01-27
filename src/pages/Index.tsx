@@ -94,10 +94,11 @@ const Index = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.7, ease: "easeOut" }}
-            className="-mt-14 relative z-10"
+            className="-mt-6 relative z-10 bg-background"
           >
+
           {/* Metrics */}
-          <div className="grid grid-cols-4 gap-3 mt-6 relative z-20">
+          <div className="grid grid-cols-4 gap-3 pt-2 relative z-20">
             <MetricCard
               icon={CheckCircle2}
               label="Tasks Completed"
