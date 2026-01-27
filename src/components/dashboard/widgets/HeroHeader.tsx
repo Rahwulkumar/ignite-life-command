@@ -41,7 +41,7 @@ export function HeroHeader({ currentTime }: HeroHeaderProps) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className="relative overflow-hidden -mx-6 -mt-4 px-6 pt-6 pb-32"
+      className="relative overflow-hidden -mx-6 -mt-4 px-6 pt-6 pb-40"
     >
       {/* Animated nature background with time-based switching */}
       <div className="absolute inset-0 z-0">
@@ -57,7 +57,7 @@ export function HeroHeader({ currentTime }: HeroHeaderProps) {
             <motion.img 
               src={currentBg}
               alt=""
-              className="h-full w-full object-cover object-top"
+              className="h-full w-full object-cover object-center"
               animate={{ 
                 scale: [1, 1.03, 1],
                 x: [0, 5, 0],
@@ -72,10 +72,11 @@ export function HeroHeader({ currentTime }: HeroHeaderProps) {
           </motion.div>
         </AnimatePresence>
         
-        {/* Gradient overlays for smooth fade to background */}
-        <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-transparent to-background/60 z-10" />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background z-10" />
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-background z-10" />
+        {/* Smooth gradient fade - sides */}
+        <div className="absolute inset-0 bg-gradient-to-r from-background/70 via-transparent to-background/50 z-10" />
+        
+        {/* Smooth gradient fade - bottom (extended and gradual) */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent from-30% via-background/50 via-60% to-background z-10" />
       </div>
 
       {/* Content */}

@@ -89,12 +89,12 @@ const Index = () => {
         <div className="min-h-screen px-6 py-4 max-w-6xl mx-auto">
           <HeroHeader currentTime={currentTime} />
 
-          {/* Content area with solid background */}
+          {/* Content blends from header */}
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.7, ease: "easeOut" }}
-            className="relative z-10 bg-background -mt-16 pt-4"
+            transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
+            className="relative z-10 -mt-24"
           >
 
           {/* Metrics */}
