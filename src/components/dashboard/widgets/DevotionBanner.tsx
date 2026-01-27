@@ -7,13 +7,15 @@ interface DevotionBannerProps {
   dayNumber?: number;
   todayScripture?: string;
   timeOfDay: "morning" | "evening";
+  className?: string;
 }
 
 export function DevotionBanner({ 
   characterName = "David", 
   dayNumber = 7, 
   todayScripture = "1 Samuel 17",
-  timeOfDay 
+  timeOfDay,
+  className 
 }: DevotionBannerProps) {
   const label = timeOfDay === "morning" ? "Morning Devotion" : "Evening Devotion";
 
@@ -26,7 +28,7 @@ export function DevotionBanner({
     >
       <Link 
         to="/spiritual" 
-        className="group block rounded-lg border border-border bg-card p-4 transition-colors hover:border-border/80"
+        className={`group block rounded-lg border border-border bg-card p-4 transition-colors hover:border-border/80 ${className || ''}`}
       >
         <div className="flex items-center gap-1.5 mb-3">
           <span className="w-1.5 h-1.5 rounded-full bg-foreground/50" />
