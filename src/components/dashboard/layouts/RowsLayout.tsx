@@ -30,10 +30,10 @@ export function RowsLayout({ habits, onToggleHabit, weeklyData, quickAccessItems
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="space-y-6"
+      className="space-y-3"
     >
       {/* Row 1: Metrics - 4 equal columns */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-4 gap-2">
         <MetricCard
           icon={CheckCircle2}
           label="Tasks Completed"
@@ -63,7 +63,7 @@ export function RowsLayout({ habits, onToggleHabit, weeklyData, quickAccessItems
       </div>
 
       {/* Row 2: Devotion and Habits - 2 equal columns */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-2">
         <DevotionBanner
           characterName="David"
           dayNumber={7}
@@ -74,7 +74,7 @@ export function RowsLayout({ habits, onToggleHabit, weeklyData, quickAccessItems
       </div>
 
       {/* Row 3: Goals - 3 equal columns */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-2">
         <GoalProgress
           icon={BookOpen}
           title="Devotional"
@@ -104,7 +104,7 @@ export function RowsLayout({ habits, onToggleHabit, weeklyData, quickAccessItems
       </div>
 
       {/* Row 4: Activity and Insight - 2 columns (wider left) */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-2">
         <div className="col-span-2">
           <ActivityChart
             data={weeklyData}
