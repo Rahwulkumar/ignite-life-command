@@ -91,10 +91,10 @@ const Index = () => {
 
           {/* Content fades in from header */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
-            className="-mt-8 relative z-10"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.7, ease: "easeOut" }}
+            className="-mt-14 relative z-10"
           >
 
           {/* Metrics */}
