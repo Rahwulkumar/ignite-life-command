@@ -1,27 +1,18 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { HeroHeader } from "@/components/dashboard/widgets/HeroHeader";
-import { MetricCard } from "@/components/dashboard/widgets/MetricCard";
-import { GoalProgress } from "@/components/dashboard/widgets/GoalProgress";
-import { QuickAccessGrid } from "@/components/dashboard/widgets/QuickAccessGrid";
-import { HabitTracker } from "@/components/dashboard/widgets/HabitTracker";
-import { ActivityChart } from "@/components/dashboard/widgets/ActivityChart";
-import { InsightCard } from "@/components/dashboard/widgets/InsightCard";
-import { DevotionBanner } from "@/components/dashboard/widgets/DevotionBanner";
+import { LayoutSwitcher, LayoutStyle } from "@/components/dashboard/layouts/LayoutSwitcher";
+import { BentoLayout } from "@/components/dashboard/layouts/BentoLayout";
+import { HeroLayout } from "@/components/dashboard/layouts/HeroLayout";
+import { RowsLayout } from "@/components/dashboard/layouts/RowsLayout";
 import { defaultHabits } from "@/components/home/DailyHabits";
 import { 
-  BookOpen, 
-  Dumbbell, 
   Code2, 
   TrendingUp, 
   Music,
   Wallet,
-  CheckCircle2,
-  Target,
-  Lightbulb,
-  GraduationCap
 } from "lucide-react";
 
 const weeklyData = [
@@ -68,6 +59,7 @@ const quickAccessItems = [
 const Index = () => {
   const [habits, setHabits] = useState(defaultHabits);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [currentLayout, setCurrentLayout] = useState<LayoutStyle>("bento");
 
   useEffect(() => {
     const interval = setInterval(() => setCurrentTime(new Date()), 60000);
@@ -83,6 +75,14 @@ const Index = () => {
   const hour = currentTime.getHours();
   const timeOfDay: "morning" | "evening" = hour < 12 ? "morning" : "evening";
 
+  const layoutProps = {
+    habits,
+    onToggleHabit: toggleHabit,
+    weeklyData,
+    quickAccessItems,
+    timeOfDay,
+  };
+
   return (
     <MainLayout>
       <PageTransition>
@@ -96,98 +96,26 @@ const Index = () => {
             transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
             className="relative z-10 -mt-24"
           >
-
-          {/* Metrics */}
-          <div className="grid grid-cols-4 gap-3">
-            <MetricCard
-              icon={CheckCircle2}
-              label="Tasks Completed"
-              value={28}
-              change={{ value: 12, positive: true }}
-              index={0}
-            />
-            <MetricCard
-              icon={Target}
-              label="Goals On Track"
-              value="4/5"
-              index={1}
-            />
-            <MetricCard
-              icon={BookOpen}
-              label="Study Hours"
-              value="14.5h"
-              change={{ value: 8, positive: true }}
-              index={2}
-            />
-            <MetricCard
-              icon={GraduationCap}
-              label="Skills Growing"
-              value={12}
-              index={3}
-            />
-          </div>
-
-          {/* Main Grid */}
-          <div className="grid grid-cols-12 gap-4 mt-6">
-            {/* Left */}
-            <div className="col-span-8 space-y-4">
-              <HabitTracker habits={habits} onToggle={toggleHabit} />
-
-              <div className="grid grid-cols-3 gap-3">
-                <GoalProgress
-                  icon={BookOpen}
-                  title="Devotional"
-                  current={45}
-                  target={60}
-                  unit="days streak"
-                  href="/spiritual"
-                  index={0}
-                />
-                <GoalProgress
-                  icon={Dumbbell}
-                  title="Fitness"
-                  current={4}
-                  target={6}
-                  unit="workouts / week"
-                  index={1}
-                />
-                <GoalProgress
-                  icon={Code2}
-                  title="Coding"
-                  current={12}
-                  target={20}
-                  unit="problems solved"
-                  href="/tech"
-                  index={2}
-                />
-              </div>
-
-              <QuickAccessGrid items={quickAccessItems} />
-            </div>
-
-            {/* Right */}
-            <div className="col-span-4 space-y-4">
-              <DevotionBanner
-                characterName="David"
-                dayNumber={7}
-                todayScripture="1 Samuel 17"
-                timeOfDay={timeOfDay}
-              />
-
-              <ActivityChart
-                data={weeklyData}
-                maxValue={6}
-                title="Weekly Activity"
-              />
-
-              <InsightCard
-                icon={Lightbulb}
-                title="Great momentum"
-                description="You've been consistent this week. Keep up the devotional streak!"
-                action={{ label: "View insights", href: "/spiritual" }}
+            {/* Layout switcher */}
+            <div className="flex justify-end mb-4">
+              <LayoutSwitcher 
+                currentLayout={currentLayout} 
+                onLayoutChange={setCurrentLayout} 
               />
             </div>
-          </div>
+
+            {/* Dynamic layout content */}
+            <AnimatePresence mode="wait">
+              {currentLayout === "bento" && (
+                <BentoLayout key="bento" {...layoutProps} />
+              )}
+              {currentLayout === "hero" && (
+                <HeroLayout key="hero" {...layoutProps} />
+              )}
+              {currentLayout === "rows" && (
+                <RowsLayout key="rows" {...layoutProps} />
+              )}
+            </AnimatePresence>
           </motion.div>
         </div>
       </PageTransition>
