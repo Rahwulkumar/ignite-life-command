@@ -41,7 +41,7 @@ export function HeroHeader({ currentTime }: HeroHeaderProps) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className="relative overflow-visible -mx-6 -mt-4 px-6 pt-6 pb-16"
+      className="relative overflow-visible -mx-6 -mt-4 px-6 pt-6 pb-24"
     >
       {/* Animated nature background with time-based switching */}
       <div className="absolute inset-0 z-0">
@@ -73,9 +73,9 @@ export function HeroHeader({ currentTime }: HeroHeaderProps) {
         </AnimatePresence>
         
         {/* Multi-layer gradient for smooth transition */}
-        <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/60 to-background/40 z-10" />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background z-10" />
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background via-background/80 to-transparent z-10" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/50 to-background/30 z-10" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/20 to-background z-10" />
+        <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background via-background/95 to-transparent z-10" />
       </div>
 
       {/* Content */}
