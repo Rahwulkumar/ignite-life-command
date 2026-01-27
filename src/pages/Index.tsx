@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { HeroHeader } from "@/components/dashboard/widgets/HeroHeader";
@@ -87,6 +88,14 @@ const Index = () => {
       <PageTransition>
         <div className="min-h-screen px-6 py-4 max-w-6xl mx-auto">
           <HeroHeader currentTime={currentTime} />
+
+          {/* Content fades in from header */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+            className="-mt-8 relative z-10"
+          >
 
           {/* Metrics */}
           <div className="grid grid-cols-4 gap-3 mt-6">
@@ -179,6 +188,7 @@ const Index = () => {
               />
             </div>
           </div>
+          </motion.div>
         </div>
       </PageTransition>
     </MainLayout>
