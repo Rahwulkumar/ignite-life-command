@@ -69,6 +69,12 @@ const Index = () => {
     );
   };
 
+  const updateHabit = (id: string, updates: { notes?: string; timerSeconds?: number; completed?: boolean }) => {
+    setHabits((prev) =>
+      prev.map((h) => (h.id === id ? { ...h, ...updates } : h))
+    );
+  };
+
   const hour = currentTime.getHours();
   const timeOfDay: "morning" | "evening" = hour < 12 ? "morning" : "evening";
 
@@ -93,6 +99,7 @@ const Index = () => {
             <ZenLayout
               habits={habits}
               onToggleHabit={toggleHabit}
+              onUpdateHabit={updateHabit}
               weeklyData={weeklyData}
               quickAccessItems={quickAccessItems}
               timeOfDay={timeOfDay}
