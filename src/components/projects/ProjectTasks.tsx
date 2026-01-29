@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { CheckCircle2, Circle, Clock, Plus, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -41,9 +42,20 @@ const mockProjects: Project[] = [
 
 export function ProjectTasks() {
   return (
-    <div className="space-y-8">
-      {mockProjects.map((project) => (
-        <div key={project.id} className="space-y-4">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="space-y-8"
+    >
+      {mockProjects.map((project, projectIndex) => (
+        <motion.div 
+          key={project.id} 
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: projectIndex * 0.1 }}
+          className="space-y-4"
+        >
           <div className="flex items-center justify-between">
             <div>
               <h3 className="font-medium">{project.name}</h3>
@@ -61,8 +73,14 @@ export function ProjectTasks() {
           </div>
 
           <div className="space-y-0 ml-1">
-            {project.tasks.map((task) => (
-              <div key={task.id} className="flex items-center justify-between py-3 border-b border-border/30">
+            {project.tasks.map((task, taskIndex) => (
+              <motion.div 
+                key={task.id} 
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, delay: projectIndex * 0.1 + taskIndex * 0.03 }}
+                className="flex items-center justify-between py-3 border-b border-border/30"
+              >
                 <div className="flex items-center gap-3">
                   {task.status === "done" ? (
                     <CheckCircle2 className="w-4 h-4 text-finance" />
@@ -88,11 +106,11 @@ export function ProjectTasks() {
                     {task.dueDate}
                   </span>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
-        </div>
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   );
 }

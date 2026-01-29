@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { TrendingUp, TrendingDown, Plus, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -34,7 +35,12 @@ export function ExpenseTracker() {
   const totalExpenses = mockTransactions.filter(tx => tx.amount < 0).reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
 
   return (
-    <div className="space-y-6">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="space-y-6"
+    >
       <div className="flex items-center justify-between">
         <h2 className="text-sm text-muted-foreground">Transactions</h2>
         <div className="flex items-center gap-2">
@@ -83,9 +89,12 @@ export function ExpenseTracker() {
 
       {/* Transaction List */}
       <div className="space-y-0">
-        {filteredTransactions.map((tx) => (
-          <div
+        {filteredTransactions.map((tx, index) => (
+          <motion.div
             key={tx.id}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3, delay: index * 0.03 }}
             className="flex items-center justify-between py-4 border-b border-border/50 hover:bg-muted/20 transition-colors cursor-pointer"
           >
             <div className="flex items-center gap-4">
@@ -109,9 +118,9 @@ export function ExpenseTracker() {
             )}>
               {tx.amount > 0 ? "+" : ""}₦{Math.abs(tx.amount).toLocaleString()}
             </span>
-          </div>
+          </motion.div>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 }
