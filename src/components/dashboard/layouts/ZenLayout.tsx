@@ -19,6 +19,7 @@ import {
 interface ZenLayoutProps {
   habits: any[];
   onToggleHabit: (id: string) => void;
+  onUpdateHabit: (id: string, updates: { notes?: string; timerSeconds?: number; completed?: boolean }) => void;
   weeklyData: any[];
   quickAccessItems: any[];
   timeOfDay: "morning" | "evening";
@@ -100,7 +101,7 @@ const InkDivider = () => (
   </motion.div>
 );
 
-export function ZenLayout({ habits, onToggleHabit, weeklyData, quickAccessItems, timeOfDay }: ZenLayoutProps) {
+export function ZenLayout({ habits, onToggleHabit, onUpdateHabit, weeklyData, quickAccessItems, timeOfDay }: ZenLayoutProps) {
   return (
     <motion.div
       initial="hidden"
@@ -114,7 +115,7 @@ export function ZenLayout({ habits, onToggleHabit, weeklyData, quickAccessItems,
       <motion.div variants={inkBrush}>
         <ZenCard season="neutral">
           <div className="p-6">
-            <HabitTracker habits={habits} onToggle={onToggleHabit} />
+            <HabitTracker habits={habits} onToggle={onToggleHabit} onUpdateHabit={onUpdateHabit} />
           </div>
         </ZenCard>
       </motion.div>

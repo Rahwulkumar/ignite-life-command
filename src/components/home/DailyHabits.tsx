@@ -6,6 +6,8 @@ interface Habit {
   icon: React.ElementType;
   label: string;
   completed: boolean;
+  notes?: string;
+  timerSeconds?: number;
 }
 
 interface DailyHabitsProps {
