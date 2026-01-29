@@ -3,7 +3,9 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
+import AuthPage from "./pages/AuthPage";
 import ChatPage from "./pages/ChatPage";
 import FinancePage from "./pages/FinancePage";
 import TradingPage from "./pages/TradingPage";
@@ -23,15 +25,20 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/chat" element={<ChatPage />} />
-          <Route path="/finance" element={<FinancePage />} />
-          <Route path="/investments" element={<TradingPage />} />
-          <Route path="/tech" element={<TechPage />} />
-          <Route path="/spiritual" element={<SpiritualPage />} />
-          <Route path="/music" element={<MusicPage />} />
-          <Route path="/content" element={<ContentPage />} />
-          <Route path="/projects" element={<ProjectsPage />} />
+          {/* Public routes */}
+          <Route path="/auth" element={<AuthPage />} />
+          
+          {/* Protected routes */}
+          <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+          <Route path="/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
+          <Route path="/finance" element={<ProtectedRoute><FinancePage /></ProtectedRoute>} />
+          <Route path="/investments" element={<ProtectedRoute><TradingPage /></ProtectedRoute>} />
+          <Route path="/tech" element={<ProtectedRoute><TechPage /></ProtectedRoute>} />
+          <Route path="/spiritual" element={<ProtectedRoute><SpiritualPage /></ProtectedRoute>} />
+          <Route path="/music" element={<ProtectedRoute><MusicPage /></ProtectedRoute>} />
+          <Route path="/content" element={<ProtectedRoute><ContentPage /></ProtectedRoute>} />
+          <Route path="/projects" element={<ProtectedRoute><ProjectsPage /></ProtectedRoute>} />
+          
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
