@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { motion } from "framer-motion";
 import { Clock, Plus, Music2, Guitar, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -27,7 +27,11 @@ export function PracticeTracker() {
   const avgRating = (mockSessions.reduce((sum, s) => sum + s.rating, 0) / mockSessions.length).toFixed(1);
 
   return (
-    <div className="space-y-6">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+    className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-sm text-muted-foreground">Practice Sessions</h2>
         <Button variant="outline" size="sm" className="gap-2">
@@ -63,9 +67,12 @@ export function PracticeTracker() {
 
       {/* Session List */}
       <div className="space-y-0">
-        {mockSessions.map((session) => (
-          <div
+        {mockSessions.map((session, index) => (
+          <motion.div
             key={session.id}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3, delay: index * 0.03 }}
             className="py-4 border-b border-border/50 hover:bg-muted/20 transition-colors"
           >
             <div className="flex items-center justify-between mb-2">
@@ -94,9 +101,9 @@ export function PracticeTracker() {
               </div>
             </div>
             <p className="text-sm text-muted-foreground ml-11 italic">"{session.notes}"</p>
-          </div>
+          </motion.div>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 }

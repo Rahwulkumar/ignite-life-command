@@ -52,8 +52,9 @@ const TechPage = () => {
   return (
     <MainLayout>
       <PageTransition>
-        <div className="min-h-screen">
-          <DomainPageHeader
+        <div className="min-h-screen flex">
+          <div className="flex-1">
+            <DomainPageHeader
             icon={Code2}
             title="Tech Mastery Hub"
             subtitle="Skills, certifications & research"
@@ -67,28 +68,19 @@ const TechPage = () => {
 
           <DomainStatsBar stats={stats} />
 
-          <div className="max-w-5xl mx-auto px-8 pb-8">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="w-full justify-start bg-transparent border-b border-border rounded-none h-auto p-0 mb-6">
-                <TabsTrigger value="overview" className="rounded-none border-b-2 border-transparent data-[state=active]:border-tech data-[state=active]:bg-transparent px-4 py-3">
-                  Overview
-                </TabsTrigger>
-                <TabsTrigger value="skills" className="rounded-none border-b-2 border-transparent data-[state=active]:border-tech data-[state=active]:bg-transparent px-4 py-3">
-                  Skills
-                </TabsTrigger>
-                <TabsTrigger value="certifications" className="rounded-none border-b-2 border-transparent data-[state=active]:border-tech data-[state=active]:bg-transparent px-4 py-3">
-                  Certifications
-                </TabsTrigger>
-                <TabsTrigger value="research" className="rounded-none border-b-2 border-transparent data-[state=active]:border-tech data-[state=active]:bg-transparent px-4 py-3">
-                  Research
-                </TabsTrigger>
-                <TabsTrigger value="library" className="rounded-none border-b-2 border-transparent data-[state=active]:border-tech data-[state=active]:bg-transparent px-4 py-3">
-                  Library
-                </TabsTrigger>
-              </TabsList>
+          <div className="px-8 pb-8">
+            <div className="max-w-5xl mx-auto">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+                <TabsList>
+                  <TabsTrigger value="overview">Overview</TabsTrigger>
+                  <TabsTrigger value="skills">Skills</TabsTrigger>
+                  <TabsTrigger value="certifications">Certifications</TabsTrigger>
+                  <TabsTrigger value="research">Research</TabsTrigger>
+                  <TabsTrigger value="library">Library</TabsTrigger>
+                </TabsList>
 
-              <TabsContent value="overview" className="mt-0">
-                <TechOverview 
+              <TabsContent value="overview">
+                <TechOverview
                   skillData={skillData}
                   activeCertifications={mockCertifications}
                   recentResearch={mockResearch}
@@ -96,22 +88,24 @@ const TechPage = () => {
                 />
               </TabsContent>
 
-              <TabsContent value="skills" className="mt-0">
+              <TabsContent value="skills">
                 <SkillsTracker />
               </TabsContent>
 
-              <TabsContent value="certifications" className="mt-0">
+              <TabsContent value="certifications">
                 <CertificationsHub />
               </TabsContent>
 
-              <TabsContent value="research" className="mt-0">
+              <TabsContent value="research">
                 <ResearchJournal />
               </TabsContent>
 
-              <TabsContent value="library" className="mt-0">
+              <TabsContent value="library">
                 <TechLibrary />
               </TabsContent>
             </Tabs>
+            </div>
+          </div>
           </div>
 
           <Sheet open={showAtlas} onOpenChange={setShowAtlas}>

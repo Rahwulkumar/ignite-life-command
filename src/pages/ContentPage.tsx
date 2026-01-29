@@ -17,8 +17,9 @@ const ContentPage = () => {
   return (
     <MainLayout>
       <PageTransition>
-        <div className="min-h-screen">
-          <DomainPageHeader
+        <div className="min-h-screen flex">
+          <div className="flex-1">
+            <DomainPageHeader
             icon={Bookmark}
             title="Content"
             subtitle="Saved reels, videos, articles, and notes"
@@ -34,6 +35,7 @@ const ContentPage = () => {
                 <SavedItems />
               </div>
             </div>
+          </div>
           </div>
         </div>
       </PageTransition>

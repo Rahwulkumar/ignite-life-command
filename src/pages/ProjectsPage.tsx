@@ -17,8 +17,9 @@ const ProjectsPage = () => {
   return (
     <MainLayout>
       <PageTransition>
-        <div className="min-h-screen">
-          <DomainPageHeader
+        <div className="min-h-screen flex">
+          <div className="flex-1">
+            <DomainPageHeader
             icon={Briefcase}
             title="Projects"
             subtitle="Tasks, milestones, and progress tracking"
@@ -39,6 +40,7 @@ const ProjectsPage = () => {
                 <ProjectTasks />
               </div>
             </div>
+          </div>
           </div>
         </div>
       </PageTransition>

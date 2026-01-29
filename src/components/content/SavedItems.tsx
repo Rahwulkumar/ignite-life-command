@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { ExternalLink, Video, FileText, Link2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -22,7 +23,12 @@ const typeIcons = { video: Video, article: FileText, reel: Link2 };
 
 export function SavedItems() {
   return (
-    <div className="space-y-6">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: 0.1 }}
+      className="space-y-6"
+    >
       <div className="flex items-center justify-between">
         <h2 className="text-sm text-muted-foreground">Recent Saves</h2>
         <Button variant="outline" size="sm" className="gap-2">
@@ -32,11 +38,14 @@ export function SavedItems() {
       </div>
 
       <div className="space-y-0">
-        {mockItems.map((item) => {
+        {mockItems.map((item, index) => {
           const Icon = typeIcons[item.type];
           return (
-            <a
+            <motion.a
               key={item.id}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, delay: index * 0.03 }}
               href={item.url}
               className="flex items-center justify-between py-4 border-b border-border/50 group hover:bg-muted/20 transition-colors"
             >
@@ -50,10 +59,10 @@ export function SavedItems() {
                 </div>
               </div>
               <ExternalLink className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-            </a>
+            </motion.a>
           );
         })}
       </div>
-    </div>
+    </motion.div>
   );
 }
