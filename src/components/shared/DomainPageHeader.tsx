@@ -2,14 +2,14 @@ import { motion } from "framer-motion";
 import { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// Import header images
-import headerFinance from "@/assets/header-finance.jpg";
-import headerTrading from "@/assets/header-trading.jpg";
-import headerTech from "@/assets/header-tech.jpg";
-import headerSpiritual from "@/assets/header-spiritual.jpg";
-import headerMusic from "@/assets/header-music.jpg";
-import headerContent from "@/assets/header-content.jpg";
-import headerProjects from "@/assets/header-projects.jpg";
+// Import header videos
+import videoFinance from "@/assets/video-finance.mp4";
+import videoTrading from "@/assets/video-trading.mp4";
+import videoTech from "@/assets/video-tech.mp4";
+import videoSpiritual from "@/assets/video-spiritual.mp4";
+import videoMusic from "@/assets/video-music.mp4";
+import videoContent from "@/assets/video-content.mp4";
+import videoProjects from "@/assets/video-projects.mp4";
 
 interface DomainPageHeaderProps {
   icon: LucideIcon;
@@ -30,7 +30,7 @@ const colorConfig = {
     iconGradient: "from-finance to-finance/50",
     shadow: "shadow-finance/20",
     text: "text-finance",
-    headerImage: headerFinance,
+    headerVideo: videoFinance,
   },
   trading: {
     gradient: "from-trading/20 via-background to-background",
@@ -38,7 +38,7 @@ const colorConfig = {
     iconGradient: "from-trading to-trading/50",
     shadow: "shadow-trading/20",
     text: "text-trading",
-    headerImage: headerTrading,
+    headerVideo: videoTrading,
   },
   tech: {
     gradient: "from-tech/20 via-background to-background",
@@ -46,7 +46,7 @@ const colorConfig = {
     iconGradient: "from-tech to-tech/50",
     shadow: "shadow-tech/20",
     text: "text-tech",
-    headerImage: headerTech,
+    headerVideo: videoTech,
   },
   spiritual: {
     gradient: "from-spiritual/20 via-background to-background",
@@ -54,7 +54,7 @@ const colorConfig = {
     iconGradient: "from-spiritual to-spiritual/50",
     shadow: "shadow-spiritual/20",
     text: "text-spiritual",
-    headerImage: headerSpiritual,
+    headerVideo: videoSpiritual,
   },
   music: {
     gradient: "from-music/20 via-background to-background",
@@ -62,7 +62,7 @@ const colorConfig = {
     iconGradient: "from-music to-music/50",
     shadow: "shadow-music/20",
     text: "text-music",
-    headerImage: headerMusic,
+    headerVideo: videoMusic,
   },
   content: {
     gradient: "from-content/20 via-background to-background",
@@ -70,7 +70,7 @@ const colorConfig = {
     iconGradient: "from-content to-content/50",
     shadow: "shadow-content/20",
     text: "text-content",
-    headerImage: headerContent,
+    headerVideo: videoContent,
   },
   work: {
     gradient: "from-work/20 via-background to-background",
@@ -78,7 +78,7 @@ const colorConfig = {
     iconGradient: "from-work to-work/50",
     shadow: "shadow-work/20",
     text: "text-work",
-    headerImage: headerProjects,
+    headerVideo: videoProjects,
   },
 };
 
@@ -93,24 +93,24 @@ export function DomainPageHeader({
 
   return (
     <div className="relative overflow-hidden pt-14">
-      {/* Animated background image */}
+      {/* Animated background video */}
       <div className="absolute inset-0 z-0">
-        <motion.img
-          src={config.headerImage}
-          alt=""
-          className="h-full w-full object-cover object-center"
+        <motion.div
           initial={{ opacity: 0, scale: 1.05 }}
-          animate={{ 
-            opacity: 1,
-            scale: [1, 1.03, 1],
-            x: [0, 5, 0],
-          }}
-          transition={{ 
-            opacity: { duration: 0.6 },
-            scale: { duration: 25, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" },
-            x: { duration: 25, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" },
-          }}
-        />
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8 }}
+          className="h-full w-full"
+        >
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="h-full w-full object-cover object-center"
+          >
+            <source src={config.headerVideo} type="video/mp4" />
+          </video>
+        </motion.div>
         
         {/* Gradient overlays */}
         <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/60 to-background/40 z-10" />
