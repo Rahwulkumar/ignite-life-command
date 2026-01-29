@@ -24,7 +24,7 @@ export type Database = {
           name: string
           total_chapters: number
           updated_at: string
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           completed_chapters?: number
@@ -35,7 +35,7 @@ export type Database = {
           name: string
           total_chapters?: number
           updated_at?: string
-          user_id?: string | null
+          user_id?: string
         }
         Update: {
           completed_chapters?: number
@@ -46,7 +46,7 @@ export type Database = {
           name?: string
           total_chapters?: number
           updated_at?: string
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -59,7 +59,7 @@ export type Database = {
           id: string
           report_date: string
           total_minutes: number | null
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           activities?: Json | null
@@ -69,7 +69,7 @@ export type Database = {
           id?: string
           report_date: string
           total_minutes?: number | null
-          user_id?: string | null
+          user_id?: string
         }
         Update: {
           activities?: Json | null
@@ -79,7 +79,7 @@ export type Database = {
           id?: string
           report_date?: string
           total_minutes?: number | null
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -89,21 +89,21 @@ export type Database = {
           created_at: string | null
           id: string
           role: string
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           content: string
           created_at?: string | null
           id?: string
           role: string
-          user_id?: string | null
+          user_id?: string
         }
         Update: {
           content?: string
           created_at?: string | null
           id?: string
           role?: string
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -119,7 +119,7 @@ export type Database = {
           parent_id: string | null
           title: string
           updated_at: string | null
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           content?: Json | null
@@ -132,7 +132,7 @@ export type Database = {
           parent_id?: string | null
           title?: string
           updated_at?: string | null
-          user_id?: string | null
+          user_id?: string
         }
         Update: {
           content?: Json | null
@@ -145,7 +145,7 @@ export type Database = {
           parent_id?: string | null
           title?: string
           updated_at?: string | null
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: [
           {
@@ -169,7 +169,7 @@ export type Database = {
           status: string
           title: string
           updated_at: string | null
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           created_at?: string | null
@@ -182,7 +182,7 @@ export type Database = {
           status?: string
           title: string
           updated_at?: string | null
-          user_id?: string | null
+          user_id?: string
         }
         Update: {
           created_at?: string | null
@@ -195,7 +195,7 @@ export type Database = {
           status?: string
           title?: string
           updated_at?: string | null
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -207,7 +207,7 @@ export type Database = {
           next_review_at: string | null
           reference: string
           times_reviewed: number | null
-          user_id: string | null
+          user_id: string
           verse_text: string
         }
         Insert: {
@@ -217,7 +217,7 @@ export type Database = {
           next_review_at?: string | null
           reference: string
           times_reviewed?: number | null
-          user_id?: string | null
+          user_id?: string
           verse_text: string
         }
         Update: {
@@ -227,7 +227,7 @@ export type Database = {
           next_review_at?: string | null
           reference?: string
           times_reviewed?: number | null
-          user_id?: string | null
+          user_id?: string
           verse_text?: string
         }
         Relationships: []
@@ -242,7 +242,7 @@ export type Database = {
           scripture_references: string[] | null
           speaker: string | null
           title: string
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           created_at?: string
@@ -253,7 +253,7 @@ export type Database = {
           scripture_references?: string[] | null
           speaker?: string | null
           title: string
-          user_id?: string | null
+          user_id?: string
         }
         Update: {
           created_at?: string
@@ -264,7 +264,7 @@ export type Database = {
           scripture_references?: string[] | null
           speaker?: string | null
           title?: string
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -274,21 +274,21 @@ export type Database = {
           created_at: string
           id: string
           role: string
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           content: string
           created_at?: string
           id?: string
           role: string
-          user_id?: string | null
+          user_id?: string
         }
         Update: {
           content?: string
           created_at?: string
           id?: string
           role?: string
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -302,7 +302,7 @@ export type Database = {
           progress: number
           target_date: string | null
           title: string
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           category?: string | null
@@ -313,7 +313,7 @@ export type Database = {
           progress?: number
           target_date?: string | null
           title: string
-          user_id?: string | null
+          user_id?: string
         }
         Update: {
           category?: string | null
@@ -324,7 +324,7 @@ export type Database = {
           progress?: number
           target_date?: string | null
           title?: string
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -338,7 +338,7 @@ export type Database = {
           id: string
           notes: string | null
           started_at: string
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           activity: string
@@ -349,7 +349,7 @@ export type Database = {
           id?: string
           notes?: string | null
           started_at?: string
-          user_id?: string | null
+          user_id?: string
         }
         Update: {
           activity?: string
@@ -360,7 +360,7 @@ export type Database = {
           id?: string
           notes?: string | null
           started_at?: string
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }

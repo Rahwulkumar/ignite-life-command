@@ -27,11 +27,20 @@ export const useSpiritualGuide = () => {
     let assistantContent = "";
 
     try {
+      // Get the current session to pass the user's JWT token
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast.error("Please sign in to chat with Sage");
+        setIsLoading(false);
+        return;
+      }
+
       const response = await fetch(CHAT_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({
           messages: [...messages, userMessage].map((m) => ({
@@ -43,7 +52,9 @@ export const useSpiritualGuide = () => {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        if (response.status === 429) {
+        if (response.status === 401) {
+          toast.error("Session expired. Please sign in again.");
+        } else if (response.status === 429) {
           toast.error("Rate limit exceeded. Please wait a moment and try again.");
         } else if (response.status === 402) {
           toast.error("AI credits exhausted. Please add credits to continue.");
