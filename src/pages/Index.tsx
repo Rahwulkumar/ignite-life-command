@@ -75,7 +75,7 @@ const Index = () => {
   return (
     <MainLayout>
       <PageTransition>
-        <div className="min-h-screen px-6 pt-18 pb-4 max-w-6xl mx-auto">
+        <div className="min-h-screen px-6 pt-4 pb-4 max-w-6xl mx-auto">
           <HeroHeader currentTime={currentTime} />
 
           <motion.div
