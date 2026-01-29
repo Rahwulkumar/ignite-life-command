@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { HeroHeader } from "@/components/dashboard/widgets/HeroHeader";
-import { DomainNavigation } from "@/components/dashboard/DomainNavigation";
 import { ZenLayout } from "@/components/dashboard/layouts/ZenLayout";
 import { defaultHabits } from "@/components/home/DailyHabits";
 import { 
@@ -84,11 +83,6 @@ const Index = () => {
             transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
             className="relative z-10 -mt-24"
           >
-            {/* Domain navigation */}
-            <div className="flex justify-end mb-4">
-              <DomainNavigation />
-            </div>
-
             {/* Dashboard content */}
             <ZenLayout
               habits={habits}
