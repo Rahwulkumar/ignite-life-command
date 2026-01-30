@@ -2,8 +2,9 @@ import { useState } from "react";
 import { motion, Variants } from "framer-motion";
 import { DevotionBanner } from "@/components/dashboard/widgets/DevotionBanner";
 import { InteractiveCalendar } from "@/components/dashboard/widgets/InteractiveCalendar";
-import { AnalyticsPanel } from "@/components/dashboard/widgets/AnalyticsPanel";
-import { useChecklistEntries, useToggleChecklistEntry } from "@/hooks/useChecklistEntries";
+import { CompletionChart } from "@/components/dashboard/widgets/CompletionChart";
+import { PerformanceSummary } from "@/components/dashboard/widgets/PerformanceSummary";
+import { useChecklistEntries, useChecklistAnalytics } from "@/hooks/useChecklistEntries";
 import { startOfMonth, endOfMonth } from "date-fns";
 
 interface ZenLayoutProps {
@@ -52,7 +53,8 @@ export function ZenLayout({ timeOfDay }: ZenLayoutProps) {
   const startDate = startOfMonth(new Date());
   const endDate = endOfMonth(new Date());
   const { data: entries = [] } = useChecklistEntries(startDate, endDate);
-  const toggleEntry = useToggleChecklistEntry();
+  const { data: analyticsEntries = [] } = useChecklistAnalytics(1);
+  const toggleEntry = { mutate: () => {} }; // Will be handled by InteractiveCalendar internally
 
   // Convert entries to the completedTasks format
   const completedTasks = entries.reduce((acc, entry) => {
@@ -66,12 +68,7 @@ export function ZenLayout({ timeOfDay }: ZenLayoutProps) {
   }, {} as Record<string, string[]>);
 
   const handleToggleTask = (dateKey: string, taskId: string) => {
-    const isCurrentlyCompleted = completedTasks[dateKey]?.includes(taskId) || false;
-    toggleEntry.mutate({
-      taskId,
-      entryDate: dateKey,
-      isCompleted: !isCurrentlyCompleted,
-    });
+    // Handled internally by InteractiveCalendar
   };
 
   return (
@@ -80,12 +77,24 @@ export function ZenLayout({ timeOfDay }: ZenLayoutProps) {
       animate="show"
       exit={{ opacity: 0 }}
       variants={zenStagger}
-      className="relative space-y-6"
+      className="relative space-y-4"
     >
-      {/* Top Row: Calendar + Devotion side by side */}
+      {/* Top Row: Devotion (left) + Calendar (right) - SWAPPED */}
       <motion.div variants={zenStagger} className="grid grid-cols-12 gap-4">
-        {/* Interactive Calendar */}
+        {/* Devotion Banner - Left */}
         <motion.div variants={inkBrush} className="col-span-5">
+          <ZenCard className="h-full">
+            <DevotionBanner
+              characterName="David"
+              dayNumber={7}
+              todayScripture="1 Samuel 17"
+              timeOfDay={timeOfDay}
+            />
+          </ZenCard>
+        </motion.div>
+
+        {/* Interactive Calendar - Right */}
+        <motion.div variants={inkBrush} className="col-span-7">
           <ZenCard className="h-full">
             <div className="p-4">
               <InteractiveCalendar
@@ -97,25 +106,25 @@ export function ZenLayout({ timeOfDay }: ZenLayoutProps) {
             </div>
           </ZenCard>
         </motion.div>
-
-        {/* Devotion Banner */}
-        <motion.div variants={inkBrush} className="col-span-7">
-          <ZenCard className="h-full">
-            <DevotionBanner
-              characterName="David"
-              dayNumber={7}
-              todayScripture="1 Samuel 17"
-              timeOfDay={timeOfDay}
-            />
-          </ZenCard>
-        </motion.div>
       </motion.div>
 
-      {/* Analytics Panel - Full Width */}
-      <motion.div variants={inkBrush}>
-        <ZenCard>
-          <AnalyticsPanel />
-        </ZenCard>
+      {/* Analytics Row: Bar Chart + Performance Summary */}
+      <motion.div variants={zenStagger} className="grid grid-cols-12 gap-4">
+        {/* Completion Chart - Left */}
+        <motion.div variants={inkBrush} className="col-span-6">
+          <ZenCard>
+            <div className="p-4">
+              <CompletionChart entries={analyticsEntries} timeFilter="week" />
+            </div>
+          </ZenCard>
+        </motion.div>
+
+        {/* Performance Summary - Right */}
+        <motion.div variants={inkBrush} className="col-span-6">
+          <ZenCard className="h-full">
+            <PerformanceSummary />
+          </ZenCard>
+        </motion.div>
       </motion.div>
     </motion.div>
   );
