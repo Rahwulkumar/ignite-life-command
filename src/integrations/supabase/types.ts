@@ -148,10 +148,12 @@ export type Database = {
           content: Json | null
           cover_image: string | null
           created_at: string | null
+          domain: string | null
           icon: string | null
           id: string
           is_pinned: boolean | null
           is_template: boolean | null
+          note_type: string | null
           parent_id: string | null
           title: string
           updated_at: string | null
@@ -161,10 +163,12 @@ export type Database = {
           content?: Json | null
           cover_image?: string | null
           created_at?: string | null
+          domain?: string | null
           icon?: string | null
           id?: string
           is_pinned?: boolean | null
           is_template?: boolean | null
+          note_type?: string | null
           parent_id?: string | null
           title?: string
           updated_at?: string | null
@@ -174,10 +178,12 @@ export type Database = {
           content?: Json | null
           cover_image?: string | null
           created_at?: string | null
+          domain?: string | null
           icon?: string | null
           id?: string
           is_pinned?: boolean | null
           is_template?: boolean | null
+          note_type?: string | null
           parent_id?: string | null
           title?: string
           updated_at?: string | null
