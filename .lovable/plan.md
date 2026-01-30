@@ -1,8 +1,8 @@
 
 
-# Simplified Analytics: Bar Chart + Performance Summary
+# Domain-Based Knowledge & Journal System
 
-This plan simplifies the analytics section to just two clean widgets: a bar chart and a text-based performance summary, plus swaps the calendar/devotion positions and adds animated video to the Devotion banner.
+This plan creates a separate Notion-style workspace for **each domain** (Spiritual, Trading, Tech, Finance, Music, Projects, Content, etc.) with both long-form pages and quick daily journal entries.
 
 ---
 
@@ -10,169 +10,296 @@ This plan simplifies the analytics section to just two clean widgets: a bar char
 
 | Change | Description |
 |--------|-------------|
-| Simplify Analytics | Replace complex analytics with 2 widgets: Bar Chart + Text Summary |
-| Swap Positions | Devotion moves left (5 cols), Calendar moves right (7 cols) |
-| Add Video | Animated `video-spiritual.mp4` background on Devotion banner |
-| Clean Layout | Minimal, focused dashboard with clear visual hierarchy |
+| Database Schema | Add `domain` and `note_type` columns to categorize notes |
+| Domain Hubs | Auto-create hub pages for each domain (Spiritual, Trading, Tech, Finance, Music, Projects, Content) |
+| Nested Pages | Long-form notes organized under domain hubs |
+| Tiny Journal | Quick daily reflection entries tied to domains |
+| Dashboard Integration | NotesWidget shows domain-grouped recent entries |
+| Contextual Access | Each domain page can open its own notes workspace |
 
 ---
 
-## New Dashboard Layout
+## Architecture Overview
 
 ```text
-+-----------------------------------------------+
-|  Devotion (5 cols)     |  Calendar (7 cols)   |
-|  [Video background]    |  - Click days        |
-|  - Scripture reading   |  - Toggle tasks      |
-+-----------------------------------------------+
-|  Bar Chart (6 cols)    |  Performance (6 cols)|
-|  - Weekly completion   |  - "You completed    |
-|  - Color-coded bars    |    85% this week"    |
-|                        |  - Top priority task |
-|                        |  - Streak info       |
-+-----------------------------------------------+
+Notes System
+├── 🙏 Spiritual
+│   ├── [Pages] Character Study: David, Romans Notes, etc.
+│   └── [Journal] Quick daily reflections after prayer/Bible
+│
+├── 📈 Trading
+│   ├── [Pages] Chart Patterns, Strategy Notes, etc.
+│   └── [Journal] Post-session reflections
+│
+├── 💻 Tech
+│   ├── [Pages] React Patterns, AWS Notes, etc.
+│   └── [Journal] Learning logs
+│
+├── 💰 Finance
+│   ├── [Pages] Budget Planning, Investment Thesis
+│   └── [Journal] Financial decisions/learnings
+│
+├── 🎵 Music
+│   ├── [Pages] Song Analysis, Practice Plans
+│   └── [Journal] Practice session notes
+│
+├── 📁 Projects
+│   ├── [Pages] Project documentation
+│   └── [Journal] Progress updates
+│
+└── 📚 Content
+    ├── [Pages] Book notes, Article summaries
+    └── [Journal] Content consumption log
 ```
 
 ---
 
-## Detailed Changes
+## Domain Configuration
 
-### 1. Create PerformanceSummary Widget (NEW)
+Define all domains with their icons and labels:
 
-A simple text-based widget showing how you've performed:
-
-**Content:**
-- Headline stat: "You completed X% of tasks this week"
-- Top priority task: Which task you're most consistent with
-- Current streak: "X day streak"
-- Quick insight: "Trading needs attention" or "Great consistency!"
-
-**Design:**
-- Clean typography, no charts or graphs
-- Subtle icons for visual interest
-- Motivational but data-driven
-
-### 2. Update ZenLayout - Swap + New Grid
-
-**Swap positions:**
-- Devotion: `col-span-5` (left)
-- Calendar: `col-span-7` (right)
-
-**Analytics row:**
-- Bar Chart: `col-span-6` (left)
-- Performance Summary: `col-span-6` (right)
-
-### 3. Update DevotionBanner - Add Video
-
-Add the `video-spiritual.mp4` as a subtle background:
-
-**Layers:**
-1. Video layer (looping, muted, 30-40% opacity)
-2. Gradient overlay (for text readability)
-3. Content layer (existing text + icons)
-
-### 4. Simplify CompletionChart
-
-Keep the existing bar chart but:
-- Update expected tasks to 4 (prayer, bible, trading, gym on weekdays)
-- Keep the color-coded bars (green=100%, yellow=50%+, red=<50%)
+```text
+DOMAINS = [
+  { id: 'spiritual', label: 'Spiritual', icon: '🙏', path: '/spiritual' },
+  { id: 'trading', label: 'Trading', icon: '📈', path: '/investments' },
+  { id: 'tech', label: 'Tech', icon: '💻', path: '/tech' },
+  { id: 'finance', label: 'Finance', icon: '💰', path: '/finance' },
+  { id: 'music', label: 'Music', icon: '🎵', path: '/music' },
+  { id: 'projects', label: 'Projects', icon: '📁', path: '/projects' },
+  { id: 'content', label: 'Content', icon: '📚', path: '/content' },
+]
+```
 
 ---
 
-## Files to Modify/Create
+## Database Migration
 
-| File | Changes |
-|------|---------|
-| `src/components/dashboard/widgets/PerformanceSummary.tsx` | NEW - Text-based performance widget |
-| `src/components/dashboard/widgets/DevotionBanner.tsx` | Add video background with overlay |
-| `src/components/dashboard/layouts/ZenLayout.tsx` | Swap positions, replace AnalyticsPanel with 2 widgets |
-| `src/components/dashboard/widgets/CompletionChart.tsx` | Update task count calculation |
+Add two new columns to `office_notes`:
+
+**New Columns:**
+- `domain` (text, nullable): 'spiritual', 'trading', 'tech', 'finance', 'music', 'projects', 'content'
+- `note_type` (text, default 'page'): 'hub', 'page', 'journal'
+
+**SQL:**
+```sql
+ALTER TABLE office_notes 
+ADD COLUMN domain text,
+ADD COLUMN note_type text DEFAULT 'page';
+
+-- Add check constraint
+ALTER TABLE office_notes 
+ADD CONSTRAINT valid_domain 
+CHECK (domain IN ('spiritual', 'trading', 'tech', 'finance', 'music', 'projects', 'content') OR domain IS NULL);
+
+ALTER TABLE office_notes 
+ADD CONSTRAINT valid_note_type 
+CHECK (note_type IN ('hub', 'page', 'journal'));
+```
 
 ---
 
-## PerformanceSummary Widget Design
+## Note Types Explained
+
+| Type | Purpose | Behavior |
+|------|---------|----------|
+| `hub` | Domain container page | Auto-created, cannot be deleted, shows nested pages + journal entries |
+| `page` | Long-form documentation | Standard Notion-style nested pages |
+| `journal` | Quick daily reflection | Lightweight, date-tagged, shown in compact list |
+
+---
+
+## New Sidebar Structure
+
+The Notes sidebar now organizes by domain:
 
 ```text
 +----------------------------------+
-|  📊 This Week                    |
-|                                  |
-|  You completed 85% of your       |
-|  daily priorities                |
-|                                  |
-|  ─────────────────────────────   |
-|                                  |
-|  🔥 7 day streak                 |
-|                                  |
-|  ⭐ Most consistent: Bible       |
-|     (completed 6/7 days)         |
-|                                  |
-|  ⚠️ Needs focus: Trading         |
-|     (completed 3/7 days)         |
+| 🔍 Search...                     |
++----------------------------------+
+| 📌 PINNED                        |
+| └── Quick reference page         |
++----------------------------------+
+| 🙏 SPIRITUAL                     |
+| ├── Character Study: David       |
+| ├── Romans Notes                 |
+| ├── 📓 Journal (3 entries)       |
+| └── + New page                   |
++----------------------------------+
+| 📈 TRADING                       |
+| ├── Chart Patterns               |
+| ├── Strategy Notes               |
+| ├── 📓 Journal (5 entries)       |
+| └── + New page                   |
++----------------------------------+
+| 💻 TECH                          |
+| ...                              |
 +----------------------------------+
 ```
 
-**Data Sources:**
-- Uses the same `useChecklistAnalytics` hook
-- Calculates which task has highest/lowest completion
-- Shows actionable insights based on data
+---
+
+## Journal Entry System
+
+**Quick Entry Form:**
+- Compact inline form (title + optional body)
+- Auto-tagged with current date
+- Domain pre-selected based on context
+- Appears at top of hub page or in dashboard widget
+
+**Journal List View:**
+- Compact cards showing date, title, snippet
+- Sorted by date (newest first)
+- Filterable within each domain hub
+
+**Entry Structure:**
+```text
++----------------------------------+
+| Jan 30, 2026                     |
+| Morning reflection on David's    |
+| courage facing Goliath           |
+| [Edit] [View]                    |
++----------------------------------+
+```
 
 ---
 
-## DevotionBanner Video Structure
+## Hub Page Layout
+
+When viewing a domain hub (e.g., Spiritual Hub):
 
 ```text
-<Link to="/spiritual">
-  {/* Video Background */}
-  <div className="absolute inset-0">
-    <video autoPlay loop muted playsInline className="opacity-40">
-      <source src={videoSpiritual} />
-    </video>
-    <div className="absolute inset-0 bg-gradient-to-r from-card/90 to-card/60" />
-  </div>
-  
-  {/* Content (unchanged) */}
-  <div className="relative z-10">
-    ... existing Morning Devotion content ...
-  </div>
-</Link>
++-----------------------------------------------+
+| 🙏 Spiritual                                  |
+| Your spiritual growth workspace               |
++-----------------------------------------------+
+| [+ New Page]  [+ Quick Journal]               |
++-----------------------------------------------+
+| PAGES                                         |
+| +--------+ +--------+ +--------+              |
+| |📖      | |✝️      | |🙏      |  <- Gallery  |
+| |David   | |Romans  | |Prayer  |              |
+| +--------+ +--------+ +--------+              |
++-----------------------------------------------+
+| JOURNAL (Recent)                              |
+| +------------------------------------------+  |
+| | Jan 30 | Morning reflection on David... |  |
+| | Jan 29 | Character study notes...       |  |
+| | Jan 28 | Memorized Romans 8:28          |  |
+| +------------------------------------------+  |
+| [View all journal entries]                    |
++-----------------------------------------------+
 ```
+
+---
+
+## Dashboard NotesWidget Update
+
+Show recent entries grouped by domain:
+
+```text
++----------------------------------+
+| 📓 Recent Notes                  |
++----------------------------------+
+| 🙏 Morning reflection on...      |
+| 📈 AAPL chart analysis           |
+| 💻 React patterns learned        |
+| 🎵 Practice session notes        |
+| ─────────────────────────────    |
+| + Quick journal entry            |
++----------------------------------+
+```
+
+Clicking "+ Quick journal entry" opens a modal to select domain and add entry.
 
 ---
 
 ## Implementation Steps
 
-1. **Create PerformanceSummary.tsx** - New text-based widget with:
-   - Weekly completion percentage headline
-   - Current streak display
-   - Best/worst performing task identification
-   - Uses existing analytics hook
+### Phase 1: Database & Core Hooks
 
-2. **Update DevotionBanner.tsx** - Add:
-   - Video import
-   - Absolute positioned video layer
-   - Gradient overlay
-   - z-index layering for content
+1. **Database migration** - Add `domain` and `note_type` columns
+2. **Update useNotes.ts** - Add domain/type filtering, hub initialization logic
+3. **Create domain config** - Centralized domain definitions
 
-3. **Update ZenLayout.tsx** - Changes:
-   - Swap calendar (col-span-7) and devotion (col-span-5)
-   - Replace `AnalyticsPanel` with 2-column grid
-   - Import and use `CompletionChart` and `PerformanceSummary`
+### Phase 2: Notes Components
 
-4. **Update CompletionChart.tsx** - Adjust:
-   - Update expected tasks: 4 on weekdays (prayer, bible, trading, gym), 3 on weekends
-   - Keep all existing styling and color logic
+4. **Update NotesSidebar** - Domain-grouped structure with collapsible sections
+5. **Create HubView component** - Hub page with pages gallery + journal section
+6. **Create JournalList component** - Compact journal entry display
+7. **Create JournalEntryForm** - Quick entry modal/inline form
 
-5. **Remove AnalyticsPanel.tsx** - No longer needed
+### Phase 3: Integration
+
+8. **Update NotesPage** - Handle hub vs page vs journal rendering
+9. **Update NotesWidget** - Domain-aware with quick add
+10. **Add domain links** - Each domain page can link to its notes section
+
+---
+
+## Files to Create/Modify
+
+| File | Changes |
+|------|---------|
+| **Database** | Migration: Add `domain` and `note_type` columns |
+| `src/lib/domains.ts` | NEW - Centralized domain configuration |
+| `src/hooks/useNotes.ts` | Add domain filtering, hub initialization, journal hooks |
+| `src/components/notes/NotesSidebar.tsx` | Domain-grouped collapsible sections |
+| `src/components/notes/HubView.tsx` | NEW - Hub page layout with gallery + journal |
+| `src/components/notes/JournalList.tsx` | NEW - Compact journal entries display |
+| `src/components/notes/JournalEntryForm.tsx` | NEW - Quick journal entry form |
+| `src/pages/NotesPage.tsx` | Handle different view modes (hub/page/journal) |
+| `src/components/dashboard/widgets/NotesWidget.tsx` | Domain-grouped display, quick add |
+
+---
+
+## User Flows
+
+**Creating a new page in a domain:**
+1. Navigate to Notes page
+2. Expand "Spiritual" section in sidebar
+3. Click "+ New page"
+4. Page auto-created with domain='spiritual'
+5. No "Untitled" clutter - always nested under domain
+
+**Quick journal entry (from dashboard):**
+1. Click "+ Quick journal entry" in NotesWidget
+2. Modal opens: select domain, enter title + optional note
+3. Entry saved with domain + note_type='journal' + today's date
+4. Appears in widget and domain hub
+
+**Viewing domain notes:**
+1. Navigate to Spiritual page
+2. Click "Notes" tab or link
+3. See all spiritual pages + journal entries
+4. Can create new pages/journal directly from domain page
+
+---
+
+## Auto-Initialize Hubs
+
+On first load (when no hubs exist for user), auto-create:
+
+```text
+- Spiritual Hub (icon: 🙏, domain: 'spiritual', note_type: 'hub')
+- Trading Hub (icon: 📈, domain: 'trading', note_type: 'hub')
+- Tech Hub (icon: 💻, domain: 'tech', note_type: 'hub')
+- Finance Hub (icon: 💰, domain: 'finance', note_type: 'hub')
+- Music Hub (icon: 🎵, domain: 'music', note_type: 'hub')
+- Projects Hub (icon: 📁, domain: 'projects', note_type: 'hub')
+- Content Hub (icon: 📚, domain: 'content', note_type: 'hub')
+```
+
+These are permanent containers that organize all domain content.
 
 ---
 
 ## Result
 
-A clean, focused dashboard with:
-- **Devotion Banner** (left) - Animated video background, links to spiritual page
-- **Calendar** (right) - Interactive daily task toggling
-- **Bar Chart** (bottom-left) - Visual weekly completion trend
-- **Performance Summary** (bottom-right) - Text insights on your priorities
-
-No complex analytics panels or multiple stat grids - just clear, actionable information about your daily priorities.
+A clean, organized knowledge system where:
+- **Each domain has its own workspace** - Spiritual, Trading, Tech, Finance, Music, Projects, Content
+- **Long-form pages nest under domains** - No loose "Untitled" pages
+- **Quick journal entries** for daily reflections tied to domains
+- **Dashboard widget** shows recent entries across all domains
+- **Contextual access** - Each domain page can link directly to its notes
+- **Zero clutter** - Everything organized under clear domain categories
 
