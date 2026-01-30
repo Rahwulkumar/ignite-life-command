@@ -1,7 +1,10 @@
-import { useState } from "react";
-import { ChevronLeft, ChevronRight, Check } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ChevronLeft, ChevronRight, Check, BarChart3, StickyNote } from "lucide-react";
+import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { DailyChecklistPopover } from "./DailyChecklistPopover";
+import { AnalyticsPanel } from "./AnalyticsPanel";
+import { Button } from "@/components/ui/button";
 import {
   startOfMonth,
   endOfMonth,
@@ -40,6 +43,7 @@ export function InteractiveCalendar({
   onToggleTask,
 }: InteractiveCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [showAnalytics, setShowAnalytics] = useState(false);
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
@@ -136,6 +140,33 @@ export function InteractiveCalendar({
           );
         })}
       </div>
+
+      {/* Quick Actions */}
+      <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/30">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-xs gap-1.5 text-muted-foreground"
+          onClick={() => setShowAnalytics(!showAnalytics)}
+        >
+          <BarChart3 className="w-3.5 h-3.5" />
+          Analytics
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-xs gap-1.5 text-muted-foreground"
+          asChild
+        >
+          <Link to="/notes">
+            <StickyNote className="w-3.5 h-3.5" />
+            Notes
+          </Link>
+        </Button>
+      </div>
+
+      {/* Analytics Panel */}
+      <AnalyticsPanel isOpen={showAnalytics} onClose={() => setShowAnalytics(false)} />
     </div>
   );
 }

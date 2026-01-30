@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, Variants } from "framer-motion";
 import { GoalProgress } from "@/components/dashboard/widgets/GoalProgress";
 import { HabitTracker } from "@/components/dashboard/widgets/HabitTracker";
@@ -6,6 +6,8 @@ import { ActivityChart } from "@/components/dashboard/widgets/ActivityChart";
 import { InsightCard } from "@/components/dashboard/widgets/InsightCard";
 import { DevotionBanner } from "@/components/dashboard/widgets/DevotionBanner";
 import { InteractiveCalendar } from "@/components/dashboard/widgets/InteractiveCalendar";
+import { useChecklistEntries, useToggleChecklistEntry } from "@/hooks/useChecklistEntries";
+import { format, startOfMonth, endOfMonth } from "date-fns";
 import { 
   BookOpen, 
   Dumbbell, 
@@ -59,16 +61,30 @@ const ZenCard = ({ children, className = "" }: { children: React.ReactNode; clas
 
 export function ZenLayout({ habits, onToggleHabit, onUpdateHabit, weeklyData, timeOfDay }: ZenLayoutProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [completedTasks, setCompletedTasks] = useState<Record<string, string[]>>({});
+  
+  // Fetch checklist entries from the database
+  const startDate = startOfMonth(new Date());
+  const endDate = endOfMonth(new Date());
+  const { data: entries = [] } = useChecklistEntries(startDate, endDate);
+  const toggleEntry = useToggleChecklistEntry();
+
+  // Convert entries to the completedTasks format
+  const completedTasks = entries.reduce((acc, entry) => {
+    if (entry.is_completed) {
+      if (!acc[entry.entry_date]) {
+        acc[entry.entry_date] = [];
+      }
+      acc[entry.entry_date].push(entry.task_id);
+    }
+    return acc;
+  }, {} as Record<string, string[]>);
 
   const handleToggleTask = (dateKey: string, taskId: string) => {
-    setCompletedTasks((prev) => {
-      const current = prev[dateKey] || [];
-      if (current.includes(taskId)) {
-        return { ...prev, [dateKey]: current.filter((id) => id !== taskId) };
-      } else {
-        return { ...prev, [dateKey]: [...current, taskId] };
-      }
+    const isCurrentlyCompleted = completedTasks[dateKey]?.includes(taskId) || false;
+    toggleEntry.mutate({
+      taskId,
+      entryDate: dateKey,
+      isCompleted: !isCurrentlyCompleted,
     });
   };
 

@@ -14,6 +14,7 @@ import SpiritualPage from "./pages/SpiritualPage";
 import MusicPage from "./pages/MusicPage";
 import ContentPage from "./pages/ContentPage";
 import ProjectsPage from "./pages/ProjectsPage";
+import NotesPage from "./pages/NotesPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => (
           <Route path="/music" element={<ProtectedRoute><MusicPage /></ProtectedRoute>} />
           <Route path="/content" element={<ProtectedRoute><ContentPage /></ProtectedRoute>} />
           <Route path="/projects" element={<ProtectedRoute><ProjectsPage /></ProtectedRoute>} />
+          <Route path="/notes" element={<ProtectedRoute><NotesPage /></ProtectedRoute>} />
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

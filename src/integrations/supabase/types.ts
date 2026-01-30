@@ -50,6 +50,42 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_checklist_entries: {
+        Row: {
+          created_at: string
+          duration_seconds: number | null
+          entry_date: string
+          id: string
+          is_completed: boolean
+          notes: string | null
+          task_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          duration_seconds?: number | null
+          entry_date: string
+          id?: string
+          is_completed?: boolean
+          notes?: string | null
+          task_id: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          duration_seconds?: number | null
+          entry_date?: string
+          id?: string
+          is_completed?: boolean
+          notes?: string | null
+          task_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       daily_reports: {
         Row: {
           activities: Json | null
