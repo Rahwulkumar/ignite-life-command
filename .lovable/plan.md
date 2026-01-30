@@ -1,8 +1,8 @@
 
 
-# Simplified Dashboard: Daily Priorities + Trading Analytics
+# Simplified Analytics: Bar Chart + Performance Summary
 
-This plan streamlines the dashboard to focus on what you prioritize every day, adds Trading as a tracked task, and displays analytics directly on the dashboard.
+This plan simplifies the analytics section to just two clean widgets: a bar chart and a text-based performance summary, plus swaps the calendar/devotion positions and adds animated video to the Devotion banner.
 
 ---
 
@@ -10,171 +10,169 @@ This plan streamlines the dashboard to focus on what you prioritize every day, a
 
 | Change | Description |
 |--------|-------------|
-| Remove HabitTracker | Delete the habits grid widget (water, gym, devotion, sleep, nutrition) |
-| Remove GoalProgress cards | Delete Devotional, Fitness, Coding goal cards |
-| Remove Activity + Insight row | Delete the bottom row with ActivityChart and InsightCard |
-| Add Trading task | New tracked activity in the daily checklist |
-| Analytics on Dashboard | Display analytics panel directly in the main dashboard layout |
-| Read-only completed days | When all tasks are done for a day, clicking navigates to notes instead of toggling |
-| Link tasks to Notes | Clicking task labels navigates to `/notes` page |
+| Simplify Analytics | Replace complex analytics with 2 widgets: Bar Chart + Text Summary |
+| Swap Positions | Devotion moves left (5 cols), Calendar moves right (7 cols) |
+| Add Video | Animated `video-spiritual.mp4` background on Devotion banner |
+| Clean Layout | Minimal, focused dashboard with clear visual hierarchy |
 
 ---
 
 ## New Dashboard Layout
 
-The simplified dashboard will have this structure:
-
 ```text
 +-----------------------------------------------+
-|  Calendar (5 cols)     |  Devotion (7 cols)   |
-|  - Click days to view  |  - Scripture reading |
-|  - Task completion     |  - Character study   |
+|  Devotion (5 cols)     |  Calendar (7 cols)   |
+|  [Video background]    |  - Click days        |
+|  - Scripture reading   |  - Toggle tasks      |
 +-----------------------------------------------+
-|           Analytics Panel (full width)        |
-|  [Weekly] [Monthly] [All Time] filter tabs    |
-|  +----------+ +----------+ +--------------+   |
-|  | Streak   | | Compl.   | | Task         |   |
-|  | Stats    | | Chart    | | Breakdown    |   |
-|  | 7 days   | | (bars)   | | Prayer  85%  |   |
-|  | longest  | |          | | Bible   90%  |   |
-|  +----------+ +----------+ | GYM     75%  |   |
-|                            | Trading 60%  |   |
-|                            +--------------+   |
+|  Bar Chart (6 cols)    |  Performance (6 cols)|
+|  - Weekly completion   |  - "You completed    |
+|  - Color-coded bars    |    85% this week"    |
+|                        |  - Top priority task |
+|                        |  - Streak info       |
 +-----------------------------------------------+
 ```
-
----
-
-## New Task: Trading
-
-Trading will be added as a daily tracked task alongside the spiritual and fitness activities.
-
-**Task Definition:**
-- ID: `trading`
-- Label: `Trading/Charts`
-- Icon: `TrendingUp` (from lucide-react)
-- Frequency: `daily` (tracked every day)
-
-This means:
-- Appears in the daily checklist popover when clicking calendar days
-- Shows in the Task Breakdown analytics with its own progress bar (amber color)
-- Contributes to streak calculations and completion percentages
-
----
-
-## Files to Modify
-
-| File | Changes |
-|------|---------|
-| `src/components/dashboard/layouts/ZenLayout.tsx` | Remove HabitTracker, GoalProgress row, Activity/Insight row. Add AnalyticsPanel |
-| `src/components/dashboard/widgets/DailyChecklistPopover.tsx` | Add Trading task, read-only mode, notes navigation |
-| `src/components/dashboard/widgets/TaskBreakdown.tsx` | Add Trading to display |
-| `src/hooks/useChecklistEntries.ts` | Update calculateAnalytics to include Trading |
-| `src/components/dashboard/widgets/AnalyticsPanel.tsx` | Convert to standalone widget |
-| `src/components/dashboard/widgets/InteractiveCalendar.tsx` | Remove Analytics button, update task count |
-| `src/pages/Index.tsx` | Remove unused habits state and props |
 
 ---
 
 ## Detailed Changes
 
-### 1. DailyChecklistPopover.tsx - Add Trading + Read-Only Mode
+### 1. Create PerformanceSummary Widget (NEW)
 
-**Add Trading to defaultTasks:**
-```text
-defaultTasks = [
-  { id: "prayer", label: "Prayer", icon: BookOpen, frequency: "daily" },
-  { id: "bible", label: "Bible Reading", icon: BookOpen, frequency: "daily" },
-  { id: "gym", label: "GYM", icon: Dumbbell, frequency: "weekly", daysOfWeek: [1,2,3,4,5] },
-  { id: "trading", label: "Trading/Charts", icon: TrendingUp, frequency: "daily" },  // NEW
-]
-```
+A simple text-based widget showing how you've performed:
 
-**Add read-only logic:**
-- When all tasks for a day are complete, display "Completed" badge
-- Checkbox clicks navigate to notes instead of toggling
-- Task label clicks always navigate to `/notes`
-- Use `useNavigate` from react-router-dom
+**Content:**
+- Headline stat: "You completed X% of tasks this week"
+- Top priority task: Which task you're most consistent with
+- Current streak: "X day streak"
+- Quick insight: "Trading needs attention" or "Great consistency!"
 
-### 2. TaskBreakdown.tsx - Add Trading Display
+**Design:**
+- Clean typography, no charts or graphs
+- Subtle icons for visual interest
+- Motivational but data-driven
 
-Add Trading with amber color:
-```text
-tasks = [
-  { id: "prayer", label: "Prayer", icon: BookOpen, color: "bg-purple-500" },
-  { id: "bible", label: "Bible Reading", icon: BookOpen, color: "bg-blue-500" },
-  { id: "gym", label: "GYM", icon: Dumbbell, color: "bg-emerald-500" },
-  { id: "trading", label: "Trading", icon: TrendingUp, color: "bg-amber-500" },  // NEW
-]
-```
+### 2. Update ZenLayout - Swap + New Grid
 
-### 3. useChecklistEntries.ts - Update Analytics
+**Swap positions:**
+- Devotion: `col-span-5` (left)
+- Calendar: `col-span-7` (right)
 
-- Add `trading: 0` to taskCounts initialization
-- Add trading to taskBreakdown return object
-- Update completion calculations: 3 daily tasks * 7 days + 5 gym days = 26 max per week
+**Analytics row:**
+- Bar Chart: `col-span-6` (left)
+- Performance Summary: `col-span-6` (right)
 
-### 4. AnalyticsPanel.tsx - Standalone Widget
+### 3. Update DevotionBanner - Add Video
 
-Convert from collapsible to always-visible:
-- Remove `isOpen` and `onClose` props
-- Remove AnimatePresence wrapper
-- Make it a full card component with permanent visibility
-- Keep the filter tabs (Weekly, Monthly, All Time)
+Add the `video-spiritual.mp4` as a subtle background:
 
-### 5. InteractiveCalendar.tsx - Remove Analytics Button
+**Layers:**
+1. Video layer (looping, muted, 30-40% opacity)
+2. Gradient overlay (for text readability)
+3. Content layer (existing text + icons)
 
-- Remove the Analytics button from footer
-- Remove AnalyticsPanel import and state
-- Keep the Notes quick-link button
-- Update `defaultDailyTaskCount` from 2 to 3 (prayer, bible, trading)
+### 4. Simplify CompletionChart
 
-### 6. ZenLayout.tsx - Simplified Structure
-
-**Remove:**
-- Lines 128-135: HabitTracker section
-- Lines 137-183: GoalProgress row (Devotional, Fitness, Coding)
-- Lines 185-206: Activity + Insight row
-- Unused imports: GoalProgress, HabitTracker, ActivityChart, InsightCard, Lightbulb
-
-**Add:**
-- Import AnalyticsPanel
-- Render AnalyticsPanel as full-width section after Calendar + Devotion row
-
-### 7. Index.tsx - Cleanup
-
-- Remove unused `habits` state, `toggleHabit`, `updateHabit` functions
-- Remove `defaultHabits` import
-- Remove corresponding props from ZenLayout usage
+Keep the existing bar chart but:
+- Update expected tasks to 4 (prayer, bible, trading, gym on weekdays)
+- Keep the color-coded bars (green=100%, yellow=50%+, red=<50%)
 
 ---
 
-## Technical Details
+## Files to Modify/Create
 
-### Read-Only Detection Logic
+| File | Changes |
+|------|---------|
+| `src/components/dashboard/widgets/PerformanceSummary.tsx` | NEW - Text-based performance widget |
+| `src/components/dashboard/widgets/DevotionBanner.tsx` | Add video background with overlay |
+| `src/components/dashboard/layouts/ZenLayout.tsx` | Swap positions, replace AnalyticsPanel with 2 widgets |
+| `src/components/dashboard/widgets/CompletionChart.tsx` | Update task count calculation |
+
+---
+
+## PerformanceSummary Widget Design
 
 ```text
-For a given date:
-1. Get all tasks scheduled for that day (3 daily + optional gym)
-2. Get all completed tasks for that day
-3. If completed.length >= scheduled.length AND scheduled.length > 0:
-   -> Read-only mode: display "Completed" badge
-   -> Clicking checkbox navigates to notes
-4. Else:
-   -> Normal mode: allow toggling
++----------------------------------+
+|  📊 This Week                    |
+|                                  |
+|  You completed 85% of your       |
+|  daily priorities                |
+|                                  |
+|  ─────────────────────────────   |
+|                                  |
+|  🔥 7 day streak                 |
+|                                  |
+|  ⭐ Most consistent: Bible       |
+|     (completed 6/7 days)         |
+|                                  |
+|  ⚠️ Needs focus: Trading         |
+|     (completed 3/7 days)         |
++----------------------------------+
 ```
 
-### Analytics Calculation Update
+**Data Sources:**
+- Uses the same `useChecklistAnalytics` hook
+- Calculates which task has highest/lowest completion
+- Shows actionable insights based on data
 
-- Daily tasks: Prayer, Bible, Trading (3 tasks)
-- Weekly tasks: GYM (Mon-Fri only)
-- Week completion: `(entries / 26) * 100` (3 daily * 7 + 1 gym * 5)
-- Month completion: `(entries / (days * 3 + weekdays)) * 100`
+---
 
-### Component Reuse
+## DevotionBanner Video Structure
 
-The existing components are reused efficiently:
-- `AnalyticsPanel` uses existing `StreakDisplay`, `CompletionChart`, `TaskBreakdown`
-- `ZenLayout` reuses existing `ZenCard` wrapper component
-- `InteractiveCalendar` and `DailyChecklistPopover` connection stays the same
+```text
+<Link to="/spiritual">
+  {/* Video Background */}
+  <div className="absolute inset-0">
+    <video autoPlay loop muted playsInline className="opacity-40">
+      <source src={videoSpiritual} />
+    </video>
+    <div className="absolute inset-0 bg-gradient-to-r from-card/90 to-card/60" />
+  </div>
+  
+  {/* Content (unchanged) */}
+  <div className="relative z-10">
+    ... existing Morning Devotion content ...
+  </div>
+</Link>
+```
+
+---
+
+## Implementation Steps
+
+1. **Create PerformanceSummary.tsx** - New text-based widget with:
+   - Weekly completion percentage headline
+   - Current streak display
+   - Best/worst performing task identification
+   - Uses existing analytics hook
+
+2. **Update DevotionBanner.tsx** - Add:
+   - Video import
+   - Absolute positioned video layer
+   - Gradient overlay
+   - z-index layering for content
+
+3. **Update ZenLayout.tsx** - Changes:
+   - Swap calendar (col-span-7) and devotion (col-span-5)
+   - Replace `AnalyticsPanel` with 2-column grid
+   - Import and use `CompletionChart` and `PerformanceSummary`
+
+4. **Update CompletionChart.tsx** - Adjust:
+   - Update expected tasks: 4 on weekdays (prayer, bible, trading, gym), 3 on weekends
+   - Keep all existing styling and color logic
+
+5. **Remove AnalyticsPanel.tsx** - No longer needed
+
+---
+
+## Result
+
+A clean, focused dashboard with:
+- **Devotion Banner** (left) - Animated video background, links to spiritual page
+- **Calendar** (right) - Interactive daily task toggling
+- **Bar Chart** (bottom-left) - Visual weekly completion trend
+- **Performance Summary** (bottom-right) - Text insights on your priorities
+
+No complex analytics panels or multiple stat grids - just clear, actionable information about your daily priorities.
 
