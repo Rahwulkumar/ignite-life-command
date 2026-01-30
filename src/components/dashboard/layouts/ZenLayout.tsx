@@ -5,15 +5,12 @@ import { HabitTracker } from "@/components/dashboard/widgets/HabitTracker";
 import { ActivityChart } from "@/components/dashboard/widgets/ActivityChart";
 import { InsightCard } from "@/components/dashboard/widgets/InsightCard";
 import { DevotionBanner } from "@/components/dashboard/widgets/DevotionBanner";
-import { MiniCalendar } from "@/components/home/MiniCalendar";
+import { InteractiveCalendar } from "@/components/dashboard/widgets/InteractiveCalendar";
 import { 
   BookOpen, 
   Dumbbell, 
   Code2, 
-  CheckCircle2,
-  Target,
   Lightbulb,
-  GraduationCap,
 } from "lucide-react";
 
 interface ZenLayoutProps {
@@ -34,18 +31,6 @@ const inkBrush: Variants = {
     transition: { 
       duration: 0.7, 
       ease: [0.22, 1, 0.36, 1]
-    } 
-  },
-};
-
-const gentleDrop: Variants = {
-  hidden: { opacity: 0, y: -10 },
-  show: { 
-    opacity: 1, 
-    y: 0,
-    transition: { 
-      duration: 0.5, 
-      ease: "easeOut"
     } 
   },
 };
@@ -74,6 +59,18 @@ const ZenCard = ({ children, className = "" }: { children: React.ReactNode; clas
 
 export function ZenLayout({ habits, onToggleHabit, onUpdateHabit, weeklyData, timeOfDay }: ZenLayoutProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [completedTasks, setCompletedTasks] = useState<Record<string, string[]>>({});
+
+  const handleToggleTask = (dateKey: string, taskId: string) => {
+    setCompletedTasks((prev) => {
+      const current = prev[dateKey] || [];
+      if (current.includes(taskId)) {
+        return { ...prev, [dateKey]: current.filter((id) => id !== taskId) };
+      } else {
+        return { ...prev, [dateKey]: [...current, taskId] };
+      }
+    });
+  };
 
   return (
     <motion.div
@@ -83,78 +80,24 @@ export function ZenLayout({ habits, onToggleHabit, onUpdateHabit, weeklyData, ti
       variants={zenStagger}
       className="relative space-y-6"
     >
-      {/* Top Row: Metrics + Calendar */}
+      {/* Top Row: Calendar + Devotion side by side */}
       <motion.div variants={zenStagger} className="grid grid-cols-12 gap-4">
-        {/* Metrics - 4 small cards */}
-        <motion.div variants={gentleDrop} className="col-span-2">
+        {/* Interactive Calendar */}
+        <motion.div variants={inkBrush} className="col-span-5">
           <ZenCard className="h-full">
-            <div className="p-4 text-center">
-              <CheckCircle2 className="w-5 h-5 mx-auto mb-2 text-muted-foreground" />
-              <div className="text-2xl font-light">28</div>
-              <span className="text-xs text-muted-foreground">Tasks</span>
-              <div className="text-xs mt-1 text-emerald-500/70">↑ 12%</div>
-            </div>
-          </ZenCard>
-        </motion.div>
-        
-        <motion.div variants={gentleDrop} className="col-span-2">
-          <ZenCard className="h-full">
-            <div className="p-4 text-center">
-              <Target className="w-5 h-5 mx-auto mb-2 text-muted-foreground" />
-              <div className="text-2xl font-light">4/5</div>
-              <span className="text-xs text-muted-foreground">Goals</span>
-            </div>
-          </ZenCard>
-        </motion.div>
-        
-        <motion.div variants={gentleDrop} className="col-span-2">
-          <ZenCard className="h-full">
-            <div className="p-4 text-center">
-              <BookOpen className="w-5 h-5 mx-auto mb-2 text-muted-foreground" />
-              <div className="text-2xl font-light">14.5h</div>
-              <span className="text-xs text-muted-foreground">Study</span>
-              <div className="text-xs mt-1 text-emerald-500/70">↑ 8%</div>
-            </div>
-          </ZenCard>
-        </motion.div>
-        
-        <motion.div variants={gentleDrop} className="col-span-2">
-          <ZenCard className="h-full">
-            <div className="p-4 text-center">
-              <GraduationCap className="w-5 h-5 mx-auto mb-2 text-muted-foreground" />
-              <div className="text-2xl font-light">12</div>
-              <span className="text-xs text-muted-foreground">Skills</span>
-            </div>
-          </ZenCard>
-        </motion.div>
-
-        {/* Calendar - compact */}
-        <motion.div variants={inkBrush} className="col-span-4">
-          <ZenCard className="h-full">
-            <div className="p-3">
-              <MiniCalendar
+            <div className="p-4">
+              <InteractiveCalendar
                 selectedDate={selectedDate}
                 onSelectDate={setSelectedDate}
-                compact
+                completedTasks={completedTasks}
+                onToggleTask={handleToggleTask}
               />
             </div>
           </ZenCard>
         </motion.div>
-      </motion.div>
 
-      {/* Main Row: Habits + Devotion */}
-      <motion.div variants={zenStagger} className="grid grid-cols-12 gap-4">
-        {/* Habit Tracker - main focus */}
-        <motion.div variants={inkBrush} className="col-span-8">
-          <ZenCard>
-            <div className="p-5">
-              <HabitTracker habits={habits} onToggle={onToggleHabit} onUpdateHabit={onUpdateHabit} />
-            </div>
-          </ZenCard>
-        </motion.div>
-
-        {/* Devotion - side */}
-        <motion.div variants={inkBrush} className="col-span-4">
+        {/* Devotion Banner */}
+        <motion.div variants={inkBrush} className="col-span-7">
           <ZenCard className="h-full">
             <DevotionBanner
               characterName="David"
@@ -164,6 +107,15 @@ export function ZenLayout({ habits, onToggleHabit, onUpdateHabit, weeklyData, ti
             />
           </ZenCard>
         </motion.div>
+      </motion.div>
+
+      {/* Main Row: Full-width Habits */}
+      <motion.div variants={inkBrush}>
+        <ZenCard>
+          <div className="p-5">
+            <HabitTracker habits={habits} onToggle={onToggleHabit} onUpdateHabit={onUpdateHabit} />
+          </div>
+        </ZenCard>
       </motion.div>
 
       {/* Goals Row */}
