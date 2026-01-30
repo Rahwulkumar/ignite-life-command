@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
+import { DOMAINS, type DomainId } from "@/lib/domains";
 
 export interface Note {
   id: string;
@@ -12,6 +13,8 @@ export interface Note {
   cover_image: string | null;
   is_pinned: boolean | null;
   is_template: boolean | null;
+  domain: DomainId | null;
+  note_type: 'hub' | 'page' | 'journal' | null;
   created_at: string | null;
   updated_at: string | null;
 }
@@ -27,6 +30,48 @@ export function useNotes() {
         .order("is_pinned", { ascending: false })
         .order("updated_at", { ascending: false });
 
+      if (error) throw error;
+      return data as Note[];
+    },
+  });
+}
+
+// Fetch notes by domain
+export function useNotesByDomain(domain: DomainId | null) {
+  return useQuery({
+    queryKey: ["notes", "domain", domain],
+    queryFn: async () => {
+      if (!domain) return [];
+      
+      const { data, error } = await supabase
+        .from("office_notes")
+        .select("*")
+        .eq("domain", domain)
+        .order("updated_at", { ascending: false });
+
+      if (error) throw error;
+      return data as Note[];
+    },
+    enabled: !!domain,
+  });
+}
+
+// Fetch journal entries by domain
+export function useJournalEntries(domain?: DomainId) {
+  return useQuery({
+    queryKey: ["notes", "journal", domain],
+    queryFn: async () => {
+      let query = supabase
+        .from("office_notes")
+        .select("*")
+        .eq("note_type", "journal")
+        .order("created_at", { ascending: false });
+
+      if (domain) {
+        query = query.eq("domain", domain);
+      }
+
+      const { data, error } = await query;
       if (error) throw error;
       return data as Note[];
     },
@@ -84,12 +129,16 @@ export function useCreateNote() {
       icon = "📝",
       is_template = false,
       content = null,
+      domain = null,
+      note_type = 'page',
     }: {
       title?: string;
       parent_id?: string | null;
       icon?: string;
       is_template?: boolean;
       content?: Json | null;
+      domain?: DomainId | null;
+      note_type?: 'hub' | 'page' | 'journal';
     }) => {
       const { data, error } = await supabase
         .from("office_notes")
@@ -99,6 +148,8 @@ export function useCreateNote() {
           icon,
           is_template,
           content,
+          domain,
+          note_type,
         })
         .select()
         .single();
@@ -128,6 +179,8 @@ export function useUpdateNote() {
       cover_image?: string | null;
       is_pinned?: boolean;
       parent_id?: string | null;
+      domain?: DomainId | null;
+      note_type?: 'hub' | 'page' | 'journal';
     }) => {
       const { data, error } = await supabase
         .from("office_notes")
@@ -166,6 +219,43 @@ export function useDeleteNote() {
   });
 }
 
+// Initialize domain hubs
+export function useInitializeHubs() {
+  const createNote = useCreateNote();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (existingNotes: Note[]) => {
+      const existingHubs = existingNotes.filter(n => n.note_type === 'hub');
+      const existingDomains = new Set(existingHubs.map(h => h.domain));
+      
+      const hubsToCreate = DOMAINS.filter(d => !existingDomains.has(d.id));
+      
+      if (hubsToCreate.length === 0) return [];
+
+      const createdHubs = await Promise.all(
+        hubsToCreate.map(domain =>
+          supabase
+            .from("office_notes")
+            .insert({
+              title: `${domain.label} Hub`,
+              icon: domain.icon,
+              domain: domain.id,
+              note_type: 'hub',
+            })
+            .select()
+            .single()
+        )
+      );
+
+      return createdHubs.map(r => r.data as Note);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+    },
+  });
+}
+
 // Build tree structure from flat notes
 export function buildNoteTree(notes: Note[]): (Note & { children: Note[] })[] {
   const noteMap = new Map<string, Note & { children: Note[] }>();
@@ -187,4 +277,34 @@ export function buildNoteTree(notes: Note[]): (Note & { children: Note[] })[] {
   });
 
   return rootNotes;
+}
+
+// Get notes grouped by domain
+export function groupNotesByDomain(notes: Note[]) {
+  const grouped: Record<DomainId, { hub: Note | null; pages: Note[]; journal: Note[] }> = {
+    spiritual: { hub: null, pages: [], journal: [] },
+    trading: { hub: null, pages: [], journal: [] },
+    tech: { hub: null, pages: [], journal: [] },
+    finance: { hub: null, pages: [], journal: [] },
+    music: { hub: null, pages: [], journal: [] },
+    projects: { hub: null, pages: [], journal: [] },
+    content: { hub: null, pages: [], journal: [] },
+  };
+
+  notes.forEach(note => {
+    if (!note.domain) return;
+    
+    const domain = note.domain as DomainId;
+    if (!grouped[domain]) return;
+
+    if (note.note_type === 'hub') {
+      grouped[domain].hub = note;
+    } else if (note.note_type === 'journal') {
+      grouped[domain].journal.push(note);
+    } else {
+      grouped[domain].pages.push(note);
+    }
+  });
+
+  return grouped;
 }
