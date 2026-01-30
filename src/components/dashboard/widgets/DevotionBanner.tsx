@@ -1,6 +1,7 @@
 import { BookOpen, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import videoSpiritual from "@/assets/video-spiritual.mp4";
 
 interface DevotionBannerProps {
   characterName?: string;
@@ -28,24 +29,42 @@ export function DevotionBanner({
     >
       <Link 
         to="/spiritual" 
-        className={`group block rounded-lg border border-border bg-card p-4 transition-colors hover:border-border/80 ${className || ''}`}
+        className={`group block relative rounded-lg border border-border overflow-hidden transition-colors hover:border-border/80 ${className || ''}`}
       >
-        <div className="flex items-center gap-1.5 mb-3">
-          <span className="w-1.5 h-1.5 rounded-full bg-foreground/50" />
-          <p className="text-xs text-muted-foreground font-medium">{label}</p>
+        {/* Video Background Layer */}
+        <div className="absolute inset-0">
+          <video 
+            autoPlay 
+            loop 
+            muted 
+            playsInline
+            className="w-full h-full object-cover opacity-40"
+          >
+            <source src={videoSpiritual} type="video/mp4" />
+          </video>
+          {/* Gradient overlay for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-r from-card/95 via-card/80 to-card/60" />
         </div>
-        
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <h3 className="font-medium">{characterName}</h3>
-            <p className="text-xs text-muted-foreground">Character Study · Day {dayNumber}</p>
+
+        {/* Content Layer */}
+        <div className="relative z-10 p-4">
+          <div className="flex items-center gap-1.5 mb-3">
+            <span className="w-1.5 h-1.5 rounded-full bg-foreground/50" />
+            <p className="text-xs text-muted-foreground font-medium">{label}</p>
           </div>
-          <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
-        </div>
-        
-        <div className="flex items-center gap-2 pt-3 border-t border-border">
-          <BookOpen className="w-3.5 h-3.5 text-muted-foreground" />
-          <span className="text-sm">{todayScripture}</span>
+          
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h3 className="font-medium">{characterName}</h3>
+              <p className="text-xs text-muted-foreground">Character Study · Day {dayNumber}</p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
+          </div>
+          
+          <div className="flex items-center gap-2 pt-3 border-t border-border/50">
+            <BookOpen className="w-3.5 h-3.5 text-muted-foreground" />
+            <span className="text-sm">{todayScripture}</span>
+          </div>
         </div>
       </Link>
     </motion.div>

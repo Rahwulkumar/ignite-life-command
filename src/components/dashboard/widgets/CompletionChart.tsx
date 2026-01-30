@@ -48,8 +48,8 @@ export function CompletionChart({ entries, timeFilter }: CompletionChartProps) {
       const dateKey = format(day, "yyyy-MM-dd");
       const completed = byDate[dateKey]?.size || 0;
       const dayOfWeek = getDay(day);
-      // Mon-Fri have 3 tasks, Sat-Sun have 2
-      const expected = [1, 2, 3, 4, 5].includes(dayOfWeek) ? 3 : 2;
+      // Mon-Fri have 4 tasks (prayer, bible, trading, gym), Sat-Sun have 3 (prayer, bible, trading)
+      const expected = [1, 2, 3, 4, 5].includes(dayOfWeek) ? 4 : 3;
       const percentage = Math.round((completed / expected) * 100);
 
       return {
