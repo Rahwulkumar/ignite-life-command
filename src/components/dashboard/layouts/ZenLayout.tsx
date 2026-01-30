@@ -4,6 +4,7 @@ import { DevotionBanner } from "@/components/dashboard/widgets/DevotionBanner";
 import { InteractiveCalendar } from "@/components/dashboard/widgets/InteractiveCalendar";
 import { CompletionChart } from "@/components/dashboard/widgets/CompletionChart";
 import { PerformanceSummary } from "@/components/dashboard/widgets/PerformanceSummary";
+import { NotesWidget } from "@/components/dashboard/widgets/NotesWidget";
 import { useChecklistEntries, useChecklistAnalytics } from "@/hooks/useChecklistEntries";
 import { startOfMonth, endOfMonth } from "date-fns";
 
@@ -79,17 +80,20 @@ export function ZenLayout({ timeOfDay }: ZenLayoutProps) {
       variants={zenStagger}
       className="relative space-y-4"
     >
-      {/* Top Row: Devotion (left) + Calendar (right) - SWAPPED */}
+      {/* Top Row: Devotion + Notes (left) + Calendar (right) */}
       <motion.div variants={zenStagger} className="grid grid-cols-12 gap-4">
-        {/* Devotion Banner - Left */}
-        <motion.div variants={inkBrush} className="col-span-5">
-          <ZenCard className="h-full">
+        {/* Left Column: Devotion + Notes */}
+        <motion.div variants={inkBrush} className="col-span-5 flex flex-col gap-4">
+          <ZenCard>
             <DevotionBanner
               characterName="David"
               dayNumber={7}
               todayScripture="1 Samuel 17"
               timeOfDay={timeOfDay}
             />
+          </ZenCard>
+          <ZenCard className="flex-1 min-h-[200px]">
+            <NotesWidget />
           </ZenCard>
         </motion.div>
 
