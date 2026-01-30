@@ -1,9 +1,8 @@
-import { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight, Check, BarChart3, StickyNote } from "lucide-react";
+import { useState } from "react";
+import { ChevronLeft, ChevronRight, Check, StickyNote } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { DailyChecklistPopover } from "./DailyChecklistPopover";
-import { AnalyticsPanel } from "./AnalyticsPanel";
 import { Button } from "@/components/ui/button";
 import {
   startOfMonth,
@@ -26,7 +25,7 @@ interface InteractiveCalendarProps {
   onToggleTask: (dateKey: string, taskId: string) => void;
 }
 
-const defaultDailyTaskCount = 2; // prayer + bible
+const defaultDailyTaskCount = 3; // prayer + bible + trading
 const getExpectedTaskCount = (date: Date) => {
   const dayOfWeek = getDay(date);
   // Mon-Fri have GYM as well
@@ -43,7 +42,6 @@ export function InteractiveCalendar({
   onToggleTask,
 }: InteractiveCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [showAnalytics, setShowAnalytics] = useState(false);
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
@@ -142,16 +140,7 @@ export function InteractiveCalendar({
       </div>
 
       {/* Quick Actions */}
-      <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/30">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-xs gap-1.5 text-muted-foreground"
-          onClick={() => setShowAnalytics(!showAnalytics)}
-        >
-          <BarChart3 className="w-3.5 h-3.5" />
-          Analytics
-        </Button>
+      <div className="flex items-center justify-end mt-3 pt-3 border-t border-border/30">
         <Button
           variant="ghost"
           size="sm"
@@ -164,9 +153,6 @@ export function InteractiveCalendar({
           </Link>
         </Button>
       </div>
-
-      {/* Analytics Panel */}
-      <AnalyticsPanel isOpen={showAnalytics} onClose={() => setShowAnalytics(false)} />
     </div>
   );
 }

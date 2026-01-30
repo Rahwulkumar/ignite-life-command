@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { format, getDay } from "date-fns";
-import { Check, BookOpen, Dumbbell, X } from "lucide-react";
+import { Check, BookOpen, Dumbbell, TrendingUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import {
   Popover,
   PopoverContent,
@@ -20,6 +21,7 @@ interface DailyTask {
 const defaultTasks: DailyTask[] = [
   { id: "prayer", label: "Prayer", icon: BookOpen, frequency: "daily" },
   { id: "bible", label: "Bible Reading", icon: BookOpen, frequency: "daily" },
+  { id: "trading", label: "Trading/Charts", icon: TrendingUp, frequency: "daily" },
   { 
     id: "gym", 
     label: "GYM", 
@@ -43,6 +45,7 @@ export function DailyChecklistPopover({
   onToggleTask,
 }: DailyChecklistPopoverProps) {
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
   const dateKey = format(date, "yyyy-MM-dd");
   const dayOfWeek = getDay(date);
   const completedForDate = completedTasks[dateKey] || [];
@@ -56,7 +59,16 @@ export function DailyChecklistPopover({
     return false;
   });
 
-  const allCompleted = tasksForDay.every((t) => completedForDate.includes(t.id));
+  const allCompleted = tasksForDay.length > 0 && tasksForDay.every((t) => completedForDate.includes(t.id));
+
+  const handleTaskClick = (taskId: string) => {
+    if (allCompleted) {
+      // Read-only mode: navigate to notes
+      navigate("/notes");
+    } else {
+      onToggleTask(dateKey, taskId);
+    }
+  };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -90,12 +102,13 @@ export function DailyChecklistPopover({
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.05 }}
-                  onClick={() => onToggleTask(dateKey, task.id)}
+                  onClick={() => handleTaskClick(task.id)}
                   className={cn(
                     "w-full flex items-center gap-3 p-2.5 rounded-lg transition-all text-left",
                     isCompleted
                       ? "bg-emerald-500/10 text-emerald-600"
-                      : "hover:bg-muted"
+                      : "hover:bg-muted",
+                    allCompleted && "cursor-pointer"
                   )}
                 >
                   <div
