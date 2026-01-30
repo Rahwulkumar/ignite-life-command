@@ -9,6 +9,7 @@ import {
   Music,
   Bookmark,
   Briefcase,
+  StickyNote,
   LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -25,6 +26,7 @@ const navItems = [
   { icon: Music, label: "Music", path: "/music" },
   { icon: Bookmark, label: "Content", path: "/content" },
   { icon: Briefcase, label: "Projects", path: "/projects" },
+  { icon: StickyNote, label: "Notes", path: "/notes" },
 ];
 
 export function TopNavigation() {
