@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { BookOpen, Dumbbell } from "lucide-react";
+import { BookOpen, Dumbbell, TrendingUp } from "lucide-react";
 
 interface TaskStat {
   completed: number;
@@ -12,6 +12,7 @@ interface TaskBreakdownProps {
     prayer: TaskStat;
     bible: TaskStat;
     gym: TaskStat;
+    trading: TaskStat;
   };
 }
 
@@ -30,6 +31,13 @@ export function TaskBreakdown({ breakdown }: TaskBreakdownProps) {
       icon: BookOpen,
       ...breakdown.bible,
       color: "bg-blue-500",
+    },
+    {
+      id: "trading",
+      label: "Trading",
+      icon: TrendingUp,
+      ...breakdown.trading,
+      color: "bg-amber-500",
     },
     {
       id: "gym",

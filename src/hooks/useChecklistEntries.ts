@@ -117,6 +117,7 @@ export function calculateAnalytics(entries: ChecklistEntry[]) {
       taskBreakdown: {
         prayer: { completed: 0, total: 0, percentage: 0 },
         bible: { completed: 0, total: 0, percentage: 0 },
+        trading: { completed: 0, total: 0, percentage: 0 },
         gym: { completed: 0, total: 0, percentage: 0 },
       },
       weeklyData: [],
@@ -164,7 +165,7 @@ export function calculateAnalytics(entries: ChecklistEntry[]) {
   }
 
   // Task breakdown
-  const taskCounts = { prayer: 0, bible: 0, gym: 0 };
+  const taskCounts = { prayer: 0, bible: 0, gym: 0, trading: 0 };
   entries.forEach((entry) => {
     if (entry.task_id in taskCounts) {
       taskCounts[entry.task_id as keyof typeof taskCounts]++;
@@ -186,6 +187,11 @@ export function calculateAnalytics(entries: ChecklistEntry[]) {
       total: totalDays,
       percentage: Math.round((taskCounts.bible / totalDays) * 100),
     },
+    trading: {
+      completed: taskCounts.trading,
+      total: totalDays,
+      percentage: Math.round((taskCounts.trading / totalDays) * 100),
+    },
     gym: {
       completed: taskCounts.gym,
       total: weekDays,
@@ -193,7 +199,7 @@ export function calculateAnalytics(entries: ChecklistEntry[]) {
     },
   };
 
-  // This week completion
+  // This week completion (3 daily tasks * 7 days + 1 gym * 5 weekdays = 26 max)
   const thisWeekEntries = entries.filter((e) => {
     const entryDate = new Date(e.entry_date);
     const weekAgo = new Date();
@@ -201,15 +207,17 @@ export function calculateAnalytics(entries: ChecklistEntry[]) {
     return entryDate >= weekAgo;
   });
   const thisWeekCompletion = thisWeekEntries.length > 0 
-    ? Math.round((thisWeekEntries.length / 21) * 100) // 3 tasks * 7 days max
+    ? Math.round((thisWeekEntries.length / 26) * 100)
     : 0;
 
-  // This month completion
+  // This month completion (3 daily tasks per day + gym on weekdays)
   const thisMonthStart = startOfMonth(new Date());
   const thisMonthEntries = entries.filter((e) => new Date(e.entry_date) >= thisMonthStart);
   const daysInMonth = new Date().getDate();
+  const weekdaysInMonth = Math.ceil(daysInMonth * (5 / 7));
+  const maxMonthTasks = (daysInMonth * 3) + weekdaysInMonth; // 3 daily + gym on weekdays
   const thisMonthCompletion = thisMonthEntries.length > 0
-    ? Math.round((thisMonthEntries.length / (daysInMonth * 3)) * 100)
+    ? Math.round((thisMonthEntries.length / maxMonthTasks) * 100)
     : 0;
 
   return {

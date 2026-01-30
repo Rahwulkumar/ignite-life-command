@@ -1,26 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, Variants } from "framer-motion";
-import { GoalProgress } from "@/components/dashboard/widgets/GoalProgress";
-import { HabitTracker } from "@/components/dashboard/widgets/HabitTracker";
-import { ActivityChart } from "@/components/dashboard/widgets/ActivityChart";
-import { InsightCard } from "@/components/dashboard/widgets/InsightCard";
 import { DevotionBanner } from "@/components/dashboard/widgets/DevotionBanner";
 import { InteractiveCalendar } from "@/components/dashboard/widgets/InteractiveCalendar";
+import { AnalyticsPanel } from "@/components/dashboard/widgets/AnalyticsPanel";
 import { useChecklistEntries, useToggleChecklistEntry } from "@/hooks/useChecklistEntries";
-import { format, startOfMonth, endOfMonth } from "date-fns";
-import { 
-  BookOpen, 
-  Dumbbell, 
-  Code2, 
-  Lightbulb,
-} from "lucide-react";
+import { startOfMonth, endOfMonth } from "date-fns";
 
 interface ZenLayoutProps {
-  habits: any[];
-  onToggleHabit: (id: string) => void;
-  onUpdateHabit: (id: string, updates: { notes?: string; timerSeconds?: number; completed?: boolean }) => void;
-  weeklyData: any[];
-  quickAccessItems: any[];
   timeOfDay: "morning" | "evening";
 }
 
@@ -59,7 +45,7 @@ const ZenCard = ({ children, className = "" }: { children: React.ReactNode; clas
   </div>
 );
 
-export function ZenLayout({ habits, onToggleHabit, onUpdateHabit, weeklyData, timeOfDay }: ZenLayoutProps) {
+export function ZenLayout({ timeOfDay }: ZenLayoutProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
   
   // Fetch checklist entries from the database
@@ -125,84 +111,11 @@ export function ZenLayout({ habits, onToggleHabit, onUpdateHabit, weeklyData, ti
         </motion.div>
       </motion.div>
 
-      {/* Main Row: Full-width Habits */}
+      {/* Analytics Panel - Full Width */}
       <motion.div variants={inkBrush}>
         <ZenCard>
-          <div className="p-5">
-            <HabitTracker habits={habits} onToggle={onToggleHabit} onUpdateHabit={onUpdateHabit} />
-          </div>
+          <AnalyticsPanel />
         </ZenCard>
-      </motion.div>
-
-      {/* Goals Row */}
-      <motion.div variants={zenStagger} className="grid grid-cols-3 gap-4">
-        <motion.div variants={inkBrush}>
-          <ZenCard>
-            <div className="p-4">
-              <GoalProgress
-                icon={BookOpen}
-                title="Devotional"
-                current={45}
-                target={60}
-                unit="days streak"
-                href="/spiritual"
-                index={0}
-              />
-            </div>
-          </ZenCard>
-        </motion.div>
-        <motion.div variants={inkBrush}>
-          <ZenCard>
-            <div className="p-4">
-              <GoalProgress
-                icon={Dumbbell}
-                title="Fitness"
-                current={4}
-                target={6}
-                unit="workouts / week"
-                index={1}
-              />
-            </div>
-          </ZenCard>
-        </motion.div>
-        <motion.div variants={inkBrush}>
-          <ZenCard>
-            <div className="p-4">
-              <GoalProgress
-                icon={Code2}
-                title="Coding"
-                current={12}
-                target={20}
-                unit="problems solved"
-                href="/tech"
-                index={2}
-              />
-            </div>
-          </ZenCard>
-        </motion.div>
-      </motion.div>
-
-      {/* Bottom Row: Activity + Insight */}
-      <motion.div variants={zenStagger} className="grid grid-cols-2 gap-4">
-        <motion.div variants={inkBrush}>
-          <ZenCard>
-            <div className="p-4">
-              <ActivityChart data={weeklyData} maxValue={6} title="This Week" />
-            </div>
-          </ZenCard>
-        </motion.div>
-        <motion.div variants={inkBrush}>
-          <ZenCard>
-            <div className="p-4">
-              <InsightCard
-                icon={Lightbulb}
-                title="Inner stillness"
-                description="Progress flows like water."
-                action={{ label: "Meditate", href: "/spiritual" }}
-              />
-            </div>
-          </ZenCard>
-        </motion.div>
       </motion.div>
     </motion.div>
   );
