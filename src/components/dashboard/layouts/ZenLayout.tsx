@@ -1,10 +1,11 @@
+import { useState } from "react";
 import { motion, Variants } from "framer-motion";
 import { GoalProgress } from "@/components/dashboard/widgets/GoalProgress";
 import { HabitTracker } from "@/components/dashboard/widgets/HabitTracker";
 import { ActivityChart } from "@/components/dashboard/widgets/ActivityChart";
 import { InsightCard } from "@/components/dashboard/widgets/InsightCard";
 import { DevotionBanner } from "@/components/dashboard/widgets/DevotionBanner";
-import { QuickAccessGrid } from "@/components/dashboard/widgets/QuickAccessGrid";
+import { MiniCalendar } from "@/components/home/MiniCalendar";
 import { 
   BookOpen, 
   Dumbbell, 
@@ -13,7 +14,6 @@ import {
   Target,
   Lightbulb,
   GraduationCap,
-  Leaf
 } from "lucide-react";
 
 interface ZenLayoutProps {
@@ -55,120 +55,122 @@ const zenStagger: Variants = {
   show: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.18,
-      delayChildren: 0.1,
+      staggerChildren: 0.12,
+      delayChildren: 0.08,
     },
   },
 };
 
 // Zen card with paper texture feel
-const ZenCard = ({ children, season = "neutral" }: { children: React.ReactNode; season?: "neutral" | "spring" | "autumn" }) => {
-  const seasons = {
-    neutral: "border-stone-600/20 from-stone-500/5 to-transparent",
-    spring: "border-emerald-600/20 from-emerald-500/5 to-transparent",
-    autumn: "border-orange-600/20 from-orange-500/5 to-transparent"
-  };
-
-  return (
-    <div className="relative">
-      <div className={`relative bg-card/80 backdrop-blur-sm rounded-xl border ${seasons[season]} overflow-hidden`}>
-        <div className={`absolute inset-0 bg-gradient-to-br ${seasons[season]}`} />
-        {/* Subtle paper texture */}
-        <div className="absolute inset-0 opacity-[0.015]" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`
-        }} />
-        <div className="relative">{children}</div>
-      </div>
-    </div>
-  );
-};
-
-// Ink brush stroke divider
-const InkDivider = () => (
-  <motion.div 
-    variants={inkBrush}
-    className="flex items-center justify-center py-2"
-  >
-    <svg width="120" height="12" viewBox="0 0 120 12" className="text-stone-500/30">
-      <path
-        d="M0 6 Q30 2, 60 6 T120 6"
-        stroke="currentColor"
-        strokeWidth="2"
-        fill="none"
-        strokeLinecap="round"
-      />
-    </svg>
-  </motion.div>
+const ZenCard = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+  <div className={`relative bg-card/80 backdrop-blur-sm rounded-xl border border-border/40 overflow-hidden ${className}`}>
+    <div className="absolute inset-0 bg-gradient-to-br from-muted/5 to-transparent" />
+    <div className="absolute inset-0 opacity-[0.015]" style={{
+      backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`
+    }} />
+    <div className="relative">{children}</div>
+  </div>
 );
 
-export function ZenLayout({ habits, onToggleHabit, onUpdateHabit, weeklyData, quickAccessItems, timeOfDay }: ZenLayoutProps) {
+export function ZenLayout({ habits, onToggleHabit, onUpdateHabit, weeklyData, timeOfDay }: ZenLayoutProps) {
+  const [selectedDate, setSelectedDate] = useState(new Date());
+
   return (
     <motion.div
       initial="hidden"
       animate="show"
       exit={{ opacity: 0 }}
       variants={zenStagger}
-      className="relative space-y-8"
+      className="relative space-y-6"
     >
+      {/* Top Row: Metrics + Calendar */}
+      <motion.div variants={zenStagger} className="grid grid-cols-12 gap-4">
+        {/* Metrics - 4 small cards */}
+        <motion.div variants={gentleDrop} className="col-span-2">
+          <ZenCard className="h-full">
+            <div className="p-4 text-center">
+              <CheckCircle2 className="w-5 h-5 mx-auto mb-2 text-muted-foreground" />
+              <div className="text-2xl font-light">28</div>
+              <span className="text-xs text-muted-foreground">Tasks</span>
+              <div className="text-xs mt-1 text-emerald-500/70">↑ 12%</div>
+            </div>
+          </ZenCard>
+        </motion.div>
+        
+        <motion.div variants={gentleDrop} className="col-span-2">
+          <ZenCard className="h-full">
+            <div className="p-4 text-center">
+              <Target className="w-5 h-5 mx-auto mb-2 text-muted-foreground" />
+              <div className="text-2xl font-light">4/5</div>
+              <span className="text-xs text-muted-foreground">Goals</span>
+            </div>
+          </ZenCard>
+        </motion.div>
+        
+        <motion.div variants={gentleDrop} className="col-span-2">
+          <ZenCard className="h-full">
+            <div className="p-4 text-center">
+              <BookOpen className="w-5 h-5 mx-auto mb-2 text-muted-foreground" />
+              <div className="text-2xl font-light">14.5h</div>
+              <span className="text-xs text-muted-foreground">Study</span>
+              <div className="text-xs mt-1 text-emerald-500/70">↑ 8%</div>
+            </div>
+          </ZenCard>
+        </motion.div>
+        
+        <motion.div variants={gentleDrop} className="col-span-2">
+          <ZenCard className="h-full">
+            <div className="p-4 text-center">
+              <GraduationCap className="w-5 h-5 mx-auto mb-2 text-muted-foreground" />
+              <div className="text-2xl font-light">12</div>
+              <span className="text-xs text-muted-foreground">Skills</span>
+            </div>
+          </ZenCard>
+        </motion.div>
 
-      {/* Main habit tracker */}
-      <motion.div variants={inkBrush}>
-        <ZenCard season="neutral">
-          <div className="p-6">
-            <HabitTracker habits={habits} onToggle={onToggleHabit} onUpdateHabit={onUpdateHabit} />
-          </div>
-        </ZenCard>
+        {/* Calendar - compact */}
+        <motion.div variants={inkBrush} className="col-span-4">
+          <ZenCard className="h-full">
+            <div className="p-3">
+              <MiniCalendar
+                selectedDate={selectedDate}
+                onSelectDate={setSelectedDate}
+                compact
+              />
+            </div>
+          </ZenCard>
+        </motion.div>
       </motion.div>
 
-      <InkDivider />
-
-      {/* Devotion */}
-      <motion.div variants={inkBrush}>
-        <ZenCard season="spring">
-          <DevotionBanner
-            characterName="David"
-            dayNumber={7}
-            todayScripture="1 Samuel 17"
-            timeOfDay={timeOfDay}
-          />
-        </ZenCard>
-      </motion.div>
-
-      {/* Metrics with generous spacing */}
-      <motion.div variants={zenStagger} className="grid grid-cols-4 gap-6">
-        {[
-          { icon: CheckCircle2, label: "Tasks", value: 28, change: { value: 12, positive: true }, season: "neutral" as const },
-          { icon: Target, label: "Goals", value: "4/5", season: "spring" as const },
-          { icon: BookOpen, label: "Study", value: "14.5h", change: { value: 8, positive: true }, season: "autumn" as const },
-          { icon: GraduationCap, label: "Skills", value: 12, season: "neutral" as const },
-        ].map((metric, i) => (
-          <motion.div 
-            key={i} 
-            variants={gentleDrop}
-          >
-            <ZenCard season={metric.season}>
-              <div className="p-4 text-center">
-                <metric.icon className="w-5 h-5 mx-auto mb-3 text-stone-400" />
-                <div className="text-2xl font-light mb-1">{metric.value}</div>
-                <span className="text-xs text-stone-500">{metric.label}</span>
-                {metric.change && (
-                  <div className={`text-xs mt-1 ${metric.change.positive ? 'text-emerald-500/70' : 'text-rose-500/70'}`}>
-                    {metric.change.positive ? '↑' : '↓'} {metric.change.value}%
-                  </div>
-                )}
-              </div>
-            </ZenCard>
-          </motion.div>
-        ))}
-      </motion.div>
-
-      <InkDivider />
-
-      {/* Goals */}
-      <motion.div variants={zenStagger} className="grid grid-cols-3 gap-6">
-        <motion.div variants={inkBrush}>
-          <ZenCard season="spring">
+      {/* Main Row: Habits + Devotion */}
+      <motion.div variants={zenStagger} className="grid grid-cols-12 gap-4">
+        {/* Habit Tracker - main focus */}
+        <motion.div variants={inkBrush} className="col-span-8">
+          <ZenCard>
             <div className="p-5">
+              <HabitTracker habits={habits} onToggle={onToggleHabit} onUpdateHabit={onUpdateHabit} />
+            </div>
+          </ZenCard>
+        </motion.div>
+
+        {/* Devotion - side */}
+        <motion.div variants={inkBrush} className="col-span-4">
+          <ZenCard className="h-full">
+            <DevotionBanner
+              characterName="David"
+              dayNumber={7}
+              todayScripture="1 Samuel 17"
+              timeOfDay={timeOfDay}
+            />
+          </ZenCard>
+        </motion.div>
+      </motion.div>
+
+      {/* Goals Row */}
+      <motion.div variants={zenStagger} className="grid grid-cols-3 gap-4">
+        <motion.div variants={inkBrush}>
+          <ZenCard>
+            <div className="p-4">
               <GoalProgress
                 icon={BookOpen}
                 title="Devotional"
@@ -182,8 +184,8 @@ export function ZenLayout({ habits, onToggleHabit, onUpdateHabit, weeklyData, qu
           </ZenCard>
         </motion.div>
         <motion.div variants={inkBrush}>
-          <ZenCard season="neutral">
-            <div className="p-5">
+          <ZenCard>
+            <div className="p-4">
               <GoalProgress
                 icon={Dumbbell}
                 title="Fitness"
@@ -196,8 +198,8 @@ export function ZenLayout({ habits, onToggleHabit, onUpdateHabit, weeklyData, qu
           </ZenCard>
         </motion.div>
         <motion.div variants={inkBrush}>
-          <ZenCard season="autumn">
-            <div className="p-5">
+          <ZenCard>
+            <div className="p-4">
               <GoalProgress
                 icon={Code2}
                 title="Coding"
@@ -212,18 +214,18 @@ export function ZenLayout({ habits, onToggleHabit, onUpdateHabit, weeklyData, qu
         </motion.div>
       </motion.div>
 
-      {/* Activity and insight */}
-      <motion.div variants={zenStagger} className="grid grid-cols-2 gap-8">
+      {/* Bottom Row: Activity + Insight */}
+      <motion.div variants={zenStagger} className="grid grid-cols-2 gap-4">
         <motion.div variants={inkBrush}>
-          <ZenCard season="neutral">
-            <div className="p-5">
+          <ZenCard>
+            <div className="p-4">
               <ActivityChart data={weeklyData} maxValue={6} title="This Week" />
             </div>
           </ZenCard>
         </motion.div>
         <motion.div variants={inkBrush}>
-          <ZenCard season="spring">
-            <div className="p-5">
+          <ZenCard>
+            <div className="p-4">
               <InsightCard
                 icon={Lightbulb}
                 title="Inner stillness"
@@ -234,8 +236,6 @@ export function ZenLayout({ habits, onToggleHabit, onUpdateHabit, weeklyData, qu
           </ZenCard>
         </motion.div>
       </motion.div>
-
-      <motion.div variants={gentleDrop} className="h-10" />
     </motion.div>
   );
 }
