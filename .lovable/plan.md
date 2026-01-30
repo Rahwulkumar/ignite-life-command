@@ -1,346 +1,180 @@
 
 
-# Dashboard Analytics + Notion-Style Notes Page
+# Simplified Dashboard: Daily Priorities + Trading Analytics
 
-This plan implements two major features: real-time task analytics with interactive filters on the dashboard, and a full-featured Notion-style notes page accessible from both the dashboard and top navigation.
-
----
-
-## Overview
-
-### Feature 1: Task Analytics Dashboard
-An interactive analytics panel on the dashboard calendar area that displays completion rates, streaks, and per-task statistics with filterable views.
-
-### Feature 2: Notion-Style Notes Page
-A dedicated `/notes` page with folder organization, nested pages, rich text editing (Tiptap), templates, and search functionality.
+This plan streamlines the dashboard to focus on what you prioritize every day, adds Trading as a tracked task, and displays analytics directly on the dashboard.
 
 ---
 
-## User Experience Flow
+## Summary of Changes
+
+| Change | Description |
+|--------|-------------|
+| Remove HabitTracker | Delete the habits grid widget (water, gym, devotion, sleep, nutrition) |
+| Remove GoalProgress cards | Delete Devotional, Fitness, Coding goal cards |
+| Remove Activity + Insight row | Delete the bottom row with ActivityChart and InsightCard |
+| Add Trading task | New tracked activity in the daily checklist |
+| Analytics on Dashboard | Display analytics panel directly in the main dashboard layout |
+| Read-only completed days | When all tasks are done for a day, clicking navigates to notes instead of toggling |
+| Link tasks to Notes | Clicking task labels navigates to `/notes` page |
+
+---
+
+## New Dashboard Layout
+
+The simplified dashboard will have this structure:
 
 ```text
-DASHBOARD ANALYTICS FLOW:
-+------------------+     +----------------------+     +--------------------+
-|  Interactive     | --> | Click "View          | --> | Analytics Panel    |
-|  Calendar        |     | Analytics" button    |     | with Filters       |
-+------------------+     +----------------------+     +--------------------+
-        |                         |                           |
-        v                         v                           v
-  Shows completion          Opens inline               Filter by:
-  status per day            analytics view             - Weekly / Monthly
-                                                       - Task type
-                                                       - Date range
-```
-
-```text
-NOTES PAGE FLOW:
-+------------------+     +------------------+     +------------------+
-|  Top Nav or      | --> | Notes Sidebar    | --> | Editor View      |
-|  Dashboard Link  |     | (folders/pages)  |     | (Tiptap rich)    |
-+------------------+     +------------------+     +------------------+
-        |                         |                       |
-        v                         v                       v
-  Navigate to           Browse nested           Full formatting:
-  /notes page           page structure          Bold, lists, code,
-                                                templates, search
++-----------------------------------------------+
+|  Calendar (5 cols)     |  Devotion (7 cols)   |
+|  - Click days to view  |  - Scripture reading |
+|  - Task completion     |  - Character study   |
++-----------------------------------------------+
+|           Analytics Panel (full width)        |
+|  [Weekly] [Monthly] [All Time] filter tabs    |
+|  +----------+ +----------+ +--------------+   |
+|  | Streak   | | Compl.   | | Task         |   |
+|  | Stats    | | Chart    | | Breakdown    |   |
+|  | 7 days   | | (bars)   | | Prayer  85%  |   |
+|  | longest  | |          | | Bible   90%  |   |
+|  +----------+ +----------+ | GYM     75%  |   |
+|                            | Trading 60%  |   |
+|                            +--------------+   |
++-----------------------------------------------+
 ```
 
 ---
 
-## Feature 1: Task Analytics Dashboard
+## New Task: Trading
 
-### Analytics Components
+Trading will be added as a daily tracked task alongside the spiritual and fitness activities.
 
-| Component | Purpose |
-|-----------|---------|
-| `AnalyticsPanel.tsx` | Main container with filter tabs and visualizations |
-| `CompletionChart.tsx` | Bar chart showing weekly/monthly completion rates |
-| `StreakDisplay.tsx` | Current streak, longest streak, and streak calendar heatmap |
-| `TaskBreakdown.tsx` | Per-task statistics (Prayer %, Bible %, GYM %) with radial progress |
-| `AnalyticsFilters.tsx` | Filter controls (time range, task type) |
+**Task Definition:**
+- ID: `trading`
+- Label: `Trading/Charts`
+- Icon: `TrendingUp` (from lucide-react)
+- Frequency: `daily` (tracked every day)
 
-### Analytics Data Structure
-
-```text
-Analytics Summary:
-+-- Overall Stats
-|   +-- Current streak: 7 days
-|   +-- Longest streak: 23 days
-|   +-- This week: 85% completion
-|   +-- This month: 78% completion
-|
-+-- Per-Task Stats
-|   +-- Prayer: 92% (23/25 days)
-|   +-- Bible Reading: 88% (22/25 days)
-|   +-- GYM: 80% (16/20 scheduled days)
-|
-+-- Weekly Chart
-    +-- Mon: 3/3 (100%)
-    +-- Tue: 2/3 (67%)
-    +-- Wed: 3/3 (100%)
-    ...
-```
-
-### UI Integration
-
-The analytics will appear when clicking an "Analytics" button on the calendar widget:
-
-```text
-+----------------------------------------+
-| January 2026              [< >]        |
-|----------------------------------------|
-|  S   M   T   W   T   F   S             |
-| ...calendar days with indicators...    |
-|----------------------------------------|
-| [Analytics] button at bottom           |
-+----------------------------------------+
-         |
-         v (expands to show)
-+----------------------------------------+
-| ANALYTICS PANEL                        |
-|----------------------------------------|
-| [Weekly] [Monthly] [All Time]  filters |
-|----------------------------------------|
-| Current Streak: 7 days                 |
-| Longest Streak: 23 days                |
-|----------------------------------------|
-| Weekly Completion Chart                |
-| [Bar chart visualization]              |
-|----------------------------------------|
-| Task Breakdown:                        |
-| Prayer      [========--] 92%          |
-| Bible       [=======---] 88%          |
-| GYM         [======----] 80%          |
-+----------------------------------------+
-```
-
-### Database Table
-
-A new `daily_checklist_entries` table to persist checklist completions:
-
-```text
-daily_checklist_entries
-+------------------+-------------+------------------------+
-| Column           | Type        | Description            |
-+------------------+-------------+------------------------+
-| id               | UUID        | Primary key            |
-| user_id          | UUID        | Owner (RLS enforced)   |
-| task_id          | TEXT        | prayer/bible/gym       |
-| entry_date       | DATE        | The date of entry      |
-| is_completed     | BOOLEAN     | Completion status      |
-| duration_seconds | INTEGER     | Optional timer data    |
-| notes            | TEXT        | Optional notes         |
-| created_at       | TIMESTAMP   | Record creation time   |
-| updated_at       | TIMESTAMP   | Last update time       |
-+------------------+-------------+------------------------+
-| UNIQUE(user_id, task_id, entry_date)                    |
-+------------------+-------------+------------------------+
-```
-
-RLS Policies:
-- SELECT, INSERT, UPDATE, DELETE: Only own entries (user_id = auth.uid())
+This means:
+- Appears in the daily checklist popover when clicking calendar days
+- Shows in the Task Breakdown analytics with its own progress bar (amber color)
+- Contributes to streak calculations and completion percentages
 
 ---
-
-## Feature 2: Notion-Style Notes Page
-
-### Core Features
-
-1. **Folder/Page Structure**: Nested pages with parent-child relationships
-2. **Rich Text Editor**: Tiptap with formatting toolbar (bold, italic, underline, lists, code blocks, quotes)
-3. **Templates**: Pre-defined note templates (Meeting Notes, Daily Journal, etc.)
-4. **Search**: Full-text search across all notes
-5. **Icons & Covers**: Emoji icons and optional cover images for pages
-
-### Page Layout
-
-```text
-/notes Page Structure:
-+-------------------------------------------------------+
-| TopNavigation (with Notes link highlighted)           |
-+-------------------------------------------------------+
-|                                                       |
-| +------------------+ +------------------------------+ |
-| | SIDEBAR          | | EDITOR AREA                  | |
-| |------------------| |------------------------------| |
-| | [Search...]      | | [Icon] Page Title            | |
-| |                  | | [Cover image area]           | |
-| | Quick Access     | |                              | |
-| |  - Pinned pages  | | +-------------------------+  | |
-| |                  | | | Rich text content       |  | |
-| | Pages            | | |                         |  | |
-| |  > Folder 1      | | | Formatting toolbar:     |  | |
-| |    - Page A      | | | [B][I][U][Link][List]   |  | |
-| |    - Page B      | | |                         |  | |
-| |  > Folder 2      | | | Auto-save indicator     |  | |
-| |    - Page C      | | +-------------------------+  | |
-| |                  | |                              | |
-| | Templates        | |                              | |
-| |  - Meeting Notes | |                              | |
-| |  - Daily Journal | |                              | |
-| |                  | |                              | |
-| | [+ New Page]     | |                              | |
-| +------------------+ +------------------------------+ |
-+-------------------------------------------------------+
-```
-
-### Components Structure
-
-| Component | Purpose |
-|-----------|---------|
-| `NotesPage.tsx` | Main page layout with sidebar + editor |
-| `NotesSidebar.tsx` | Navigation tree with folders, pages, templates |
-| `NoteEditor.tsx` | Tiptap-based rich text editor |
-| `PageHeader.tsx` | Icon picker, title, cover image |
-| `NotesSearch.tsx` | Search bar with results dropdown |
-| `TemplateSelector.tsx` | Choose from pre-made templates |
-| `PageTreeItem.tsx` | Recursive tree item for nested pages |
-
-### Using Existing Database
-
-The project already has an `office_notes` table with:
-- `id`, `user_id`, `title`, `content` (JSONB for rich text)
-- `parent_id` (for nesting), `icon`, `cover_image`
-- `is_pinned`, `is_template`
-- RLS policies already configured
-
-This table perfectly supports the Notion-style structure!
-
-### Rich Text Editor Features (Tiptap)
-
-The project has Tiptap extensions installed:
-- `@tiptap/starter-kit` (basic formatting)
-- `@tiptap/extension-placeholder`
-- `@tiptap/extension-link`
-- `@tiptap/extension-underline`
-- `@tiptap/extension-highlight`
-- `@tiptap/extension-task-list` & `task-item`
-- `@tiptap/extension-code-block-lowlight`
-- `@tiptap/extension-bubble-menu`
-
-Formatting toolbar will include:
-- Bold, Italic, Underline, Strikethrough
-- Headings (H1, H2, H3)
-- Bullet & Numbered Lists
-- Task/Checkbox Lists
-- Code Blocks with syntax highlighting
-- Links
-- Blockquotes
-- Highlight/Marker
-
----
-
-## Navigation Updates
-
-Add "Notes" to the top navigation bar:
-
-```text
-Current navItems:
-Home | Finance | Investments | Tech | Spiritual | Music | Content | Projects
-
-Updated navItems:
-Home | Finance | Investments | Tech | Spiritual | Music | Content | Projects | Notes
-```
-
-Also add a quick access button on the dashboard calendar area linking to `/notes`.
-
----
-
-## Implementation Phases
-
-### Phase 1: Database + Data Layer
-1. Create `daily_checklist_entries` table with RLS policies
-2. Create React Query hooks for checklist CRUD operations
-3. Create React Query hooks for `office_notes` CRUD operations
-4. Update `ZenLayout` to persist calendar completions to database
-
-### Phase 2: Notes Page Foundation
-1. Create `NotesPage.tsx` with sidebar + editor layout
-2. Implement `NotesSidebar.tsx` with page tree navigation
-3. Build `NoteEditor.tsx` using Tiptap with formatting toolbar
-4. Add `/notes` route to App.tsx
-5. Add "Notes" link to TopNavigation
-
-### Phase 3: Notes Features
-1. Implement nested page creation and navigation
-2. Add `PageHeader.tsx` with icon picker and cover images
-3. Create `NotesSearch.tsx` with full-text filtering
-4. Build `TemplateSelector.tsx` with preset templates
-5. Add auto-save functionality with debouncing
-
-### Phase 4: Analytics Dashboard
-1. Create `AnalyticsPanel.tsx` main container
-2. Build `CompletionChart.tsx` using Recharts (already installed)
-3. Implement `StreakDisplay.tsx` with heatmap calendar
-4. Create `TaskBreakdown.tsx` with radial progress indicators
-5. Add `AnalyticsFilters.tsx` for time range and task filtering
-
-### Phase 5: Integration
-1. Add analytics trigger button to InteractiveCalendar
-2. Add quick access to Notes from dashboard
-3. Ensure responsive design for mobile views
-4. Polish animations and transitions
-
----
-
-## Files to Create
-
-| File | Purpose |
-|------|---------|
-| `src/pages/NotesPage.tsx` | Main notes page component |
-| `src/components/notes/NotesSidebar.tsx` | Sidebar navigation |
-| `src/components/notes/NoteEditor.tsx` | Tiptap rich text editor |
-| `src/components/notes/PageHeader.tsx` | Page title, icon, cover |
-| `src/components/notes/PageTreeItem.tsx` | Recursive tree navigation |
-| `src/components/notes/NotesSearch.tsx` | Search functionality |
-| `src/components/notes/TemplateSelector.tsx` | Template picker |
-| `src/components/notes/EditorToolbar.tsx` | Formatting toolbar |
-| `src/components/dashboard/widgets/AnalyticsPanel.tsx` | Analytics container |
-| `src/components/dashboard/widgets/CompletionChart.tsx` | Weekly/monthly chart |
-| `src/components/dashboard/widgets/StreakDisplay.tsx` | Streak visualization |
-| `src/components/dashboard/widgets/TaskBreakdown.tsx` | Per-task stats |
-| `src/components/dashboard/widgets/AnalyticsFilters.tsx` | Filter controls |
-| `src/hooks/useChecklistEntries.ts` | React Query for checklist |
-| `src/hooks/useNotes.ts` | React Query for notes CRUD |
 
 ## Files to Modify
 
 | File | Changes |
 |------|---------|
-| `src/App.tsx` | Add `/notes` route |
-| `src/components/shared/TopNavigation.tsx` | Add "Notes" nav item |
-| `src/components/dashboard/layouts/ZenLayout.tsx` | Integrate analytics, add Notes quick link |
-| `src/components/dashboard/widgets/InteractiveCalendar.tsx` | Add analytics button, persist to DB |
-| `src/components/dashboard/widgets/DailyChecklistPopover.tsx` | Connect to database |
+| `src/components/dashboard/layouts/ZenLayout.tsx` | Remove HabitTracker, GoalProgress row, Activity/Insight row. Add AnalyticsPanel |
+| `src/components/dashboard/widgets/DailyChecklistPopover.tsx` | Add Trading task, read-only mode, notes navigation |
+| `src/components/dashboard/widgets/TaskBreakdown.tsx` | Add Trading to display |
+| `src/hooks/useChecklistEntries.ts` | Update calculateAnalytics to include Trading |
+| `src/components/dashboard/widgets/AnalyticsPanel.tsx` | Convert to standalone widget |
+| `src/components/dashboard/widgets/InteractiveCalendar.tsx` | Remove Analytics button, update task count |
+| `src/pages/Index.tsx` | Remove unused habits state and props |
+
+---
+
+## Detailed Changes
+
+### 1. DailyChecklistPopover.tsx - Add Trading + Read-Only Mode
+
+**Add Trading to defaultTasks:**
+```text
+defaultTasks = [
+  { id: "prayer", label: "Prayer", icon: BookOpen, frequency: "daily" },
+  { id: "bible", label: "Bible Reading", icon: BookOpen, frequency: "daily" },
+  { id: "gym", label: "GYM", icon: Dumbbell, frequency: "weekly", daysOfWeek: [1,2,3,4,5] },
+  { id: "trading", label: "Trading/Charts", icon: TrendingUp, frequency: "daily" },  // NEW
+]
+```
+
+**Add read-only logic:**
+- When all tasks for a day are complete, display "Completed" badge
+- Checkbox clicks navigate to notes instead of toggling
+- Task label clicks always navigate to `/notes`
+- Use `useNavigate` from react-router-dom
+
+### 2. TaskBreakdown.tsx - Add Trading Display
+
+Add Trading with amber color:
+```text
+tasks = [
+  { id: "prayer", label: "Prayer", icon: BookOpen, color: "bg-purple-500" },
+  { id: "bible", label: "Bible Reading", icon: BookOpen, color: "bg-blue-500" },
+  { id: "gym", label: "GYM", icon: Dumbbell, color: "bg-emerald-500" },
+  { id: "trading", label: "Trading", icon: TrendingUp, color: "bg-amber-500" },  // NEW
+]
+```
+
+### 3. useChecklistEntries.ts - Update Analytics
+
+- Add `trading: 0` to taskCounts initialization
+- Add trading to taskBreakdown return object
+- Update completion calculations: 3 daily tasks * 7 days + 5 gym days = 26 max per week
+
+### 4. AnalyticsPanel.tsx - Standalone Widget
+
+Convert from collapsible to always-visible:
+- Remove `isOpen` and `onClose` props
+- Remove AnimatePresence wrapper
+- Make it a full card component with permanent visibility
+- Keep the filter tabs (Weekly, Monthly, All Time)
+
+### 5. InteractiveCalendar.tsx - Remove Analytics Button
+
+- Remove the Analytics button from footer
+- Remove AnalyticsPanel import and state
+- Keep the Notes quick-link button
+- Update `defaultDailyTaskCount` from 2 to 3 (prayer, bible, trading)
+
+### 6. ZenLayout.tsx - Simplified Structure
+
+**Remove:**
+- Lines 128-135: HabitTracker section
+- Lines 137-183: GoalProgress row (Devotional, Fitness, Coding)
+- Lines 185-206: Activity + Insight row
+- Unused imports: GoalProgress, HabitTracker, ActivityChart, InsightCard, Lightbulb
+
+**Add:**
+- Import AnalyticsPanel
+- Render AnalyticsPanel as full-width section after Calendar + Devotion row
+
+### 7. Index.tsx - Cleanup
+
+- Remove unused `habits` state, `toggleHabit`, `updateHabit` functions
+- Remove `defaultHabits` import
+- Remove corresponding props from ZenLayout usage
 
 ---
 
 ## Technical Details
 
-### Tiptap Editor Configuration
+### Read-Only Detection Logic
 
 ```text
-Extensions:
-+-- StarterKit (bold, italic, strike, code, headings, lists)
-+-- Placeholder ("Start writing...")
-+-- Link (inline links)
-+-- Underline
-+-- Highlight (text marker)
-+-- TaskList + TaskItem (checkboxes)
-+-- CodeBlockLowlight (syntax highlighting)
-+-- BubbleMenu (floating toolbar)
+For a given date:
+1. Get all tasks scheduled for that day (3 daily + optional gym)
+2. Get all completed tasks for that day
+3. If completed.length >= scheduled.length AND scheduled.length > 0:
+   -> Read-only mode: display "Completed" badge
+   -> Clicking checkbox navigates to notes
+4. Else:
+   -> Normal mode: allow toggling
 ```
 
-### State Management
+### Analytics Calculation Update
 
-- **Notes**: React Query with optimistic updates
-- **Checklist entries**: React Query with invalidation on toggle
-- **Analytics**: Computed from checklist entries query
+- Daily tasks: Prayer, Bible, Trading (3 tasks)
+- Weekly tasks: GYM (Mon-Fri only)
+- Week completion: `(entries / 26) * 100` (3 daily * 7 + 1 gym * 5)
+- Month completion: `(entries / (days * 3 + weekdays)) * 100`
 
-### Performance Considerations
+### Component Reuse
 
-- Lazy load notes content (only fetch when page selected)
-- Debounce auto-save (500ms)
-- Virtualized sidebar list for many pages
-- Paginated analytics queries for long date ranges
+The existing components are reused efficiently:
+- `AnalyticsPanel` uses existing `StreakDisplay`, `CompletionChart`, `TaskBreakdown`
+- `ZenLayout` reuses existing `ZenCard` wrapper component
+- `InteractiveCalendar` and `DailyChecklistPopover` connection stays the same
 
