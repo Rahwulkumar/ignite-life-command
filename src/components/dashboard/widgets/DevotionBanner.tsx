@@ -26,10 +26,11 @@ export function DevotionBanner({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
       whileHover={{ scale: 1.01 }}
+      className="h-full"
     >
       <Link 
         to="/spiritual" 
-        className={`group block relative rounded-lg border border-border overflow-hidden transition-colors hover:border-border/80 ${className || ''}`}
+        className={`group flex flex-col h-full relative rounded-lg border border-border overflow-hidden transition-colors hover:border-border/80 ${className || ''}`}
       >
         {/* Video Background Layer */}
         <div className="absolute inset-0">
@@ -47,7 +48,7 @@ export function DevotionBanner({
         </div>
 
         {/* Content Layer */}
-        <div className="relative z-10 p-4">
+        <div className="relative z-10 p-4 flex flex-col flex-1">
           <div className="flex items-center gap-1.5 mb-3">
             <span className="w-1.5 h-1.5 rounded-full bg-foreground/50" />
             <p className="text-xs text-muted-foreground font-medium">{label}</p>
@@ -60,6 +61,9 @@ export function DevotionBanner({
             </div>
             <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
           </div>
+          
+          {/* Spacer to push scripture to bottom */}
+          <div className="flex-1" />
           
           <div className="flex items-center gap-2 pt-3 border-t border-border/50">
             <BookOpen className="w-3.5 h-3.5 text-muted-foreground" />
