@@ -1,7 +1,8 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { PageTransition } from "@/components/layout/PageTransition";
-import { Code2, MessageSquare, Sparkles, Award, Lightbulb, BookOpen } from "lucide-react";
+import { Code2, MessageSquare, Sparkles, Award, Lightbulb, BookOpen, StickyNote } from "lucide-react";
 import { AtlasChat } from "@/components/tech/AtlasChat";
 import { DomainPageHeader } from "@/components/shared/DomainPageHeader";
 import { DomainStatsBar } from "@/components/shared/DomainStatsBar";
@@ -71,12 +72,18 @@ const TechPage = () => {
           <div className="px-8 pb-8">
             <div className="max-w-5xl mx-auto">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-                <TabsList>
+                <TabsList className="flex-wrap">
                   <TabsTrigger value="overview">Overview</TabsTrigger>
                   <TabsTrigger value="skills">Skills</TabsTrigger>
                   <TabsTrigger value="certifications">Certifications</TabsTrigger>
                   <TabsTrigger value="research">Research</TabsTrigger>
                   <TabsTrigger value="library">Library</TabsTrigger>
+                  <TabsTrigger value="notes" asChild>
+                    <Link to="/notes" state={{ domain: 'tech' }} className="flex items-center gap-1.5">
+                      <StickyNote className="w-3.5 h-3.5" />
+                      Notes
+                    </Link>
+                  </TabsTrigger>
                 </TabsList>
 
               <TabsContent value="overview">

@@ -1,6 +1,7 @@
+import { Link } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { PageTransition } from "@/components/layout/PageTransition";
-import { Music, MessageSquare, Clock, Guitar, Flame } from "lucide-react";
+import { Music, MessageSquare, Clock, Guitar, Flame, StickyNote } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PracticeTracker } from "@/components/music/PracticeTracker";
 import { RepertoireCard } from "@/components/music/RepertoireCard";
@@ -43,9 +44,15 @@ const MusicPage = () => {
             <div className="px-8 pb-8">
               <div className="max-w-5xl mx-auto">
                 <Tabs defaultValue="practice" className="space-y-6">
-                  <TabsList>
+                  <TabsList className="flex-wrap">
                     <TabsTrigger value="practice">Practice</TabsTrigger>
                     <TabsTrigger value="repertoire">Repertoire</TabsTrigger>
+                    <TabsTrigger value="notes" asChild>
+                      <Link to="/notes" state={{ domain: 'music' }} className="flex items-center gap-1.5">
+                        <StickyNote className="w-3.5 h-3.5" />
+                        Notes
+                      </Link>
+                    </TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="practice">

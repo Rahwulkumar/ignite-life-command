@@ -1,6 +1,7 @@
+import { Link } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { PageTransition } from "@/components/layout/PageTransition";
-import { BookOpen, MessageSquare, Flame, Heart, BookMarked } from "lucide-react";
+import { BookOpen, MessageSquare, Flame, Heart, BookMarked, StickyNote } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BibleReadingCard } from "@/components/spiritual/BibleReadingCard";
 import { ScriptureMemoryCard } from "@/components/spiritual/ScriptureMemoryCard";
@@ -125,13 +126,18 @@ const SpiritualPage = () => {
                 )}
 
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-                  <TabsList>
+                  <TabsList className="flex-wrap">
                     <TabsTrigger value="reading">Reading</TabsTrigger>
                     <TabsTrigger value="character">Character Study</TabsTrigger>
                     <TabsTrigger value="journal">Journal</TabsTrigger>
                     <TabsTrigger value="memory">Memory</TabsTrigger>
                     <TabsTrigger value="goals">Goals</TabsTrigger>
-                    <TabsTrigger value="notes">Notes</TabsTrigger>
+                    <TabsTrigger value="notes" asChild>
+                      <Link to="/notes" state={{ domain: 'spiritual' }} className="flex items-center gap-1.5">
+                        <StickyNote className="w-3.5 h-3.5" />
+                        Notes
+                      </Link>
+                    </TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="reading">
@@ -168,12 +174,6 @@ const SpiritualPage = () => {
                     <SpiritualGoalsCard
                       goals={mockGoals}
                       onAddGoal={() => console.log("Add goal")}
-                    />
-                  </TabsContent>
-                  <TabsContent value="notes">
-                    <SermonNotesCard
-                      notes={mockNotes}
-                      onAddNote={() => console.log("Add note")}
                     />
                   </TabsContent>
                 </Tabs>

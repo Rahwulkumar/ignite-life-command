@@ -41,7 +41,7 @@ export function HeroHeader({ currentTime }: HeroHeaderProps) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className="relative overflow-hidden -mx-6 -mt-4 px-6 pt-6 pb-40"
+      className="relative overflow-hidden -mx-4 sm:-mx-6 -mt-4 px-4 sm:px-6 pt-4 sm:pt-6 pb-28 sm:pb-36 lg:pb-40"
     >
       {/* Animated nature background with time-based switching */}
       <div className="absolute inset-0 z-0">
@@ -80,13 +80,13 @@ export function HeroHeader({ currentTime }: HeroHeaderProps) {
       </div>
 
       {/* Content */}
-      <div className="relative z-20 flex items-center justify-between">
+      <div className="relative z-20 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <motion.p 
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.5 }}
-            className="text-sm text-foreground/60 mb-1"
+            className="text-xs sm:text-sm text-foreground/60 mb-1"
           >
             {format(currentTime, "EEEE, MMMM d")}
           </motion.p>
@@ -94,7 +94,7 @@ export function HeroHeader({ currentTime }: HeroHeaderProps) {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.5 }}
-            className="text-4xl font-semibold tracking-tight text-foreground drop-shadow-lg"
+            className="text-2xl sm:text-3xl lg:text-4xl font-semibold tracking-tight text-foreground drop-shadow-lg"
             style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}
           >
             {getGreeting()}
@@ -105,15 +105,15 @@ export function HeroHeader({ currentTime }: HeroHeaderProps) {
           initial={{ opacity: 0, x: 15 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.5, duration: 0.5 }}
-          className="flex items-center gap-3 text-sm"
+          className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm"
         >
           <motion.div 
             whileHover={{ scale: 1.05, y: -2 }}
             transition={{ type: "spring", stiffness: 400, damping: 17 }}
-            className="flex items-center gap-2 px-4 py-2 rounded-full bg-background/70 backdrop-blur-md border border-white/10 shadow-lg shadow-black/10"
+            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-background/70 backdrop-blur-md border border-white/10 shadow-lg shadow-black/10"
           >
             <motion.span 
-              className="w-2 h-2 rounded-full bg-emerald-400"
+              className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-400"
               animate={{ scale: [1, 1.2, 1], opacity: [1, 0.7, 1] }}
               transition={{ duration: 2, repeat: Infinity }}
             />
@@ -122,7 +122,7 @@ export function HeroHeader({ currentTime }: HeroHeaderProps) {
           <motion.div 
             whileHover={{ scale: 1.05, y: -2 }}
             transition={{ type: "spring", stiffness: 400, damping: 17 }}
-            className="flex items-center gap-2 px-4 py-2 rounded-full bg-background/70 backdrop-blur-md border border-white/10 shadow-lg shadow-black/10"
+            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-background/70 backdrop-blur-md border border-white/10 shadow-lg shadow-black/10"
           >
             <span className="font-medium text-foreground">92% focus</span>
           </motion.div>

@@ -22,7 +22,7 @@ const domains = [
 
 export function DomainNavigation() {
   return (
-    <div className="flex items-center gap-1.5 p-1 rounded-lg bg-muted/50 border border-border">
+    <div className="flex items-center gap-1 sm:gap-1.5 p-1 rounded-lg bg-muted/50 border border-border overflow-x-auto scrollbar-hide">
       {domains.map((domain, i) => (
         <motion.div
           key={domain.path}
@@ -32,10 +32,10 @@ export function DomainNavigation() {
         >
           <Link
             to={domain.path}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+            className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-md text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors whitespace-nowrap"
           >
-            <domain.icon className="w-3.5 h-3.5" />
-            {domain.label}
+            <domain.icon className="w-3.5 h-3.5 flex-shrink-0" />
+            <span className="hidden sm:inline">{domain.label}</span>
           </Link>
         </motion.div>
       ))}

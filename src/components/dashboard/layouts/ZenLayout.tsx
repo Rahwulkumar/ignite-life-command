@@ -78,12 +78,12 @@ export function ZenLayout({ timeOfDay }: ZenLayoutProps) {
       animate="show"
       exit={{ opacity: 0 }}
       variants={zenStagger}
-      className="relative space-y-4"
+      className="relative space-y-3 sm:space-y-4"
     >
       {/* Top Row: Devotion + Notes (left) + Calendar (right) */}
-      <motion.div variants={zenStagger} className="grid grid-cols-12 gap-4">
+      <motion.div variants={zenStagger} className="grid grid-cols-12 gap-3 sm:gap-4">
         {/* Left Column: Devotion + Notes */}
-        <motion.div variants={inkBrush} className="col-span-5 flex flex-col gap-4">
+        <motion.div variants={inkBrush} className="col-span-12 lg:col-span-5 flex flex-col gap-3 sm:gap-4">
           <ZenCard>
             <DevotionBanner
               characterName="David"
@@ -92,15 +92,15 @@ export function ZenLayout({ timeOfDay }: ZenLayoutProps) {
               timeOfDay={timeOfDay}
             />
           </ZenCard>
-          <ZenCard className="flex-1 min-h-[200px]">
+          <ZenCard className="flex-1 min-h-[180px] sm:min-h-[200px]">
             <NotesWidget />
           </ZenCard>
         </motion.div>
 
         {/* Interactive Calendar - Right */}
-        <motion.div variants={inkBrush} className="col-span-7">
+        <motion.div variants={inkBrush} className="col-span-12 lg:col-span-7">
           <ZenCard className="h-full">
-            <div className="p-4">
+            <div className="p-3 sm:p-4">
               <InteractiveCalendar
                 selectedDate={selectedDate}
                 onSelectDate={setSelectedDate}
@@ -113,18 +113,18 @@ export function ZenLayout({ timeOfDay }: ZenLayoutProps) {
       </motion.div>
 
       {/* Analytics Row: Bar Chart + Performance Summary */}
-      <motion.div variants={zenStagger} className="grid grid-cols-12 gap-4">
+      <motion.div variants={zenStagger} className="grid grid-cols-12 gap-3 sm:gap-4">
         {/* Completion Chart - Left */}
-        <motion.div variants={inkBrush} className="col-span-6">
+        <motion.div variants={inkBrush} className="col-span-12 md:col-span-6">
           <ZenCard>
-            <div className="p-4">
+            <div className="p-3 sm:p-4">
               <CompletionChart entries={analyticsEntries} timeFilter="week" />
             </div>
           </ZenCard>
         </motion.div>
 
         {/* Performance Summary - Right */}
-        <motion.div variants={inkBrush} className="col-span-6">
+        <motion.div variants={inkBrush} className="col-span-12 md:col-span-6">
           <ZenCard className="h-full">
             <PerformanceSummary />
           </ZenCard>

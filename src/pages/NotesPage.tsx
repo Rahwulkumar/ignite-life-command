@@ -1,9 +1,14 @@
 import { useState, useCallback, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { NotesSidebar } from "@/components/notes/NotesSidebar";
 import { NoteEditor } from "@/components/notes/NoteEditor";
 import { HubView } from "@/components/notes/HubView";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Menu } from "lucide-react";
 import { 
   useNotes, 
   useNote, 
@@ -20,7 +25,16 @@ import type { Json } from "@/integrations/supabase/types";
 
 type NoteWithChildren = Note & { children: NoteWithChildren[] };
 
+interface LocationState {
+  domain?: DomainId;
+}
+
 export default function NotesPage() {
+  const location = useLocation();
+  const locationState = location.state as LocationState | null;
+  const isMobile = useIsMobile();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
   const [activeDomain, setActiveDomain] = useState<DomainId | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -45,9 +59,24 @@ export default function NotesPage() {
     }
   }, [notesLoading, notes.length]);
 
-  // Auto-select first hub if nothing selected
+  // Handle incoming domain from navigation state
   useEffect(() => {
-    if (!selectedNoteId && !activeDomain && notes.length > 0 && !notesLoading) {
+    if (locationState?.domain && !activeDomain) {
+      const hub = notes.find(n => n.domain === locationState.domain && n.note_type === 'hub');
+      if (hub) {
+        setActiveDomain(locationState.domain);
+        setSelectedNoteId(hub.id);
+        setViewMode('hub');
+      } else if (notes.length > 0) {
+        setActiveDomain(locationState.domain);
+        setViewMode('hub');
+      }
+    }
+  }, [locationState?.domain, notes, activeDomain]);
+
+  // Auto-select first hub if nothing selected and no incoming state
+  useEffect(() => {
+    if (!selectedNoteId && !activeDomain && !locationState?.domain && notes.length > 0 && !notesLoading) {
       // Default to spiritual hub
       const spiritualHub = notes.find(n => n.domain === 'spiritual' && n.note_type === 'hub');
       if (spiritualHub) {
@@ -55,7 +84,7 @@ export default function NotesPage() {
         setViewMode('hub');
       }
     }
-  }, [notes, selectedNoteId, activeDomain, notesLoading]);
+  }, [notes, selectedNoteId, activeDomain, notesLoading, locationState]);
 
   // Debounced save function
   const debouncedSave = useCallback(
@@ -90,6 +119,7 @@ export default function NotesPage() {
     if (note) {
       setSelectedNoteId(noteId);
       setActiveDomain(note.domain);
+      setSidebarOpen(false);
       
       // If it's a hub, show hub view; otherwise show editor
       if (note.note_type === 'hub') {
@@ -103,6 +133,7 @@ export default function NotesPage() {
   const handleSelectHub = (domainId: DomainId) => {
     setActiveDomain(domainId);
     setViewMode('hub');
+    setSidebarOpen(false);
     
     const hub = notes.find(n => n.domain === domainId && n.note_type === 'hub');
     if (hub) {
@@ -122,6 +153,7 @@ export default function NotesPage() {
     setSelectedNoteId(note.id);
     setActiveDomain(domainId);
     setViewMode('editor');
+    setSidebarOpen(false);
   };
 
   const handleTogglePin = (noteId: string) => {
@@ -139,22 +171,44 @@ export default function NotesPage() {
     currentPages.filter(p => !p.is_template && p.note_type === 'page')
   ) as NoteWithChildren[];
 
+  const sidebarContent = (
+    <NotesSidebar
+      notes={notes}
+      pinnedNotes={pinnedNotes}
+      selectedNoteId={selectedNoteId}
+      activeDomain={activeDomain}
+      onSelectNote={handleSelectNote}
+      onSelectHub={handleSelectHub}
+      onCreateNote={handleCreateNote}
+      onTogglePin={handleTogglePin}
+      isLoading={notesLoading}
+    />
+  );
+
   return (
     <MainLayout>
       <PageTransition>
         <div className="min-h-screen flex">
-          {/* Sidebar */}
-          <NotesSidebar
-            notes={notes}
-            pinnedNotes={pinnedNotes}
-            selectedNoteId={selectedNoteId}
-            activeDomain={activeDomain}
-            onSelectNote={handleSelectNote}
-            onSelectHub={handleSelectHub}
-            onCreateNote={handleCreateNote}
-            onTogglePin={handleTogglePin}
-            isLoading={notesLoading}
-          />
+          {/* Mobile sidebar */}
+          {isMobile ? (
+            <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+              <SheetTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="fixed top-16 left-4 z-40 bg-background/80 backdrop-blur-sm border border-border"
+                >
+                  <Menu className="w-5 h-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="p-0 w-72">
+                {sidebarContent}
+              </SheetContent>
+            </Sheet>
+          ) : (
+            /* Desktop sidebar */
+            sidebarContent
+          )}
 
           {/* Main Content Area */}
           <div className="flex-1 min-w-0">
@@ -176,10 +230,10 @@ export default function NotesPage() {
                 isSaving={isSaving}
               />
             ) : (
-              <div className="h-full flex items-center justify-center text-muted-foreground">
+              <div className="h-full flex items-center justify-center text-muted-foreground p-4">
                 <div className="text-center">
-                  <p className="text-lg mb-2">Select a domain to get started</p>
-                  <p className="text-sm">Choose a domain from the sidebar to view your notes</p>
+                  <p className="text-base sm:text-lg mb-2">Select a domain to get started</p>
+                  <p className="text-xs sm:text-sm">Choose a domain from the sidebar to view your notes</p>
                 </div>
               </div>
             )}

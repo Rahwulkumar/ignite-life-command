@@ -57,7 +57,7 @@ export function NotesSidebar({
   ) as NoteWithChildren[];
 
   return (
-    <div className="w-64 border-r border-border/50 bg-card/50 flex flex-col">
+    <div className="w-64 md:w-56 lg:w-64 border-r border-border/50 bg-card/50 flex flex-col h-full">
       {/* Domain Selector Tabs */}
       <TooltipProvider delayDuration={300}>
         <div className="flex items-center gap-1 p-2 border-b border-border/30 overflow-x-auto">

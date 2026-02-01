@@ -20,17 +20,17 @@ const Index = () => {
   return (
     <MainLayout>
       <PageTransition>
-        <div className="min-h-screen px-6 pt-4 pb-4 max-w-6xl mx-auto">
+        <div className="min-h-screen px-4 sm:px-6 pt-2 sm:pt-4 pb-4 max-w-6xl mx-auto">
           <HeroHeader currentTime={currentTime} />
 
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
-            className="relative z-10 -mt-24"
+            className="relative z-10 -mt-16 sm:-mt-20 lg:-mt-24"
           >
             {/* Domain navigation */}
-            <div className="flex justify-end mb-4">
+            <div className="flex justify-end mb-3 sm:mb-4">
               <DomainNavigation />
             </div>
 

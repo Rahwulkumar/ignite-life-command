@@ -118,29 +118,29 @@ export function DomainPageHeader({
       </div>
       
       {/* Decorative orb */}
-      <div className={cn("absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 z-10", config.orb)} />
+      <div className={cn("absolute top-0 right-0 w-48 sm:w-72 lg:w-96 h-48 sm:h-72 lg:h-96 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 z-10", config.orb)} />
       
-      <div className="relative px-8 pt-10 pb-8 z-20">
+      <div className="relative px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 lg:pt-10 pb-6 sm:pb-8 z-20">
         <div className="max-w-5xl mx-auto">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div className="flex items-center gap-3 sm:gap-4">
               <motion.div 
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 className={cn(
-                  "w-14 h-14 rounded-2xl bg-gradient-to-br flex items-center justify-center shadow-lg",
+                  "w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-xl sm:rounded-2xl bg-gradient-to-br flex items-center justify-center shadow-lg flex-shrink-0",
                   config.iconGradient,
                   config.shadow
                 )}
               >
-                <Icon className="w-7 h-7 text-white" />
+                <Icon className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-white" />
               </motion.div>
-              <div>
+              <div className="min-w-0">
                 <motion.h1 
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
-                  className="text-2xl font-semibold tracking-tight"
+                  className="text-xl sm:text-2xl font-semibold tracking-tight truncate"
                 >
                   {title}
                 </motion.h1>
@@ -148,7 +148,7 @@ export function DomainPageHeader({
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="text-muted-foreground"
+                  className="text-sm sm:text-base text-muted-foreground truncate"
                 >
                   {subtitle}
                 </motion.p>
@@ -161,7 +161,7 @@ export function DomainPageHeader({
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.3 }}
                 onClick={action.onClick}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-background/70 backdrop-blur-sm border border-foreground/10 hover:bg-background/90 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl bg-background/70 backdrop-blur-sm border border-foreground/10 hover:bg-background/90 transition-all hover:scale-[1.02] active:scale-[0.98] self-start sm:self-auto"
               >
                 <action.icon className={cn("w-4 h-4", config.text)} />
                 <span className="text-sm font-medium">{action.label}</span>

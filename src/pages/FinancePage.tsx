@@ -1,6 +1,7 @@
+import { Link } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { PageTransition } from "@/components/layout/PageTransition";
-import { Wallet, MessageSquare, TrendingDown, PiggyBank, CreditCard } from "lucide-react";
+import { Wallet, MessageSquare, TrendingDown, PiggyBank, CreditCard, StickyNote } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ExpenseTracker } from "@/components/finance/ExpenseTracker";
 import { BudgetOverview } from "@/components/finance/BudgetOverview";
@@ -44,10 +45,16 @@ const FinancePage = () => {
             <div className="px-8 pb-8">
               <div className="max-w-5xl mx-auto">
                 <Tabs defaultValue="transactions" className="space-y-6">
-                  <TabsList>
+                  <TabsList className="flex-wrap">
                     <TabsTrigger value="transactions">Transactions</TabsTrigger>
                     <TabsTrigger value="budgets">Budgets</TabsTrigger>
                     <TabsTrigger value="investments">Investments</TabsTrigger>
+                    <TabsTrigger value="notes" asChild>
+                      <Link to="/notes" state={{ domain: 'finance' }} className="flex items-center gap-1.5">
+                        <StickyNote className="w-3.5 h-3.5" />
+                        Notes
+                      </Link>
+                    </TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="transactions">

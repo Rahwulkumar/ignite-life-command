@@ -1,7 +1,9 @@
+import { Link } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { PageTransition } from "@/components/layout/PageTransition";
-import { Briefcase, Plus, CheckCircle2, Clock, Target } from "lucide-react";
+import { Briefcase, Plus, CheckCircle2, Clock, Target, StickyNote } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProjectTasks } from "@/components/projects/ProjectTasks";
 import { DomainPageHeader } from "@/components/shared/DomainPageHeader";
 import { DomainStatsBar } from "@/components/shared/DomainStatsBar";
@@ -33,12 +35,23 @@ const ProjectsPage = () => {
 
           <DomainStatsBar stats={stats} />
 
-          <div className="px-8 pb-8">
+          <div className="px-4 sm:px-6 lg:px-8 pb-8">
             <div className="max-w-5xl mx-auto">
-              <div>
-                <h2 className="text-sm text-muted-foreground mb-6">Active Projects</h2>
-                <ProjectTasks />
-              </div>
+              <Tabs defaultValue="active" className="space-y-6">
+                <TabsList className="flex-wrap">
+                  <TabsTrigger value="active">Active Projects</TabsTrigger>
+                  <TabsTrigger value="notes" asChild>
+                    <Link to="/notes" state={{ domain: 'work' }} className="flex items-center gap-1.5">
+                      <StickyNote className="w-3.5 h-3.5" />
+                      Notes
+                    </Link>
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="active">
+                  <ProjectTasks />
+                </TabsContent>
+              </Tabs>
             </div>
           </div>
           </div>

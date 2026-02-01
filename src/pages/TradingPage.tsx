@@ -1,6 +1,7 @@
+import { Link } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { PageTransition } from "@/components/layout/PageTransition";
-import { TrendingUp, MessageSquare, DollarSign, BarChart3, Percent } from "lucide-react";
+import { TrendingUp, MessageSquare, DollarSign, BarChart3, Percent, StickyNote } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PortfolioChart } from "@/components/trading/PortfolioChart";
 import { TradeJournal } from "@/components/trading/TradeJournal";
@@ -45,11 +46,17 @@ const TradingPage = () => {
             <div className="px-8 pb-8">
               <div className="max-w-5xl mx-auto">
                 <Tabs defaultValue="investments" className="space-y-6">
-                  <TabsList>
+                  <TabsList className="flex-wrap">
                     <TabsTrigger value="investments">Investments</TabsTrigger>
                     <TabsTrigger value="portfolio">Performance</TabsTrigger>
                     <TabsTrigger value="journal">Journal</TabsTrigger>
                     <TabsTrigger value="watchlist">Watchlist</TabsTrigger>
+                    <TabsTrigger value="notes" asChild>
+                      <Link to="/notes" state={{ domain: 'trading' }} className="flex items-center gap-1.5">
+                        <StickyNote className="w-3.5 h-3.5" />
+                        Notes
+                      </Link>
+                    </TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="investments">
