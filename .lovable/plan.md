@@ -1,144 +1,196 @@
 
 
-# Replace Emojis with Professional Lucide Icons
+# Strict Domain Isolation for Notes Sidebar
 
-This plan removes all emoji icons and replaces them with clean, professional Lucide icons throughout the notes system. It also transforms the dashboard widget to show domain workspaces instead of recent notes.
+This plan implements strict domain isolation so when viewing a domain's workspace, only that domain's notes appear in the sidebar - no other domain folders or content will be visible.
 
 ---
 
 ## Summary of Changes
 
-| Area | Current | After |
-|------|---------|-------|
-| Domain Icons | Emojis (🙏, 📈, 💻, etc.) | Lucide icons (Heart, TrendingUp, Code, etc.) |
-| Note Icons | Emoji fallback (📝) | Lucide FileText icon |
-| Hub Icons | 🏠 emoji | Lucide Home icon |
-| Pinned Indicator | 📌 emoji | Lucide Pin icon |
-| Dashboard Widget | Shows recent notes with emojis | Shows domain workspace links with Lucide icons |
+| Component | Current Behavior | New Behavior |
+|-----------|-----------------|--------------|
+| NotesSidebar | Shows all 7 domain folders at once | Shows only the active domain's content |
+| Domain Navigation | Collapsible folders for each domain | Domain selector tabs at top, content below |
+| Pinned Notes | Shows all pinned notes | Shows only pinned notes from active domain |
+| Search | Searches all notes | Searches only within active domain |
 
 ---
 
-## Domain Icon Mapping
+## Current vs New Sidebar Layout
 
-| Domain | Icon Name | Lucide Component |
-|--------|-----------|------------------|
-| Spiritual | heart | Heart |
-| Trading | trending-up | TrendingUp |
-| Tech | code | Code |
-| Finance | wallet | Wallet |
-| Music | music | Music |
-| Projects | folder-kanban | FolderKanban |
-| Content | book-open | BookOpen |
+**Current:**
+```text
++----------------------------------+
+| Search...                        |
++----------------------------------+
+| PINNED                           |
+| └── Any pinned note              |
++----------------------------------+
+| SPIRITUAL                        |  
+| ├── Hub                          |  <- All domains visible
+| ├── Page 1                       |
+| └── Journal (3)                  |
++----------------------------------+
+| TRADING                          |  <- Should not see this
+| ├── Hub                          |     when in Spiritual
+| └── Journal (5)                  |
++----------------------------------+
+| TECH                             |  <- Should not see this
+| ...                              |
++----------------------------------+
+```
+
+**New (Isolated):**
+```text
++----------------------------------+
+| [Heart][Chart][Code][Wallet]...  |  <- Domain selector tabs
++----------------------------------+
+| Search in Spiritual...           |
++----------------------------------+
+| SPIRITUAL                        |  <- ONLY active domain
+| ├── Hub                          |
+| ├── Character Study              |
+| ├── Romans Notes                 |
+| └── Journal (3)                  |
++----------------------------------+
+```
 
 ---
 
 ## Files to Modify
 
-### 1. `src/lib/domains.ts`
-- Change `icon` field from emoji string to Lucide icon name (e.g., `'heart'`, `'trending-up'`)
-- Add `DomainIcon` React component that renders the correct Lucide icon
-- Update `getDomainIcon` to return icon name instead of emoji
+### 1. `src/components/notes/NotesSidebar.tsx`
 
-### 2. `src/components/notes/DomainSection.tsx`
-- Replace `{domain.icon}` with `<DomainIcon domainId={domain.id} />`
-- Replace `🏠` with `<Home />` icon
-- Replace note icons `{note.icon || "📝"}` with `<FileText />` icon
+**Changes:**
+- Add domain selector tabs at the top of sidebar
+- Replace `DOMAINS.map()` with single active domain rendering
+- Filter pinned notes to only show those from active domain
+- Update search placeholder to reflect active domain
+- Filter search results to only active domain
 
-### 3. `src/components/notes/HubView.tsx`
-- Replace `{domainConfig?.icon}` with `<DomainIcon domainId={domain} />`
-- Replace page icons `{page.icon || "📝"}` with `<FileText />` icon
+**New Structure:**
+```text
+- Domain Tabs Row (7 icon buttons)
+- Search Input (scoped to active domain)
+- Active Domain Content Only:
+  - Pinned notes (from this domain only)
+  - Hub link
+  - Pages tree
+  - Journal count
+```
 
-### 4. `src/components/notes/NotesSidebar.tsx`
-- Replace emoji note icons with `<FileText />` Lucide icon
-- Replace pinned icon 📌 with `<Pin />` Lucide icon
+### 2. `src/hooks/useNotes.ts`
 
-### 5. `src/components/notes/JournalEntryForm.tsx`
-- Replace emoji in domain selector with `<DomainIcon />` component
-- Remove emoji icon assignment when creating notes (use `null` instead)
-
-### 6. `src/components/dashboard/widgets/NotesWidget.tsx`
-- Transform to show domain workspace links instead of recent notes
-- Display all 7 domains with Lucide icons
-- Each link navigates to Notes page with that domain active
-- Show page/journal count per domain
-
-### 7. `src/hooks/useNotes.ts`
-- Remove emoji default icons (change `"📝"` to `null`)
-- Update hub initialization to use `null` instead of emoji icons
-
-### 8. `src/pages/NotesPage.tsx`
-- Remove emoji icon assignment when creating notes
+**Changes:**
+- Update `useSearchNotes` to accept optional domain filter parameter
+- Search results will be filtered by domain when provided
 
 ---
 
 ## Technical Details
 
-### New DomainIcon Component
+### Domain Selector Tabs
 
 ```typescript
-// Added to src/lib/domains.ts
-import { Heart, TrendingUp, Code, Wallet, Music, FolderKanban, BookOpen, LucideIcon } from "lucide-react";
+// At top of sidebar - icon buttons to switch domains
+<div className="flex items-center gap-1 p-2 border-b overflow-x-auto">
+  {DOMAINS.map((domain) => (
+    <button
+      key={domain.id}
+      onClick={() => onSelectHub(domain.id)}
+      className={cn(
+        "p-2 rounded-md flex-shrink-0 transition-colors",
+        activeDomain === domain.id 
+          ? "bg-primary text-primary-foreground" 
+          : "hover:bg-muted text-muted-foreground"
+      )}
+      title={domain.label}
+    >
+      <DomainIcon domainId={domain.id} className="w-4 h-4" />
+    </button>
+  ))}
+</div>
+```
 
-export const DOMAIN_ICONS: Record<DomainId, LucideIcon> = {
-  spiritual: Heart,
-  trading: TrendingUp,
-  tech: Code,
-  finance: Wallet,
-  music: Music,
-  projects: FolderKanban,
-  content: BookOpen,
-};
+### Filtered Content Rendering
 
-export function DomainIcon({ 
-  domainId, 
-  className 
-}: { 
-  domainId: DomainId; 
-  className?: string 
-}) {
-  const IconComponent = DOMAIN_ICONS[domainId];
-  return IconComponent ? <IconComponent className={className} /> : null;
+```typescript
+// Only render the active domain's content
+{activeDomain && !isLoading && (
+  <div className="space-y-2">
+    {/* Only pinned notes from this domain */}
+    {domainPinnedNotes.length > 0 && (
+      // ... pinned section
+    )}
+    
+    {/* Single domain section - not a map of all domains */}
+    <DomainSection
+      domain={activeDomainConfig}
+      pages={activeDomainPages}
+      journalCount={activeDomainJournalCount}
+      // ...
+    />
+  </div>
+)}
+```
+
+### Filtered Search
+
+```typescript
+// Search only within active domain
+const { data: searchResults = [] } = useSearchNotes(searchQuery, activeDomain);
+
+// In useNotes.ts
+export function useSearchNotes(query: string, domain?: DomainId | null) {
+  return useQuery({
+    queryKey: ["notes", "search", query, domain],
+    queryFn: async () => {
+      let request = supabase
+        .from("office_notes")
+        .select("*")
+        .ilike("title", `%${query}%`);
+      
+      if (domain) {
+        request = request.eq("domain", domain);
+      }
+      
+      const { data, error } = await request.limit(10);
+      // ...
+    },
+    enabled: query.length > 0,
+  });
 }
 ```
 
-### Updated NotesWidget (Domain Workspaces)
+---
 
-```text
-+----------------------------------+
-| Workspaces                       |
-+----------------------------------+
-| [Heart] Spiritual            (3) |
-| [TrendUp] Trading            (5) |
-| [Code] Tech                  (2) |
-| [Wallet] Finance             (0) |
-| [Music] Music                (1) |
-| [Folder] Projects            (4) |
-| [Book] Content               (2) |
-+----------------------------------+
-| View all notes ->                |
-+----------------------------------+
-```
+## User Experience
+
+1. **Open Notes page** - Default domain (Spiritual) is active, only Spiritual content visible
+2. **Click Trading icon tab** - Sidebar instantly shows only Trading content
+3. **Search "analysis"** - Only searches within Trading domain
+4. **Pin a note** - Pin only shows when that domain is active
+5. **Switch to Finance** - Trading content disappears, Finance content appears
 
 ---
 
 ## Implementation Order
 
-1. Update `src/lib/domains.ts` - Add icon mapping and DomainIcon component
-2. Update `src/hooks/useNotes.ts` - Remove emoji defaults
-3. Update `src/components/notes/DomainSection.tsx` - Use Lucide icons
-4. Update `src/components/notes/HubView.tsx` - Use Lucide icons
-5. Update `src/components/notes/NotesSidebar.tsx` - Use Lucide icons
-6. Update `src/components/notes/JournalEntryForm.tsx` - Use DomainIcon
-7. Update `src/components/dashboard/widgets/NotesWidget.tsx` - Domain workspaces
-8. Update `src/pages/NotesPage.tsx` - Remove emoji icon
+1. Update `useSearchNotes` in `useNotes.ts` to accept domain filter
+2. Update `NotesSidebar.tsx`:
+   - Add domain selector tabs at top
+   - Filter pinned notes by active domain
+   - Replace `DOMAINS.map()` with single domain render
+   - Pass domain to search hook
 
 ---
 
 ## Result
 
 After implementation:
-- **Clean, professional icons** - All Lucide icons, no emojis
-- **Consistent visual language** - Same icon style throughout the app
-- **Dashboard workspace links** - Quick access to each domain's notes
-- **Minimal, zen aesthetic** - Aligns with the project's design direction
+- **Complete isolation** - When in Finance, you see ONLY Finance notes
+- **No cross-domain visibility** - Music notes never appear in Tech view
+- **Quick domain switching** - Icon tabs at top for fast navigation
+- **Scoped search** - Search only finds notes in current domain
 
