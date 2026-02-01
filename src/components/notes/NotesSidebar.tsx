@@ -4,8 +4,9 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { useSearchNotes, groupNotesByDomain, buildNoteTree, type Note } from "@/hooks/useNotes";
-import { DOMAINS, type DomainId } from "@/lib/domains";
+import { DOMAINS, type DomainId, DomainIcon, getDomainById } from "@/lib/domains";
 import { DomainSection } from "./DomainSection";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 type NoteWithChildren = Note & { children: NoteWithChildren[] };
 
@@ -33,21 +34,64 @@ export function NotesSidebar({
   isLoading,
 }: NotesSidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const { data: searchResults = [] } = useSearchNotes(searchQuery);
+  // Search is now scoped to active domain
+  const { data: searchResults = [] } = useSearchNotes(searchQuery, activeDomain);
 
   // Group notes by domain
   const groupedNotes = groupNotesByDomain(notes);
 
+  // Get active domain config and data
+  const activeDomainConfig = activeDomain ? getDomainById(activeDomain) : null;
+  const activeDomainData = activeDomain ? groupedNotes[activeDomain] : null;
+
+  // Filter pinned notes to only show those from active domain
+  const domainPinnedNotes = pinnedNotes.filter(note => note.domain === activeDomain);
+
+  // Build tree for active domain pages only
+  const activeDomainPages = activeDomainData?.pages || [];
+  const activeDomainJournalCount = activeDomainData?.journal?.length || 0;
+  const activeDomainHubId = activeDomainData?.hub?.id || null;
+  
+  const pageTree = buildNoteTree(
+    activeDomainPages.filter(p => !p.is_template && p.note_type === 'page')
+  ) as NoteWithChildren[];
+
   return (
     <div className="w-64 border-r border-border/50 bg-card/50 flex flex-col">
-      {/* Header */}
+      {/* Domain Selector Tabs */}
+      <TooltipProvider delayDuration={300}>
+        <div className="flex items-center gap-1 p-2 border-b border-border/30 overflow-x-auto">
+          {DOMAINS.map((domain) => (
+            <Tooltip key={domain.id}>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => onSelectHub(domain.id)}
+                  className={cn(
+                    "p-2 rounded-md flex-shrink-0 transition-colors",
+                    activeDomain === domain.id 
+                      ? "bg-primary text-primary-foreground" 
+                      : "hover:bg-muted text-muted-foreground"
+                  )}
+                >
+                  <DomainIcon domainId={domain.id} className="w-4 h-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">
+                {domain.label}
+              </TooltipContent>
+            </Tooltip>
+          ))}
+        </div>
+      </TooltipProvider>
+
+      {/* Search - scoped to active domain */}
       <div className="p-3 border-b border-border/30">
         <div className="relative">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search notes..."
+            placeholder={`Search in ${activeDomainConfig?.label || 'notes'}...`}
             className="pl-8 h-8 bg-muted/50"
           />
         </div>
@@ -82,14 +126,14 @@ export function NotesSidebar({
 
           {!searchQuery && (
             <>
-              {/* Pinned Notes */}
-              {pinnedNotes.length > 0 && (
+              {/* Pinned Notes - only from active domain */}
+              {domainPinnedNotes.length > 0 && (
                 <div>
                   <p className="px-2 text-xs font-medium text-muted-foreground mb-1 flex items-center gap-1">
                     <Pin className="w-3 h-3" />
                     Pinned
                   </p>
-                  {pinnedNotes.map((note) => (
+                  {domainPinnedNotes.map((note) => (
                     <button
                       key={note.id}
                       onClick={() => onSelectNote(note.id)}
@@ -105,38 +149,25 @@ export function NotesSidebar({
                 </div>
               )}
 
-              {/* Domain Sections */}
+              {/* Active Domain Content Only */}
               {isLoading ? (
                 <div className="px-2 py-4 text-center text-sm text-muted-foreground">
                   Loading...
                 </div>
+              ) : activeDomainConfig ? (
+                <DomainSection
+                  domain={activeDomainConfig}
+                  pages={pageTree}
+                  journalCount={activeDomainJournalCount}
+                  selectedNoteId={selectedNoteId}
+                  hubId={activeDomainHubId}
+                  onSelectNote={onSelectNote}
+                  onSelectHub={onSelectHub}
+                  onCreatePage={onCreateNote}
+                />
               ) : (
-                <div className="space-y-1">
-                  {DOMAINS.map((domain) => {
-                    const domainData = groupedNotes[domain.id];
-                    const pages = domainData?.pages || [];
-                    const journalCount = domainData?.journal?.length || 0;
-                    const hubId = domainData?.hub?.id || null;
-                    
-                    // Build tree for pages only (not templates, not journal)
-                    const pageTree = buildNoteTree(
-                      pages.filter(p => !p.is_template && p.note_type === 'page')
-                    ) as NoteWithChildren[];
-
-                    return (
-                      <DomainSection
-                        key={domain.id}
-                        domain={domain}
-                        pages={pageTree}
-                        journalCount={journalCount}
-                        selectedNoteId={selectedNoteId}
-                        hubId={hubId}
-                        onSelectNote={onSelectNote}
-                        onSelectHub={onSelectHub}
-                        onCreatePage={onCreateNote}
-                      />
-                    );
-                  })}
+                <div className="px-2 py-4 text-center text-sm text-muted-foreground">
+                  Select a domain to view notes
                 </div>
               )}
             </>
