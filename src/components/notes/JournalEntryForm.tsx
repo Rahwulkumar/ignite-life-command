@@ -17,7 +17,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { DOMAINS, type DomainId } from "@/lib/domains";
+import { DOMAINS, DomainIcon, type DomainId } from "@/lib/domains";
 import { useCreateNote } from "@/hooks/useNotes";
 import { toast } from "sonner";
 
@@ -62,7 +62,7 @@ export function JournalEntryForm({
         } : null,
         domain,
         note_type: 'journal',
-        icon: DOMAINS.find(d => d.id === domain)?.icon || '📓',
+        icon: null,
       });
 
       toast.success("Journal entry created");
@@ -124,7 +124,7 @@ export function JournalEntryForm({
                 {DOMAINS.map((d) => (
                   <SelectItem key={d.id} value={d.id}>
                     <span className="flex items-center gap-2">
-                      <span>{d.icon}</span>
+                      <DomainIcon domainId={d.id} className="w-4 h-4" />
                       <span>{d.label}</span>
                     </span>
                   </SelectItem>

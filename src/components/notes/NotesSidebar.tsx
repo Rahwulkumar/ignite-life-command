@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Search, Pin } from "lucide-react";
+import { useState } from "react";
+import { Search, Pin, FileText } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
@@ -73,7 +73,7 @@ export function NotesSidebar({
                     note.id === selectedNoteId && "bg-muted"
                   )}
                 >
-                  <span>{note.icon || "📝"}</span>
+                  <FileText className="w-3.5 h-3.5 text-muted-foreground" />
                   <span className="text-sm truncate">{note.title}</span>
                 </button>
               ))}
@@ -98,7 +98,7 @@ export function NotesSidebar({
                         note.id === selectedNoteId && "bg-muted"
                       )}
                     >
-                      <span>{note.icon || "📝"}</span>
+                      <FileText className="w-3.5 h-3.5 text-muted-foreground" />
                       <span className="text-sm truncate">{note.title}</span>
                     </button>
                   ))}

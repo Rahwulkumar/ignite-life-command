@@ -113,12 +113,11 @@ export default function NotesPage() {
   };
 
   const handleCreateNote = async (domainId: DomainId) => {
-    const domain = DOMAINS.find(d => d.id === domainId);
     const note = await createNote.mutateAsync({
       title: "Untitled",
       domain: domainId,
       note_type: 'page',
-      icon: domain?.icon || '📝',
+      icon: null,
     });
     setSelectedNoteId(note.id);
     setActiveDomain(domainId);
