@@ -97,17 +97,23 @@ export function useNote(noteId: string | null) {
   });
 }
 
-// Search notes
-export function useSearchNotes(searchQuery: string) {
+// Search notes (optionally filtered by domain)
+export function useSearchNotes(searchQuery: string, domain?: DomainId | null) {
   return useQuery({
-    queryKey: ["notes-search", searchQuery],
+    queryKey: ["notes-search", searchQuery, domain],
     queryFn: async () => {
       if (!searchQuery.trim()) return [];
       
-      const { data, error } = await supabase
+      let query = supabase
         .from("office_notes")
         .select("*")
-        .ilike("title", `%${searchQuery}%`)
+        .ilike("title", `%${searchQuery}%`);
+      
+      if (domain) {
+        query = query.eq("domain", domain);
+      }
+      
+      const { data, error } = await query
         .order("updated_at", { ascending: false })
         .limit(10);
 
