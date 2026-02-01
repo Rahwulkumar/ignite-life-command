@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
@@ -9,8 +9,7 @@ import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import { common, createLowlight } from "lowlight";
-import { motion, AnimatePresence } from "framer-motion";
-import { Loader2 } from "lucide-react";
+import { Loader2, FileText } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { EditorToolbar } from "./EditorToolbar";
 import type { Note } from "@/hooks/useNotes";
@@ -26,16 +25,12 @@ interface NoteEditorProps {
   isSaving: boolean;
 }
 
-const EMOJI_OPTIONS = ["📝", "📓", "📔", "📕", "📗", "📘", "📙", "💡", "⭐", "🎯", "🚀", "💼", "📌", "🔖", "✨", "💭"];
-
 export function NoteEditor({
   note,
   onContentChange,
   onTitleChange,
-  onIconChange,
   isSaving,
 }: NoteEditorProps) {
-  const [showIconPicker, setShowIconPicker] = useState(false);
 
   const editor = useEditor({
     extensions: [
@@ -67,7 +62,7 @@ export function NoteEditor({
     },
     editorProps: {
       attributes: {
-        class: "prose prose-sm dark:prose-invert max-w-none focus:outline-none min-h-[300px] px-12 py-8",
+        class: "prose prose-sm dark:prose-invert max-w-none focus:outline-none min-h-[250px] sm:min-h-[300px] px-4 sm:px-8 lg:px-12 py-6 sm:py-8",
       },
     },
   });
@@ -86,45 +81,19 @@ export function NoteEditor({
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="px-12 pt-8 pb-4">
-        {/* Icon Picker */}
-        <div className="relative inline-block mb-2">
-          <button
-            onClick={() => setShowIconPicker(!showIconPicker)}
-            className="text-4xl hover:bg-muted rounded-lg p-2 transition-colors"
-          >
-            {note.icon || "📝"}
-          </button>
-          <AnimatePresence>
-            {showIconPicker && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="absolute top-full left-0 mt-1 p-2 bg-card border border-border rounded-lg shadow-lg z-10 grid grid-cols-8 gap-1"
-              >
-                {EMOJI_OPTIONS.map((emoji) => (
-                  <button
-                    key={emoji}
-                    onClick={() => {
-                      onIconChange(emoji);
-                      setShowIconPicker(false);
-                    }}
-                    className="text-xl p-1.5 hover:bg-muted rounded transition-colors"
-                  >
-                    {emoji}
-                  </button>
-                ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
+      <div className="px-4 sm:px-8 lg:px-12 pt-6 sm:pt-8 pb-3 sm:pb-4">
+        {/* Icon */}
+        <div className="mb-2">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-muted/50 flex items-center justify-center">
+            <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-muted-foreground" />
+          </div>
         </div>
 
         {/* Title */}
         <Input
           value={note.title}
           onChange={(e) => onTitleChange(e.target.value)}
-          className="text-3xl font-bold border-none bg-transparent px-0 h-auto focus-visible:ring-0"
+          className="text-xl sm:text-2xl lg:text-3xl font-bold border-none bg-transparent px-0 h-auto focus-visible:ring-0"
           placeholder="Untitled"
         />
 

@@ -50,13 +50,13 @@ export function TopNavigation() {
       transition={{ duration: 0.3 }}
       className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-b from-background/60 via-background/30 to-transparent backdrop-blur-sm"
     >
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="flex items-center justify-between h-14">
-          <Link to="/" className="font-semibold text-foreground">
+      <div className="max-w-6xl mx-auto px-3 sm:px-6">
+        <div className="flex items-center justify-between h-12 sm:h-14">
+          <Link to="/" className="font-semibold text-foreground text-sm sm:text-base">
             LifeOS
           </Link>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-0.5 sm:gap-1 overflow-x-auto scrollbar-hide">
             {navItems.map((item, i) => {
               const isActive = location.pathname === item.path;
               return (
@@ -69,14 +69,14 @@ export function TopNavigation() {
                   <Link
                     to={item.path}
                     className={cn(
-                      "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors",
+                      "flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 sm:py-1.5 rounded-md text-xs font-medium transition-colors min-w-[2.5rem] justify-center sm:min-w-0 sm:justify-start",
                       isActive
                         ? "bg-foreground/10 text-foreground"
                         : "text-muted-foreground hover:text-foreground hover:bg-foreground/5"
                     )}
                   >
-                    <item.icon className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">{item.label}</span>
+                    <item.icon className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span className="hidden md:inline">{item.label}</span>
                   </Link>
                 </motion.div>
               );
@@ -86,10 +86,10 @@ export function TopNavigation() {
               variant="ghost"
               size="sm"
               onClick={handleSignOut}
-              className="ml-2 text-muted-foreground hover:text-foreground"
+              className="ml-1 sm:ml-2 text-muted-foreground hover:text-foreground px-2 sm:px-3"
             >
               <LogOut className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline ml-1.5">Sign Out</span>
+              <span className="hidden md:inline ml-1.5">Sign Out</span>
             </Button>
           </div>
         </div>
