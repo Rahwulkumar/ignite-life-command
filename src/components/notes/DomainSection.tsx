@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronRight, ChevronDown, Plus, BookOpen } from "lucide-react";
+import { ChevronRight, ChevronDown, Plus, BookOpen, Home, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Collapsible,
@@ -7,7 +7,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
-import type { Domain, DomainId } from "@/lib/domains";
+import { DomainIcon, type Domain, type DomainId } from "@/lib/domains";
 import type { Note } from "@/hooks/useNotes";
 
 type NoteWithChildren = Note & { children: NoteWithChildren[] };
@@ -48,7 +48,7 @@ export function DomainSection({
           )}
           style={{ paddingLeft: `${8 + depth * 12}px` }}
         >
-          <span className="text-sm">{note.icon || "📝"}</span>
+          <FileText className="w-3.5 h-3.5 text-muted-foreground" />
           <span className="truncate flex-1">{note.title}</span>
         </button>
         {note.children.length > 0 && (
@@ -70,7 +70,7 @@ export function DomainSection({
             ) : (
               <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
             )}
-            <span className="text-base">{domain.icon}</span>
+            <DomainIcon domainId={domain.id} className="w-4 h-4 text-muted-foreground" />
             <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground flex-1 text-left">
               {domain.label}
             </span>
@@ -99,7 +99,7 @@ export function DomainSection({
                   selectedNoteId === hubId && "bg-muted text-foreground"
                 )}
               >
-                <span className="text-sm">🏠</span>
+                <Home className="w-3.5 h-3.5" />
                 <span className="truncate flex-1">{domain.label} Hub</span>
               </button>
             )}

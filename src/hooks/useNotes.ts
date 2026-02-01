@@ -126,7 +126,7 @@ export function useCreateNote() {
     mutationFn: async ({
       title = "Untitled",
       parent_id = null,
-      icon = "📝",
+      icon = null,
       is_template = false,
       content = null,
       domain = null,
@@ -134,7 +134,7 @@ export function useCreateNote() {
     }: {
       title?: string;
       parent_id?: string | null;
-      icon?: string;
+      icon?: string | null;
       is_template?: boolean;
       content?: Json | null;
       domain?: DomainId | null;
@@ -221,7 +221,6 @@ export function useDeleteNote() {
 
 // Initialize domain hubs
 export function useInitializeHubs() {
-  const createNote = useCreateNote();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -239,7 +238,7 @@ export function useInitializeHubs() {
             .from("office_notes")
             .insert({
               title: `${domain.label} Hub`,
-              icon: domain.icon,
+              icon: null,
               domain: domain.id,
               note_type: 'hub',
             })

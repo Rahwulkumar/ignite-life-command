@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { JournalList } from "./JournalList";
 import { JournalEntryForm } from "./JournalEntryForm";
 import { cn } from "@/lib/utils";
-import { DOMAINS, type DomainId } from "@/lib/domains";
+import { DOMAINS, DomainIcon, type DomainId } from "@/lib/domains";
 import type { Note } from "@/hooks/useNotes";
 
 type NoteWithChildren = Note & { children: NoteWithChildren[] };
@@ -41,7 +41,7 @@ export function HubView({
           className="max-w-3xl"
         >
           <h1 className="text-3xl font-bold flex items-center gap-3">
-            <span className="text-4xl">{domainConfig?.icon}</span>
+            <DomainIcon domainId={domain} className="w-8 h-8" />
             {domainConfig?.label}
           </h1>
           <p className="text-muted-foreground mt-2">{domainConfig?.description}</p>
@@ -116,7 +116,7 @@ export function HubView({
                         : "bg-card/50 border-border/50 hover:bg-muted/50 hover:border-border"
                     )}
                   >
-                    <span className="text-3xl mb-2">{page.icon || "📝"}</span>
+                    <FileText className="w-8 h-8 mb-2 text-muted-foreground" />
                     <span className="text-sm font-medium truncate w-full">
                       {page.title}
                     </span>
