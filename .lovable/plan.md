@@ -1,302 +1,160 @@
 
 
-# Full-Bleed Dashboard Transformation
+# Compact Calendar Widget Transformation
 
-This plan transforms the current dashboard into a fluid, full-viewport web application that occupies 100% of browser width and height with proper scroll containment, fixed header, and dynamic content areas.
-
----
-
-## Current Issues Identified
-
-| Issue | Location | Problem |
-|-------|----------|---------|
-| Max-width constraint | `src/App.css` | `#root { max-width: 1280px }` limits app width |
-| Container constraint | `src/pages/Index.tsx` | `max-w-6xl` limits dashboard to 1152px |
-| Fixed padding | `src/pages/Index.tsx` | `px-4 sm:px-6` creates dead space on edges |
-| No viewport height control | `MainLayout.tsx` | Uses `min-h-screen` without `h-screen` overflow handling |
-| Component overflow | `ZenLayout.tsx` | Grid doesn't fill available height properly |
-| Tailwind container | `tailwind.config.ts` | Container has `center: true` and max-width |
+Transform the InteractiveCalendar from a large 7-column component into a compact, elegant widget that fits better with the Zen dashboard aesthetic.
 
 ---
 
-## Architecture Overview
+## Current State
 
-```text
-┌─────────────────────────────────────────────────────────────┐
-│                    BROWSER VIEWPORT                         │
-│  ┌───────────────────────────────────────────────────────┐  │
-│  │               HERO HEADER (fixed/sticky)              │  │
-│  │         Full-width background with gradients          │  │
-│  ├───────────────────────────────────────────────────────┤  │
-│  │                                                       │  │
-│  │              SCROLLABLE CONTENT AREA                  │  │
-│  │     ┌─────────────────────────────────────────────┐   │  │
-│  │     │   Domain Navigation (positioned right)      │   │  │
-│  │     ├───────────────────┬─────────────────────────┤   │  │
-│  │     │  Devotion         │                         │   │  │
-│  │     │  Banner           │   Interactive Calendar  │   │  │
-│  │     ├───────────────────┤   (fills remaining)     │   │  │
-│  │     │  Notes            │                         │   │  │
-│  │     │  Widget           │                         │   │  │
-│  │     ├───────────────────┴─────────────────────────┤   │  │
-│  │     │  Completion Chart  │  Performance Summary   │   │  │
-│  │     └─────────────────────────────────────────────┘   │  │
-│  │                                                       │  │
-│  └───────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────┘
-```
+| Aspect | Current | Target |
+|--------|---------|--------|
+| Grid span | 7 columns (58%) | 4-5 columns (33-42%) |
+| Day cells | `aspect-square` with `text-sm` | Smaller fixed size with `text-xs` |
+| Gaps | `gap-1` between days | `gap-0.5` for tighter grid |
+| Padding | `p-3 sm:p-4` on container | `p-2 sm:p-3` reduced |
+| Header | Full month name | Abbreviated (Jan, Feb) |
+| Footer | Notes button | Remove (redundant) |
+| Icons | `w-4 h-4` chevrons | `w-3 h-3` smaller |
 
 ---
 
 ## Files to Modify
 
-### 1. `src/App.css` - Remove Root Constraints
-Remove the legacy Vite template constraints that limit the root element.
+### 1. `src/components/dashboard/widgets/InteractiveCalendar.tsx`
 
-**Before:**
-```css
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-}
-```
+**Reduce overall sizing:**
+- Header: Change month format from `"MMMM yyyy"` to `"MMM yyyy"`
+- Header: Smaller navigation buttons with `w-3 h-3` icons
+- Week days: Change `text-xs` to `text-[10px]` with less margin
+- Day grid: Change `gap-1` to `gap-0.5`
+- Day cells: Remove `aspect-square`, use fixed `w-7 h-7` or `w-6 h-6`
+- Day text: Change `text-sm` to `text-xs`
+- Completion indicators: Smaller icons `w-2.5 h-2.5`
+- Remove the bottom "Notes" footer entirely (redundant with Notes widget)
 
-**After:**
-```css
-#root {
-  width: 100%;
-  min-height: 100vh;
-}
-```
+### 2. `src/components/dashboard/layouts/ZenLayout.tsx`
 
-### 2. `src/index.css` - Add Viewport Utilities
-Add base styles for full-viewport behavior and scroll containment.
-
-**Add to base layer:**
-```css
-html, body, #root {
-  height: 100%;
-  overflow-x: hidden;
-}
-```
-
-### 3. `src/components/layout/MainLayout.tsx` - Full Viewport Layout
-Convert to a flex-based full-height layout with proper overflow handling.
-
-**Key changes:**
-- Use `h-screen` with `flex flex-col`
-- Main content uses `flex-1 overflow-y-auto overflow-x-hidden`
-- Remove duplicate `min-h-screen` on main element
-
-### 4. `src/pages/Index.tsx` - Remove Max-Width Constraint
-Convert from constrained container to full-bleed layout.
-
-**Changes:**
-- Remove `max-w-6xl mx-auto`
-- Use responsive padding: `px-4 sm:px-6 lg:px-8 xl:px-12`
-- Change `min-h-screen` to `h-full` (inherits from parent)
-- Add `w-full` for explicit full-width
-
-### 5. `src/components/dashboard/widgets/HeroHeader.tsx` - Full-Bleed Header
-Ensure header extends edge-to-edge.
-
-**Changes:**
-- Remove negative margins workaround (`-mx-4 sm:-mx-6`)
-- Use `w-screen` or `w-full` with proper positioning
-- Keep sticky/fixed positioning for scroll behavior
-
-### 6. `src/components/dashboard/layouts/ZenLayout.tsx` - Fluid Grid
-Convert to percentage-based fluid grid that fills available space.
-
-**Changes:**
-- Use `flex-1` on outer container for height growth
-- Keep responsive grid spans
-- Ensure cards use `h-full` where appropriate
-- Remove fixed `min-h` values where possible
-
-### 7. `tailwind.config.ts` - Update Container Configuration
-Modify the container plugin settings for full-width behavior.
-
-**Changes:**
-```typescript
-container: {
-  center: true,
-  padding: {
-    DEFAULT: "1rem",
-    sm: "1.5rem",
-    lg: "2rem",
-    xl: "3rem",
-  },
-  screens: {
-    "2xl": "100%", // No max-width constraint
-  },
-},
-```
+**Rebalance the grid layout:**
+- Change calendar column span from `lg:col-span-7` to `lg:col-span-4`
+- Expand left column from `lg:col-span-5` to `lg:col-span-8`
+- This gives more space to Devotion + Notes, makes calendar a true sidebar widget
 
 ---
 
-## Technical Implementation Details
+## Detailed Changes
 
-### Viewport Optimization
+### InteractiveCalendar.tsx - Compact Mode
 
-**Base HTML/CSS:**
-```css
-/* src/index.css */
-html {
-  height: 100%;
-  overflow-x: hidden;
-}
-
-body {
-  height: 100%;
-  overflow-x: hidden;
-}
-```
-
-**Root Element:**
-```css
-/* src/App.css */
-#root {
-  width: 100%;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-```
-
-### Layout Container Structure
-
-**MainLayout.tsx:**
+**Header (lines 65-82):**
 ```typescript
-export function MainLayout({ children }: MainLayoutProps) {
-  const location = useLocation();
-  const isHomePage = location.pathname === "/";
-
-  return (
-    <div className="h-screen flex flex-col bg-background overflow-hidden">
-      {!isHomePage && <TopNavigation />}
-      <main className="flex-1 overflow-y-auto overflow-x-hidden">
-        {children}
-      </main>
-    </div>
-  );
-}
-```
-
-### Dashboard Container
-
-**Index.tsx:**
-```typescript
-<div className="h-full w-full px-4 sm:px-6 lg:px-8 xl:px-12 pt-2 sm:pt-4 pb-4">
-  <HeroHeader currentTime={currentTime} />
-  {/* ... rest of content */}
+// Tighter header with smaller text
+<div className="flex items-center justify-between mb-2">
+  <h3 className="text-xs font-medium">{format(currentMonth, "MMM yyyy")}</h3>
+  <div className="flex gap-0.5">
+    <button className="p-1 hover:bg-muted rounded">
+      <ChevronLeft className="w-3 h-3 text-muted-foreground" />
+    </button>
+    <button className="p-1 hover:bg-muted rounded">
+      <ChevronRight className="w-3 h-3 text-muted-foreground" />
+    </button>
+  </div>
 </div>
 ```
 
-### Fluid Hero Header
-
-**HeroHeader.tsx:**
+**Week Days Header (lines 84-91):**
 ```typescript
-<motion.header 
-  className="relative overflow-hidden w-full px-4 sm:px-6 lg:px-8 xl:px-12 pt-4 sm:pt-6 pb-28 sm:pb-36 lg:pb-40"
->
-  {/* Background spans full width via absolute positioning */}
-  <div className="absolute inset-0 z-0">
-    {/* ... background content */}
-  </div>
-</motion.header>
+<div className="grid grid-cols-7 gap-0.5 mb-1">
+  {weekDays.map((d, i) => (
+    <div key={i} className="text-center text-[10px] text-muted-foreground font-medium">
+      {d}
+    </div>
+  ))}
+</div>
 ```
 
-### Responsive Grid with Flex Growth
-
-**ZenLayout.tsx:**
+**Days Grid (lines 93-140):**
 ```typescript
-<motion.div
-  className="relative flex-1 flex flex-col gap-3 sm:gap-4"
->
-  {/* Grid rows */}
-  <div className="grid grid-cols-12 gap-3 sm:gap-4 flex-1">
-    {/* Cards with h-full */}
-  </div>
+<div className="grid grid-cols-7 gap-0.5">
+  {/* Each day button: smaller fixed size */}
+  <button className={cn(
+    "w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded text-xs transition-all relative",
+    // ... styling classes
+  )}>
+    {format(day, "d")}
+    {/* Smaller completion indicator */}
+    {status === "complete" ? (
+      <Check className="w-2 h-2 absolute bottom-0.5" />
+    ) : (
+      <div className="w-1 h-1 rounded-full absolute bottom-0.5" />
+    )}
+  </button>
+</div>
+```
+
+**Remove Footer (lines 142-155):**
+Delete the entire "Quick Actions" section - the Notes link is redundant since there's already a NotesWidget in the same view.
+
+### ZenLayout.tsx - Grid Rebalance
+
+**Top Row (lines 84-113):**
+```typescript
+{/* Left Column: Devotion + Notes - now wider */}
+<motion.div className="col-span-12 lg:col-span-8 flex flex-col gap-3 sm:gap-4">
+  ...
+</motion.div>
+
+{/* Calendar - now narrower widget */}
+<motion.div className="col-span-12 lg:col-span-4">
+  <ZenCard>
+    <div className="p-2 sm:p-3">
+      <InteractiveCalendar ... />
+    </div>
+  </ZenCard>
 </motion.div>
 ```
 
 ---
 
-## Spacing Audit & Standardization
+## Visual Comparison
 
-### Responsive Padding Scale
 ```text
-Mobile:  px-4  (16px)
-Tablet:  px-6  (24px)  
-Desktop: px-8  (32px)
-Wide:    px-12 (48px)
+BEFORE:
+┌────────────────────────────────┬──────────────────────────────────────────┐
+│  Devotion Banner               │                                          │
+│  ──────────────────            │            CALENDAR                      │
+│  Notes Widget                  │     S  M  T  W  T  F  S                  │
+│  (cramped)                     │     1  2  3  4  5  6  7                  │
+│                                │     8  9 10 11 12 13 14                  │
+│                                │    15 16 17 18 19 20 21                  │
+│                                │    22 23 24 25 26 27 28                  │
+│                                │    29 30 31                              │
+│                                │                     [Notes →]            │
+└────────────────────────────────┴──────────────────────────────────────────┘
+        5 columns (42%)                        7 columns (58%)
+
+AFTER:
+┌──────────────────────────────────────────────────┬────────────────────────┐
+│  Devotion Banner                                 │   Jan 2026     < >     │
+│  ────────────────────────────                    │   S M T W T F S        │
+│                                                  │   1 2 3 4 5 6 7        │
+│  Notes Widget (more room to breathe)             │   8 9 ...              │
+│  • Spiritual  • Trading  • Tech                  │                        │
+│  • Finance    • Music    • Projects              │                        │
+│                                                  │                        │
+└──────────────────────────────────────────────────┴────────────────────────┘
+        8 columns (67%)                                4 columns (33%)
 ```
-
-### Gap Standardization
-```text
-Small gaps:  gap-2 (8px)
-Medium gaps: gap-3 sm:gap-4 (12px / 16px)
-Large gaps:  gap-4 sm:gap-6 (16px / 24px)
-```
-
----
-
-## Overflow Handling Strategy
-
-| Element | Overflow X | Overflow Y | Reason |
-|---------|-----------|-----------|--------|
-| `html` | hidden | auto | Prevent horizontal scroll |
-| `body` | hidden | auto | Prevent horizontal scroll |
-| `#root` | hidden | auto | Container boundary |
-| `MainLayout` | hidden | hidden | Parent constraint |
-| `main` | hidden | auto | Scrollable content area |
-| Cards/Widgets | hidden | auto/visible | Content clipping |
-
----
-
-## Component-Specific Fixes
-
-### ZenCard Wrapper
-- Add `w-full` for explicit full-width behavior
-- Keep `h-full` where vertical fill is needed
-- Use `flex-1` for growing widgets
-
-### InteractiveCalendar
-- Already uses `h-full flex flex-col` (good)
-- Ensure parent card provides height
-
-### CompletionChart
-- Already uses `ResponsiveContainer` (good)
-- Remove fixed `h-32`, use percentage height
-
-### PerformanceSummary
-- Use `h-full` on wrapper
-- Let flex-1 on parent handle height
-
----
-
-## Implementation Order
-
-1. **src/App.css** - Remove root constraints
-2. **src/index.css** - Add viewport utilities  
-3. **tailwind.config.ts** - Update container config
-4. **src/components/layout/MainLayout.tsx** - Full viewport layout
-5. **src/pages/Index.tsx** - Remove max-width, add fluid classes
-6. **src/components/dashboard/widgets/HeroHeader.tsx** - Full-bleed header
-7. **src/components/dashboard/layouts/ZenLayout.tsx** - Fluid grid
 
 ---
 
 ## Result
 
 After implementation:
-- **Full viewport coverage** - Dashboard spans 100vw × 100vh
-- **No horizontal scrollbar** - Overflow properly contained
-- **Fixed scroll zones** - Only content area scrolls, not the entire page
-- **Responsive padding** - Edges breathe appropriately at all screen sizes
-- **Dynamic content sizing** - Components grow/shrink with viewport
-- **Consistent spacing** - Unified gap and padding scale throughout
+- **Compact Calendar** - Tighter, widget-like appearance matching Zen aesthetic
+- **Better Balance** - Devotion + Notes get more breathing room
+- **Cleaner UI** - Removed redundant Notes link from calendar footer
+- **Responsive** - Still stacks vertically on mobile (`col-span-12`)
+- **Consistent Sizing** - Fixed day cell sizes prevent layout shifts
 
