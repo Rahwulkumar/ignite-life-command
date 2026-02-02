@@ -1,9 +1,7 @@
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, Check, StickyNote } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ChevronLeft, ChevronRight, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DailyChecklistPopover } from "./DailyChecklistPopover";
-import { Button } from "@/components/ui/button";
 import {
   startOfMonth,
   endOfMonth,
@@ -63,35 +61,35 @@ export function InteractiveCalendar({
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-medium">{format(currentMonth, "MMMM yyyy")}</h3>
-        <div className="flex gap-1">
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-xs font-medium">{format(currentMonth, "MMM yyyy")}</h3>
+        <div className="flex gap-0.5">
           <button
             onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-            className="p-1.5 hover:bg-muted rounded transition-colors"
+            className="p-1 hover:bg-muted rounded transition-colors"
           >
-            <ChevronLeft className="w-4 h-4 text-muted-foreground" />
+            <ChevronLeft className="w-3 h-3 text-muted-foreground" />
           </button>
           <button
             onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-            className="p-1.5 hover:bg-muted rounded transition-colors"
+            className="p-1 hover:bg-muted rounded transition-colors"
           >
-            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            <ChevronRight className="w-3 h-3 text-muted-foreground" />
           </button>
         </div>
       </div>
 
       {/* Week Days Header */}
-      <div className="grid grid-cols-7 gap-1 mb-2">
+      <div className="grid grid-cols-7 gap-0.5 mb-1">
         {weekDays.map((d, i) => (
-          <div key={i} className="text-center text-xs text-muted-foreground font-medium py-1">
+          <div key={i} className="text-center text-[10px] text-muted-foreground font-medium">
             {d}
           </div>
         ))}
       </div>
 
       {/* Days Grid */}
-      <div className="grid grid-cols-7 gap-1 flex-1">
+      <div className="grid grid-cols-7 gap-0.5 flex-1">
         {days.map((day, i) => {
           const isSelected = isSameDay(day, selectedDate);
           const isCurrentMonth = isSameMonth(day, currentMonth);
@@ -108,7 +106,7 @@ export function InteractiveCalendar({
               <button
                 onClick={() => onSelectDate(day)}
                 className={cn(
-                  "aspect-square flex flex-col items-center justify-center rounded-lg text-sm transition-all relative group",
+                  "w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded text-xs transition-all relative",
                   !isCurrentMonth && "text-muted-foreground/30",
                   isCurrentMonth && !isSelected && "hover:bg-muted",
                   isSelected && "bg-foreground text-background",
@@ -119,15 +117,15 @@ export function InteractiveCalendar({
                 
                 {/* Completion indicator */}
                 {isCurrentMonth && status !== "none" && (
-                  <div className="absolute bottom-1 flex items-center justify-center">
+                  <div className="absolute bottom-0.5 flex items-center justify-center">
                     {status === "complete" ? (
                       <Check className={cn(
-                        "w-3 h-3",
+                        "w-2 h-2",
                         isSelected ? "text-background" : "text-emerald-500"
                       )} />
                     ) : (
                       <div className={cn(
-                        "w-1.5 h-1.5 rounded-full",
+                        "w-1 h-1 rounded-full",
                         isSelected ? "bg-background/60" : "bg-amber-500"
                       )} />
                     )}
@@ -137,21 +135,6 @@ export function InteractiveCalendar({
             </DailyChecklistPopover>
           );
         })}
-      </div>
-
-      {/* Quick Actions */}
-      <div className="flex items-center justify-end mt-3 pt-3 border-t border-border/30">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-xs gap-1.5 text-muted-foreground"
-          asChild
-        >
-          <Link to="/notes">
-            <StickyNote className="w-3.5 h-3.5" />
-            Notes
-          </Link>
-        </Button>
       </div>
     </div>
   );
