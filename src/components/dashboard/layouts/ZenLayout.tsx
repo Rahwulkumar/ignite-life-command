@@ -78,7 +78,7 @@ export function ZenLayout({ timeOfDay }: ZenLayoutProps) {
       animate="show"
       exit={{ opacity: 0 }}
       variants={zenStagger}
-      className="relative space-y-3 sm:space-y-4"
+      className="relative flex-1 flex flex-col gap-3 sm:gap-4"
     >
       {/* Top Row: Devotion + Notes (left) + Calendar (right) */}
       <motion.div variants={zenStagger} className="grid grid-cols-12 gap-3 sm:gap-4">
