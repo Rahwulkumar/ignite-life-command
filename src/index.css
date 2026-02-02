@@ -9,6 +9,11 @@
 @tailwind utilities;
 
 @layer base {
+  html, body, #root {
+    height: 100%;
+    overflow-x: hidden;
+  }
+
   :root {
     /* Ultra-refined dark palette */
     --background: 0 0% 3%;

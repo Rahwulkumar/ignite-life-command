@@ -11,9 +11,9 @@ export function MainLayout({ children }: MainLayoutProps) {
   const isHomePage = location.pathname === "/";
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-screen flex flex-col bg-background overflow-hidden">
       {!isHomePage && <TopNavigation />}
-      <main className="min-h-screen">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden">
         {children}
       </main>
     </div>

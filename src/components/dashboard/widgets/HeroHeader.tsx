@@ -41,7 +41,7 @@ export function HeroHeader({ currentTime }: HeroHeaderProps) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className="relative overflow-hidden -mx-4 sm:-mx-6 -mt-4 px-4 sm:px-6 pt-4 sm:pt-6 pb-28 sm:pb-36 lg:pb-40"
+      className="relative overflow-hidden -mx-4 sm:-mx-6 lg:-mx-8 xl:-mx-12 -mt-2 sm:-mt-4 px-4 sm:px-6 lg:px-8 xl:px-12 pt-4 sm:pt-6 pb-28 sm:pb-36 lg:pb-40"
     >
       {/* Animated nature background with time-based switching */}
       <div className="absolute inset-0 z-0">
