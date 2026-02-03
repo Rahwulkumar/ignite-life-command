@@ -29,6 +29,7 @@ export function useChecklistEntries(startDate: Date, endDate: Date) {
       if (error) throw error;
       return data as ChecklistEntry[];
     },
+    staleTime: 0, // Always refetch for real-time accuracy
   });
 }
 
@@ -51,10 +52,11 @@ export function useChecklistAnalytics(monthsBack = 3) {
       if (error) throw error;
       return data as ChecklistEntry[];
     },
+    staleTime: 0, // Always refetch for real-time accuracy
   });
 }
 
-// Toggle task completion
+// Toggle task completion with optimistic updates
 export function useToggleChecklistEntry() {
   const queryClient = useQueryClient();
 
@@ -88,7 +90,7 @@ export function useToggleChecklistEntry() {
         if (error) throw error;
         return data;
       } else {
-        // Delete the entry or mark as not completed
+        // Delete the entry
         const { error } = await supabase
           .from("daily_checklist_entries")
           .delete()
@@ -99,7 +101,79 @@ export function useToggleChecklistEntry() {
         return null;
       }
     },
-    onSuccess: () => {
+    // Optimistic update for instant UI feedback
+    onMutate: async ({ taskId, entryDate, isCompleted }) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ["checklist-entries"] });
+      await queryClient.cancelQueries({ queryKey: ["checklist-analytics"] });
+
+      // Snapshot the previous values
+      const previousEntries = queryClient.getQueriesData({ queryKey: ["checklist-entries"] });
+      const previousAnalytics = queryClient.getQueriesData({ queryKey: ["checklist-analytics"] });
+
+      // Optimistically update checklist-entries caches
+      queryClient.setQueriesData({ queryKey: ["checklist-entries"] }, (old: ChecklistEntry[] | undefined) => {
+        if (!old) return old;
+        
+        if (isCompleted) {
+          // Add new entry
+          const newEntry: ChecklistEntry = {
+            id: `temp-${Date.now()}`,
+            user_id: "",
+            task_id: taskId,
+            entry_date: entryDate,
+            is_completed: true,
+            duration_seconds: null,
+            notes: null,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          };
+          return [...old, newEntry];
+        } else {
+          // Remove entry
+          return old.filter((e) => !(e.task_id === taskId && e.entry_date === entryDate));
+        }
+      });
+
+      // Also update analytics cache
+      queryClient.setQueriesData({ queryKey: ["checklist-analytics"] }, (old: ChecklistEntry[] | undefined) => {
+        if (!old) return old;
+        
+        if (isCompleted) {
+          const newEntry: ChecklistEntry = {
+            id: `temp-${Date.now()}`,
+            user_id: "",
+            task_id: taskId,
+            entry_date: entryDate,
+            is_completed: true,
+            duration_seconds: null,
+            notes: null,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          };
+          return [...old, newEntry];
+        } else {
+          return old.filter((e) => !(e.task_id === taskId && e.entry_date === entryDate));
+        }
+      });
+
+      return { previousEntries, previousAnalytics };
+    },
+    // If mutation fails, rollback to previous values
+    onError: (_err, _variables, context) => {
+      if (context?.previousEntries) {
+        context.previousEntries.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
+      }
+      if (context?.previousAnalytics) {
+        context.previousAnalytics.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data);
+        });
+      }
+    },
+    // Always refetch after mutation settles
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["checklist-entries"] });
       queryClient.invalidateQueries({ queryKey: ["checklist-analytics"] });
     },
@@ -144,11 +218,11 @@ export function calculateAnalytics(entries: ChecklistEntry[]) {
   for (let i = 0; i < dates.length; i++) {
     const date = dates[i];
     const tasksCompleted = byDate[date].length;
-    
+
     if (tasksCompleted > 0) {
       tempStreak++;
       longestStreak = Math.max(longestStreak, tempStreak);
-      
+
       if (i === 0 && date === today) {
         currentStreak = tempStreak;
       }
@@ -206,19 +280,15 @@ export function calculateAnalytics(entries: ChecklistEntry[]) {
     weekAgo.setDate(weekAgo.getDate() - 7);
     return entryDate >= weekAgo;
   });
-  const thisWeekCompletion = thisWeekEntries.length > 0 
-    ? Math.round((thisWeekEntries.length / 26) * 100)
-    : 0;
+  const thisWeekCompletion = thisWeekEntries.length > 0 ? Math.round((thisWeekEntries.length / 26) * 100) : 0;
 
   // This month completion (3 daily tasks per day + gym on weekdays)
   const thisMonthStart = startOfMonth(new Date());
   const thisMonthEntries = entries.filter((e) => new Date(e.entry_date) >= thisMonthStart);
   const daysInMonth = new Date().getDate();
   const weekdaysInMonth = Math.ceil(daysInMonth * (5 / 7));
-  const maxMonthTasks = (daysInMonth * 3) + weekdaysInMonth; // 3 daily + gym on weekdays
-  const thisMonthCompletion = thisMonthEntries.length > 0
-    ? Math.round((thisMonthEntries.length / maxMonthTasks) * 100)
-    : 0;
+  const maxMonthTasks = daysInMonth * 3 + weekdaysInMonth; // 3 daily + gym on weekdays
+  const thisMonthCompletion = thisMonthEntries.length > 0 ? Math.round((thisMonthEntries.length / maxMonthTasks) * 100) : 0;
 
   return {
     currentStreak,

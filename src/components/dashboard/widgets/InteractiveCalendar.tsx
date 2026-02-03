@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, Check } from "lucide-react";
+import { ChevronLeft, ChevronRight, Check, BookOpen, TrendingUp, Dumbbell } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DailyChecklistPopover } from "./DailyChecklistPopover";
 import {
@@ -23,14 +23,32 @@ interface InteractiveCalendarProps {
   onToggleTask: (dateKey: string, taskId: string) => void;
 }
 
-const defaultDailyTaskCount = 3; // prayer + bible + trading
+// Task definitions for the footer
+const dailyTasks = [
+  { id: "prayer", label: "Prayer", icon: BookOpen },
+  { id: "bible", label: "Bible", icon: BookOpen },
+  { id: "trading", label: "Charts", icon: TrendingUp },
+];
+
+const weekdayTasks = [
+  { id: "gym", label: "GYM", icon: Dumbbell },
+];
+
 const getExpectedTaskCount = (date: Date) => {
   const dayOfWeek = getDay(date);
   // Mon-Fri have GYM as well
   if ([1, 2, 3, 4, 5].includes(dayOfWeek)) {
-    return defaultDailyTaskCount + 1;
+    return 4; // 3 daily + 1 gym
   }
-  return defaultDailyTaskCount;
+  return 3; // 3 daily
+};
+
+const getTasksForDay = (date: Date) => {
+  const dayOfWeek = getDay(date);
+  if ([1, 2, 3, 4, 5].includes(dayOfWeek)) {
+    return [...dailyTasks, ...weekdayTasks];
+  }
+  return dailyTasks;
 };
 
 export function InteractiveCalendar({
@@ -40,6 +58,11 @@ export function InteractiveCalendar({
   onToggleTask,
 }: InteractiveCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const today = new Date();
+  const todayKey = format(today, "yyyy-MM-dd");
+  const todayCompleted = completedTasks[todayKey] || [];
+  const todayTasks = getTasksForDay(today);
+  const remainingTasks = todayTasks.filter((t) => !todayCompleted.includes(t.id));
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
@@ -59,20 +82,20 @@ export function InteractiveCalendar({
   };
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-2">
-        <h3 className="text-xs font-medium">{format(currentMonth, "MMM yyyy")}</h3>
-        <div className="flex gap-0.5">
+    <div className="flex flex-col">
+      {/* Ultra-compact header */}
+      <div className="flex items-center justify-between mb-1.5">
+        <h3 className="text-[11px] font-medium">{format(currentMonth, "MMM yyyy")}</h3>
+        <div className="flex">
           <button
             onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-            className="p-1 hover:bg-muted rounded transition-colors"
+            className="p-0.5 hover:bg-muted rounded transition-colors"
           >
             <ChevronLeft className="w-3 h-3 text-muted-foreground" />
           </button>
           <button
             onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-            className="p-1 hover:bg-muted rounded transition-colors"
+            className="p-0.5 hover:bg-muted rounded transition-colors"
           >
             <ChevronRight className="w-3 h-3 text-muted-foreground" />
           </button>
@@ -80,20 +103,20 @@ export function InteractiveCalendar({
       </div>
 
       {/* Week Days Header */}
-      <div className="grid grid-cols-7 gap-0.5 mb-1">
+      <div className="grid grid-cols-7 gap-px mb-0.5">
         {weekDays.map((d, i) => (
-          <div key={i} className="text-center text-[10px] text-muted-foreground font-medium">
+          <div key={i} className="text-center text-[9px] text-muted-foreground font-medium py-0.5">
             {d}
           </div>
         ))}
       </div>
 
-      {/* Days Grid */}
-      <div className="grid grid-cols-7 gap-0.5 flex-1">
+      {/* Days Grid - Ultra compact */}
+      <div className="grid grid-cols-7 gap-px mb-2">
         {days.map((day, i) => {
           const isSelected = isSameDay(day, selectedDate);
           const isCurrentMonth = isSameMonth(day, currentMonth);
-          const isToday = isSameDay(day, new Date());
+          const isToday = isSameDay(day, today);
           const status = getCompletionStatus(day);
 
           return (
@@ -106,7 +129,7 @@ export function InteractiveCalendar({
               <button
                 onClick={() => onSelectDate(day)}
                 className={cn(
-                  "w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded text-xs transition-all relative",
+                  "w-5 h-5 flex items-center justify-center rounded text-[10px] transition-all relative",
                   !isCurrentMonth && "text-muted-foreground/30",
                   isCurrentMonth && !isSelected && "hover:bg-muted",
                   isSelected && "bg-foreground text-background",
@@ -114,20 +137,24 @@ export function InteractiveCalendar({
                 )}
               >
                 <span>{format(day, "d")}</span>
-                
+
                 {/* Completion indicator */}
                 {isCurrentMonth && status !== "none" && (
-                  <div className="absolute bottom-0.5 flex items-center justify-center">
+                  <div className="absolute -bottom-0.5 flex items-center justify-center">
                     {status === "complete" ? (
-                      <Check className={cn(
-                        "w-2 h-2",
-                        isSelected ? "text-background" : "text-emerald-500"
-                      )} />
+                      <Check
+                        className={cn(
+                          "w-2 h-2",
+                          isSelected ? "text-background" : "text-emerald-500"
+                        )}
+                      />
                     ) : (
-                      <div className={cn(
-                        "w-1 h-1 rounded-full",
-                        isSelected ? "bg-background/60" : "bg-amber-500"
-                      )} />
+                      <div
+                        className={cn(
+                          "w-1 h-1 rounded-full",
+                          isSelected ? "bg-background/60" : "bg-amber-500"
+                        )}
+                      />
                     )}
                   </div>
                 )}
@@ -135,6 +162,42 @@ export function InteractiveCalendar({
             </DailyChecklistPopover>
           );
         })}
+      </div>
+
+      {/* Today's Progress Footer */}
+      <div className="pt-2 border-t border-border/30">
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-[10px] text-muted-foreground">Today</span>
+          <span className="text-[10px] font-medium">
+            {todayCompleted.length}/{todayTasks.length}
+          </span>
+        </div>
+
+        {remainingTasks.length > 0 ? (
+          <div className="flex flex-wrap gap-1">
+            {remainingTasks.map((task) => {
+              const Icon = task.icon;
+              return (
+                <DailyChecklistPopover
+                  key={task.id}
+                  date={today}
+                  completedTasks={completedTasks}
+                  onToggleTask={onToggleTask}
+                >
+                  <button className="flex items-center gap-0.5 text-[9px] px-1.5 py-0.5 rounded bg-muted/50 hover:bg-muted transition-colors">
+                    <Icon className="w-2.5 h-2.5 text-muted-foreground" />
+                    <span className="text-muted-foreground">{task.label}</span>
+                  </button>
+                </DailyChecklistPopover>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="flex items-center gap-1 text-[10px] text-emerald-500">
+            <Check className="w-3 h-3" />
+            <span>All done!</span>
+          </div>
+        )}
       </div>
     </div>
   );
