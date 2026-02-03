@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { motion, Variants } from "framer-motion";
+import { format } from "date-fns";
 import { DevotionBanner } from "@/components/dashboard/widgets/DevotionBanner";
 import { InteractiveCalendar } from "@/components/dashboard/widgets/InteractiveCalendar";
 import { CompletionChart } from "@/components/dashboard/widgets/CompletionChart";
 import { PerformanceSummary } from "@/components/dashboard/widgets/PerformanceSummary";
 import { NotesWidget } from "@/components/dashboard/widgets/NotesWidget";
-import { useChecklistEntries, useChecklistAnalytics } from "@/hooks/useChecklistEntries";
+import { StreakStats } from "@/components/dashboard/widgets/StreakStats";
+import { useChecklistEntries, useChecklistAnalytics, useToggleChecklistEntry } from "@/hooks/useChecklistEntries";
 import { startOfMonth, endOfMonth } from "date-fns";
 
 interface ZenLayoutProps {
@@ -14,14 +16,14 @@ interface ZenLayoutProps {
 
 const inkBrush: Variants = {
   hidden: { opacity: 0, x: -20, filter: "blur(2px)" },
-  show: { 
-    opacity: 1, 
+  show: {
+    opacity: 1,
     x: 0,
     filter: "blur(0px)",
-    transition: { 
-      duration: 0.7, 
-      ease: [0.22, 1, 0.36, 1]
-    } 
+    transition: {
+      duration: 0.7,
+      ease: [0.22, 1, 0.36, 1],
+    },
   },
 };
 
@@ -40,22 +42,25 @@ const zenStagger: Variants = {
 const ZenCard = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
   <div className={`relative bg-card/80 backdrop-blur-sm rounded-xl border border-border/40 overflow-hidden ${className}`}>
     <div className="absolute inset-0 bg-gradient-to-br from-muted/5 to-transparent" />
-    <div className="absolute inset-0 opacity-[0.015]" style={{
-      backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`
-    }} />
+    <div
+      className="absolute inset-0 opacity-[0.015]"
+      style={{
+        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+      }}
+    />
     <div className="relative">{children}</div>
   </div>
 );
 
 export function ZenLayout({ timeOfDay }: ZenLayoutProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
-  
+
   // Fetch checklist entries from the database
   const startDate = startOfMonth(new Date());
   const endDate = endOfMonth(new Date());
   const { data: entries = [] } = useChecklistEntries(startDate, endDate);
   const { data: analyticsEntries = [] } = useChecklistAnalytics(1);
-  const toggleEntry = { mutate: () => {} }; // Will be handled by InteractiveCalendar internally
+  const toggleEntry = useToggleChecklistEntry();
 
   // Convert entries to the completedTasks format
   const completedTasks = entries.reduce((acc, entry) => {
@@ -69,7 +74,12 @@ export function ZenLayout({ timeOfDay }: ZenLayoutProps) {
   }, {} as Record<string, string[]>);
 
   const handleToggleTask = (dateKey: string, taskId: string) => {
-    // Handled internally by InteractiveCalendar
+    const isCurrentlyCompleted = completedTasks[dateKey]?.includes(taskId) || false;
+    toggleEntry.mutate({
+      taskId,
+      entryDate: dateKey,
+      isCompleted: !isCurrentlyCompleted,
+    });
   };
 
   return (
@@ -80,11 +90,11 @@ export function ZenLayout({ timeOfDay }: ZenLayoutProps) {
       variants={zenStagger}
       className="relative flex-1 flex flex-col gap-3 sm:gap-4"
     >
-      {/* Top Row: Devotion + Notes (left) + Calendar (right) */}
+      {/* Top Row: Devotion (5) + Notes (4) + Calendar (3) */}
       <motion.div variants={zenStagger} className="grid grid-cols-12 gap-3 sm:gap-4">
-        {/* Left Column: Devotion + Notes - wider */}
-        <motion.div variants={inkBrush} className="col-span-12 lg:col-span-8 flex flex-col gap-3 sm:gap-4">
-          <ZenCard>
+        {/* Devotion Banner - Prominent */}
+        <motion.div variants={inkBrush} className="col-span-12 md:col-span-6 lg:col-span-5">
+          <ZenCard className="h-full">
             <DevotionBanner
               characterName="David"
               dayNumber={7}
@@ -92,15 +102,19 @@ export function ZenLayout({ timeOfDay }: ZenLayoutProps) {
               timeOfDay={timeOfDay}
             />
           </ZenCard>
-          <ZenCard className="flex-1 min-h-[180px] sm:min-h-[200px]">
+        </motion.div>
+
+        {/* Notes/Workspaces - Standalone */}
+        <motion.div variants={inkBrush} className="col-span-12 md:col-span-6 lg:col-span-4">
+          <ZenCard className="h-full">
             <NotesWidget />
           </ZenCard>
         </motion.div>
 
-        {/* Interactive Calendar - Compact widget */}
-        <motion.div variants={inkBrush} className="col-span-12 lg:col-span-4">
+        {/* Calendar - Ultra-compact sidebar */}
+        <motion.div variants={inkBrush} className="col-span-12 lg:col-span-3">
           <ZenCard className="h-full">
-            <div className="p-2 sm:p-3">
+            <div className="p-2">
               <InteractiveCalendar
                 selectedDate={selectedDate}
                 onSelectDate={setSelectedDate}
@@ -112,10 +126,10 @@ export function ZenLayout({ timeOfDay }: ZenLayoutProps) {
         </motion.div>
       </motion.div>
 
-      {/* Analytics Row: Bar Chart + Performance Summary */}
+      {/* Analytics Row: 3 equal widgets */}
       <motion.div variants={zenStagger} className="grid grid-cols-12 gap-3 sm:gap-4">
-        {/* Completion Chart - Left */}
-        <motion.div variants={inkBrush} className="col-span-12 md:col-span-6">
+        {/* Completion Chart */}
+        <motion.div variants={inkBrush} className="col-span-12 md:col-span-6 lg:col-span-4">
           <ZenCard>
             <div className="p-3 sm:p-4">
               <CompletionChart entries={analyticsEntries} timeFilter="week" />
@@ -123,10 +137,17 @@ export function ZenLayout({ timeOfDay }: ZenLayoutProps) {
           </ZenCard>
         </motion.div>
 
-        {/* Performance Summary - Right */}
-        <motion.div variants={inkBrush} className="col-span-12 md:col-span-6">
+        {/* Performance Summary */}
+        <motion.div variants={inkBrush} className="col-span-12 md:col-span-6 lg:col-span-4">
           <ZenCard className="h-full">
             <PerformanceSummary />
+          </ZenCard>
+        </motion.div>
+
+        {/* Streak Stats - NEW */}
+        <motion.div variants={inkBrush} className="col-span-12 lg:col-span-4">
+          <ZenCard className="h-full">
+            <StreakStats />
           </ZenCard>
         </motion.div>
       </motion.div>
