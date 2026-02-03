@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, Check, BookOpen, TrendingUp, Dumbbell } from "lucide-react";
+import { ChevronLeft, ChevronRight, Check, BookOpen, TrendingUp, Dumbbell, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DailyChecklistPopover } from "./DailyChecklistPopover";
+import { QuickAddTaskPopover } from "./QuickAddTaskPopover";
 import {
   startOfMonth,
   endOfMonth,
@@ -168,9 +169,16 @@ export function InteractiveCalendar({
       <div className="pt-2 border-t border-border/30">
         <div className="flex items-center justify-between mb-1.5">
           <span className="text-[10px] text-muted-foreground">Today</span>
-          <span className="text-[10px] font-medium">
-            {todayCompleted.length}/{todayTasks.length}
-          </span>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] font-medium">
+              {todayCompleted.length}/{todayTasks.length}
+            </span>
+            <QuickAddTaskPopover date={today} onToggleTask={onToggleTask}>
+              <button className="p-0.5 rounded hover:bg-muted transition-colors" title="Add task">
+                <Plus className="w-3 h-3 text-muted-foreground" />
+              </button>
+            </QuickAddTaskPopover>
+          </div>
         </div>
 
         {remainingTasks.length > 0 ? (

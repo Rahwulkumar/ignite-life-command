@@ -90,11 +90,12 @@ export function ZenLayout({ timeOfDay }: ZenLayoutProps) {
       variants={zenStagger}
       className="relative flex-1 flex flex-col gap-3 sm:gap-4"
     >
-      {/* Top Row: Devotion (5) + Notes (4) + Calendar (3) */}
+      {/* Top Row: Devotion + Workspaces (stacked left) + Calendar (right) */}
       <motion.div variants={zenStagger} className="grid grid-cols-12 gap-3 sm:gap-4">
-        {/* Devotion Banner - Prominent */}
-        <motion.div variants={inkBrush} className="col-span-12 md:col-span-6 lg:col-span-5">
-          <ZenCard className="h-full">
+        {/* Left Column: Devotion + Workspaces stacked */}
+        <motion.div variants={inkBrush} className="col-span-12 lg:col-span-9 flex flex-col gap-3 sm:gap-4">
+          {/* Devotion Banner - Prominent */}
+          <ZenCard>
             <DevotionBanner
               characterName="David"
               dayNumber={7}
@@ -102,16 +103,14 @@ export function ZenLayout({ timeOfDay }: ZenLayoutProps) {
               timeOfDay={timeOfDay}
             />
           </ZenCard>
-        </motion.div>
 
-        {/* Notes/Workspaces - Standalone */}
-        <motion.div variants={inkBrush} className="col-span-12 md:col-span-6 lg:col-span-4">
-          <ZenCard className="h-full">
+          {/* Notes/Workspaces - Below Devotion */}
+          <ZenCard>
             <NotesWidget />
           </ZenCard>
         </motion.div>
 
-        {/* Calendar - Ultra-compact sidebar */}
+        {/* Calendar - Ultra-compact sidebar on right */}
         <motion.div variants={inkBrush} className="col-span-12 lg:col-span-3">
           <ZenCard className="h-full">
             <div className="p-2">
