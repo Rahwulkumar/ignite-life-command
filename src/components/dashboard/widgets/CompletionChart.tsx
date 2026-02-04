@@ -74,9 +74,17 @@ export function CompletionChart({ entries, timeFilter }: CompletionChartProps) {
   };
 
   return (
-    <div className="space-y-2">
-      <h4 className="text-xs font-medium text-muted-foreground">Completion Rate</h4>
-      <div className="h-32">
+    <div className="p-3 sm:p-4 h-full flex flex-col">
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-3">
+        <div className="w-4 h-4 rounded bg-chart-2/20 flex items-center justify-center">
+          <div className="w-2 h-2 rounded-sm bg-chart-2" />
+        </div>
+        <h3 className="text-sm font-medium">Completion Rate</h3>
+      </div>
+
+      {/* Chart */}
+      <div className="flex-1 min-h-[120px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} margin={{ top: 5, right: 5, bottom: 5, left: -20 }}>
             <XAxis 
