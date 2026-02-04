@@ -90,10 +90,10 @@ export function ZenLayout({ timeOfDay }: ZenLayoutProps) {
       variants={zenStagger}
       className="relative flex-1 flex flex-col gap-3 sm:gap-4"
     >
-      {/* Top Row: Devotion + Workspaces (stacked left) + Calendar (right) */}
+      {/* Top Row: Devotion + Workspaces (left 50%) + Calendar (right 50%) */}
       <motion.div variants={zenStagger} className="grid grid-cols-12 gap-3 sm:gap-4">
         {/* Left Column: Devotion + Workspaces stacked */}
-        <motion.div variants={inkBrush} className="col-span-12 lg:col-span-8 flex flex-col gap-3 sm:gap-4">
+        <motion.div variants={inkBrush} className="col-span-12 lg:col-span-6 flex flex-col gap-3 sm:gap-4">
           {/* Devotion Banner - Prominent */}
           <ZenCard>
             <DevotionBanner
@@ -110,8 +110,8 @@ export function ZenLayout({ timeOfDay }: ZenLayoutProps) {
           </ZenCard>
         </motion.div>
 
-        {/* Calendar - Expanded sidebar on right */}
-        <motion.div variants={inkBrush} className="col-span-12 lg:col-span-4">
+        {/* Calendar - 50% width on right */}
+        <motion.div variants={inkBrush} className="col-span-12 lg:col-span-6">
           <ZenCard className="h-full">
             <div className="p-3 sm:p-4">
               <InteractiveCalendar
