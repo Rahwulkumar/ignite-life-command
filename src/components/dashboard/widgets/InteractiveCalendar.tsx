@@ -84,36 +84,36 @@ export function InteractiveCalendar({
 
   return (
     <div className="flex flex-col">
-      {/* Ultra-compact header */}
-      <div className="flex items-center justify-between mb-1.5">
-        <h3 className="text-[11px] font-medium">{format(currentMonth, "MMM yyyy")}</h3>
-        <div className="flex">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-sm font-medium">{format(currentMonth, "MMM yyyy")}</h3>
+        <div className="flex gap-1">
           <button
             onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-            className="p-0.5 hover:bg-muted rounded transition-colors"
+            className="p-1 hover:bg-muted rounded transition-colors"
           >
-            <ChevronLeft className="w-3 h-3 text-muted-foreground" />
+            <ChevronLeft className="w-4 h-4 text-muted-foreground" />
           </button>
           <button
             onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-            className="p-0.5 hover:bg-muted rounded transition-colors"
+            className="p-1 hover:bg-muted rounded transition-colors"
           >
-            <ChevronRight className="w-3 h-3 text-muted-foreground" />
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
           </button>
         </div>
       </div>
 
       {/* Week Days Header */}
-      <div className="grid grid-cols-7 gap-px mb-0.5">
+      <div className="grid grid-cols-7 gap-1 mb-1">
         {weekDays.map((d, i) => (
-          <div key={i} className="text-center text-[9px] text-muted-foreground font-medium py-0.5">
+          <div key={i} className="text-center text-[11px] text-muted-foreground font-medium py-1">
             {d}
           </div>
         ))}
       </div>
 
-      {/* Days Grid - Ultra compact */}
-      <div className="grid grid-cols-7 gap-px mb-2">
+      {/* Days Grid */}
+      <div className="grid grid-cols-7 gap-1 mb-3">
         {days.map((day, i) => {
           const isSelected = isSameDay(day, selectedDate);
           const isCurrentMonth = isSameMonth(day, currentMonth);
@@ -130,7 +130,7 @@ export function InteractiveCalendar({
               <button
                 onClick={() => onSelectDate(day)}
                 className={cn(
-                  "w-5 h-5 flex items-center justify-center rounded text-[10px] transition-all relative",
+                  "w-7 h-7 flex items-center justify-center rounded text-xs transition-all relative",
                   !isCurrentMonth && "text-muted-foreground/30",
                   isCurrentMonth && !isSelected && "hover:bg-muted",
                   isSelected && "bg-foreground text-background",
@@ -166,23 +166,23 @@ export function InteractiveCalendar({
       </div>
 
       {/* Today's Progress Footer */}
-      <div className="pt-2 border-t border-border/30">
-        <div className="flex items-center justify-between mb-1.5">
-          <span className="text-[10px] text-muted-foreground">Today</span>
-          <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-medium">
+      <div className="pt-3 border-t border-border/30">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs text-muted-foreground">Today</span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium">
               {todayCompleted.length}/{todayTasks.length}
             </span>
             <QuickAddTaskPopover date={today} onToggleTask={onToggleTask}>
-              <button className="p-0.5 rounded hover:bg-muted transition-colors" title="Add task">
-                <Plus className="w-3 h-3 text-muted-foreground" />
+              <button className="p-1 rounded hover:bg-muted transition-colors" title="Add task">
+                <Plus className="w-4 h-4 text-muted-foreground" />
               </button>
             </QuickAddTaskPopover>
           </div>
         </div>
 
         {remainingTasks.length > 0 ? (
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-1.5">
             {remainingTasks.map((task) => {
               const Icon = task.icon;
               return (
@@ -192,8 +192,8 @@ export function InteractiveCalendar({
                   completedTasks={completedTasks}
                   onToggleTask={onToggleTask}
                 >
-                  <button className="flex items-center gap-0.5 text-[9px] px-1.5 py-0.5 rounded bg-muted/50 hover:bg-muted transition-colors">
-                    <Icon className="w-2.5 h-2.5 text-muted-foreground" />
+                  <button className="flex items-center gap-1 text-[10px] px-2 py-1 rounded bg-muted/50 hover:bg-muted transition-colors">
+                    <Icon className="w-3 h-3 text-muted-foreground" />
                     <span className="text-muted-foreground">{task.label}</span>
                   </button>
                 </DailyChecklistPopover>
@@ -201,8 +201,8 @@ export function InteractiveCalendar({
             })}
           </div>
         ) : (
-          <div className="flex items-center gap-1 text-[10px] text-emerald-500">
-            <Check className="w-3 h-3" />
+          <div className="flex items-center gap-1.5 text-xs text-emerald-500">
+            <Check className="w-4 h-4" />
             <span>All done!</span>
           </div>
         )}

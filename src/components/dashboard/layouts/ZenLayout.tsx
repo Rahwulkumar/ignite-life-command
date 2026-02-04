@@ -93,7 +93,7 @@ export function ZenLayout({ timeOfDay }: ZenLayoutProps) {
       {/* Top Row: Devotion + Workspaces (stacked left) + Calendar (right) */}
       <motion.div variants={zenStagger} className="grid grid-cols-12 gap-3 sm:gap-4">
         {/* Left Column: Devotion + Workspaces stacked */}
-        <motion.div variants={inkBrush} className="col-span-12 lg:col-span-9 flex flex-col gap-3 sm:gap-4">
+        <motion.div variants={inkBrush} className="col-span-12 lg:col-span-8 flex flex-col gap-3 sm:gap-4">
           {/* Devotion Banner - Prominent */}
           <ZenCard>
             <DevotionBanner
@@ -110,10 +110,10 @@ export function ZenLayout({ timeOfDay }: ZenLayoutProps) {
           </ZenCard>
         </motion.div>
 
-        {/* Calendar - Ultra-compact sidebar on right */}
-        <motion.div variants={inkBrush} className="col-span-12 lg:col-span-3">
+        {/* Calendar - Expanded sidebar on right */}
+        <motion.div variants={inkBrush} className="col-span-12 lg:col-span-4">
           <ZenCard className="h-full">
-            <div className="p-2">
+            <div className="p-3 sm:p-4">
               <InteractiveCalendar
                 selectedDate={selectedDate}
                 onSelectDate={setSelectedDate}
