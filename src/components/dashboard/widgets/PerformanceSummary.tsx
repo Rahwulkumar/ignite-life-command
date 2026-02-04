@@ -33,27 +33,27 @@ export function PerformanceSummary() {
   const hasData = entries.length > 0;
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="p-3 sm:p-4 h-full flex flex-col">
       {/* Header */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 mb-3">
         <TrendingUp className="w-4 h-4 text-muted-foreground" />
         <h3 className="text-sm font-medium">This Week</h3>
       </div>
 
       {/* Headline Stat */}
-      <div className="space-y-1">
+      <div className="space-y-1 mb-3">
         <p className="text-2xl font-semibold">
           {hasData ? `${analytics.thisWeekCompletion}%` : "—"}
         </p>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           of daily priorities completed
         </p>
       </div>
 
-      <div className="h-px bg-border" />
+      <div className="h-px bg-border/50 mb-3" />
 
       {/* Streak */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 mb-2">
         <Flame className="w-4 h-4 text-orange-500" />
         <span className="text-sm">
           {analytics.currentStreak > 0 
@@ -64,11 +64,11 @@ export function PerformanceSummary() {
 
       {/* Best Task */}
       {hasData && taskPerformance.best.completed > 0 && (
-        <div className="flex items-start gap-2">
+        <div className="flex items-start gap-2 mb-2">
           <Star className="w-4 h-4 text-amber-500 mt-0.5" />
           <div className="space-y-0.5">
             <p className="text-sm">Most consistent: {taskPerformance.best.label}</p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-[10px] text-muted-foreground">
               {taskPerformance.best.completed}/{taskPerformance.best.total} days ({taskPerformance.best.percentage}%)
             </p>
           </div>
@@ -81,7 +81,7 @@ export function PerformanceSummary() {
           <AlertTriangle className="w-4 h-4 text-muted-foreground mt-0.5" />
           <div className="space-y-0.5">
             <p className="text-sm">Needs focus: {taskPerformance.worst.label}</p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-[10px] text-muted-foreground">
               {taskPerformance.worst.completed}/{taskPerformance.worst.total} days ({taskPerformance.worst.percentage}%)
             </p>
           </div>
