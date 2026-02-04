@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { env } from "@/lib/env";
 
 interface Message {
   id: string;
@@ -8,7 +9,7 @@ interface Message {
   content: string;
 }
 
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/spiritual-guide`;
+const CHAT_URL = `${env.SUPABASE_URL}/functions/v1/spiritual-guide`;
 
 export const useSpiritualGuide = () => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -29,7 +30,7 @@ export const useSpiritualGuide = () => {
     try {
       // Get the current session to pass the user's JWT token
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       if (!session) {
         toast.error("Please sign in to chat with Sage");
         setIsLoading(false);

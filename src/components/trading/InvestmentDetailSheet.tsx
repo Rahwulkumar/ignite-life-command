@@ -6,6 +6,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { cn } from "@/lib/utils";
 import { InvestmentChart } from "./InvestmentChart";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { env } from "@/lib/env";
 
 interface Holding {
   id: string;
@@ -31,7 +33,7 @@ interface InvestmentDetailSheetProps {
   onClose: () => void;
 }
 
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/nova-chat`;
+const CHAT_URL = `${env.SUPABASE_URL}/functions/v1/nova-chat`;
 
 export function InvestmentDetailSheet({ holding, isOpen, onClose }: InvestmentDetailSheetProps) {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -54,13 +56,21 @@ export function InvestmentDetailSheet({ holding, isOpen, onClose }: InvestmentDe
   }, [messages]);
 
   const streamChat = async (userMessages: Message[]) => {
+    // Get user session for proper authentication
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
+      toast.error("Please sign in to continue");
+      throw new Error("No active session");
+    }
+
     const resp = await fetch(CHAT_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        Authorization: `Bearer ${session.access_token}`, // ✅ Use session token, not publishable key
       },
-      body: JSON.stringify({ 
+      body: JSON.stringify({
         messages: userMessages.map(m => ({ role: m.role, content: m.content })),
         investmentContext: holding
       }),
@@ -108,9 +118,9 @@ export function InvestmentDetailSheet({ holding, isOpen, onClose }: InvestmentDe
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        
+
         buffer += decoder.decode(value, { stream: true });
-        
+
         let newlineIndex: number;
         while ((newlineIndex = buffer.indexOf("\n")) !== -1) {
           let line = buffer.slice(0, newlineIndex);
@@ -131,7 +141,7 @@ export function InvestmentDetailSheet({ holding, isOpen, onClose }: InvestmentDe
               setMessages(prev => {
                 const last = prev[prev.length - 1];
                 if (last?.role === "assistant" && last.id !== "intro") {
-                  return prev.map((m, i) => 
+                  return prev.map((m, i) =>
                     i === prev.length - 1 ? { ...m, content: assistantContent } : m
                   );
                 }

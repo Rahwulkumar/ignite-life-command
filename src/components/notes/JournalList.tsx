@@ -2,6 +2,7 @@ import { format } from "date-fns";
 import { FileText, ChevronRight } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { extractTiptapPreviewText } from "@/lib/tiptapUtils";
 import type { Note } from "@/hooks/useNotes";
 
 interface JournalListProps {
@@ -41,6 +42,7 @@ export function JournalList({
           {displayEntries.map((entry) => {
             const date = entry.created_at ? new Date(entry.created_at) : new Date();
             const isSelected = entry.id === selectedId;
+            const previewText = extractTiptapPreviewText(entry.content, 60);
 
             return (
               <button
@@ -48,8 +50,8 @@ export function JournalList({
                 onClick={() => onSelectEntry(entry.id)}
                 className={cn(
                   "w-full flex items-start gap-3 px-3 py-2.5 rounded-lg text-left transition-colors",
-                  isSelected 
-                    ? "bg-primary/10 border border-primary/20" 
+                  isSelected
+                    ? "bg-primary/10 border border-primary/20"
                     : "hover:bg-muted/50 border border-transparent"
                 )}
               >
@@ -60,9 +62,9 @@ export function JournalList({
                   <p className="text-sm font-medium truncate">
                     {entry.title || "Untitled"}
                   </p>
-                  {entry.content && typeof entry.content === 'object' && (entry.content as any)?.content?.[0]?.content?.[0]?.text && (
+                  {previewText && (
                     <p className="text-xs text-muted-foreground truncate mt-0.5">
-                      {(entry.content as any).content[0].content[0].text}
+                      {previewText}
                     </p>
                   )}
                 </div>
