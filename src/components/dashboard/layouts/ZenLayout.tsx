@@ -62,7 +62,7 @@ export function ZenLayout({ timeOfDay }: ZenLayoutProps) {
   const { data: analyticsEntries = [] } = useChecklistAnalytics(1);
   const toggleEntry = useToggleChecklistEntry();
 
-  // Convert entries to the completedTasks format
+  // Convert entries to the completed tasks format
   const completedTasks = entries.reduce((acc, entry) => {
     if (entry.is_completed) {
       if (!acc[entry.entry_date]) {
@@ -73,8 +73,18 @@ export function ZenLayout({ timeOfDay }: ZenLayoutProps) {
     return acc;
   }, {} as Record<string, string[]>);
 
+  // Track all tasks (both completed and pending) for proper task list display
+  const allTasksData = entries.reduce((acc, entry) => {
+    if (!acc[entry.entry_date]) {
+      acc[entry.entry_date] = [];
+    }
+    acc[entry.entry_date].push(entry.task_id);
+    return acc;
+  }, {} as Record<string, string[]>);
+
   const handleToggleTask = (dateKey: string, taskId: string) => {
-    const isCurrentlyCompleted = completedTasks[dateKey]?.includes(taskId) || false;
+    const entry = entries.find(e => e.task_id === taskId && e.entry_date === dateKey);
+    const isCurrentlyCompleted = entry?.is_completed || false;
     toggleEntry.mutate({
       taskId,
       entryDate: dateKey,
@@ -118,6 +128,7 @@ export function ZenLayout({ timeOfDay }: ZenLayoutProps) {
                 selectedDate={selectedDate}
                 onSelectDate={setSelectedDate}
                 completedTasks={completedTasks}
+                allTasks={allTasksData}
                 onToggleTask={handleToggleTask}
               />
             </div>
@@ -129,10 +140,8 @@ export function ZenLayout({ timeOfDay }: ZenLayoutProps) {
       <motion.div variants={zenStagger} className="grid grid-cols-12 gap-3 sm:gap-4">
         {/* Completion Chart */}
         <motion.div variants={inkBrush} className="col-span-12 md:col-span-6 lg:col-span-4">
-          <ZenCard>
-            <div className="p-3 sm:p-4">
-              <CompletionChart entries={analyticsEntries} timeFilter="week" />
-            </div>
+          <ZenCard className="h-full">
+            <CompletionChart entries={analyticsEntries} timeFilter="week" />
           </ZenCard>
         </motion.div>
 

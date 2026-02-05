@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, Check, BookOpen, TrendingUp, Dumbbell, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Check, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DailyChecklistPopover } from "./DailyChecklistPopover";
 import { QuickAddTaskPopover } from "./QuickAddTaskPopover";
@@ -16,40 +16,33 @@ import {
   subMonths,
   getDay,
 } from "date-fns";
+import {
+  STANDARD_TASKS,
+  formattedIdToLabel,
+  getTaskIcon,
+  TaskDefinition
+} from "@/lib/constants";
 
 interface InteractiveCalendarProps {
   selectedDate: Date;
   onSelectDate: (date: Date) => void;
   completedTasks: Record<string, string[]>;
+  allTasks?: Record<string, string[]>;
   onToggleTask: (dateKey: string, taskId: string) => void;
 }
 
-// Task definitions for the footer
-const dailyTasks = [
-  { id: "prayer", label: "Prayer", icon: BookOpen },
-  { id: "bible", label: "Bible", icon: BookOpen },
-  { id: "trading", label: "Charts", icon: TrendingUp },
-];
-
-const weekdayTasks = [
-  { id: "gym", label: "GYM", icon: Dumbbell },
-];
-
 const getExpectedTaskCount = (date: Date) => {
   const dayOfWeek = getDay(date);
-  // Mon-Fri have GYM as well
-  if ([1, 2, 3, 4, 5].includes(dayOfWeek)) {
-    return 4; // 3 daily + 1 gym
-  }
-  return 3; // 3 daily
-};
+  // Calculate total standard tasks applicable for this day
+  const applicableStandard = STANDARD_TASKS.filter(task => {
+    if (task.frequency === "daily") return true;
+    if (task.frequency === "weekly" && task.daysOfWeek) {
+      return task.daysOfWeek.includes(dayOfWeek);
+    }
+    return false;
+  });
 
-const getTasksForDay = (date: Date) => {
-  const dayOfWeek = getDay(date);
-  if ([1, 2, 3, 4, 5].includes(dayOfWeek)) {
-    return [...dailyTasks, ...weekdayTasks];
-  }
-  return dailyTasks;
+  return applicableStandard.length;
 };
 
 export function InteractiveCalendar({
@@ -60,10 +53,31 @@ export function InteractiveCalendar({
 }: InteractiveCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const today = new Date();
+  const dayOfWeek = getDay(today);
   const todayKey = format(today, "yyyy-MM-dd");
   const todayCompleted = completedTasks[todayKey] || [];
-  const todayTasks = getTasksForDay(today);
-  const remainingTasks = todayTasks.filter((t) => !todayCompleted.includes(t.id));
+
+  // Standard tasks for today
+  const standardTodayTasks = STANDARD_TASKS.filter(task => {
+    if (task.frequency === "daily") return true;
+    if (task.frequency === "weekly" && task.daysOfWeek) {
+      return task.daysOfWeek.includes(dayOfWeek);
+    }
+    return false;
+  });
+
+  // Custom tasks for today
+  const customTodayTasks: TaskDefinition[] = todayCompleted
+    .filter(id => !STANDARD_TASKS.some(t => t.id === id))
+    .map(id => ({
+      id,
+      label: formattedIdToLabel(id),
+      icon: getTaskIcon(id),
+      frequency: "daily"
+    }));
+
+  const allTodayTasks = [...standardTodayTasks, ...customTodayTasks];
+  const remainingTasks = allTodayTasks.filter((t) => !todayCompleted.includes(t.id));
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
@@ -76,7 +90,11 @@ export function InteractiveCalendar({
   const getCompletionStatus = (date: Date) => {
     const dateKey = format(date, "yyyy-MM-dd");
     const completed = completedTasks[dateKey] || [];
-    const expected = getExpectedTaskCount(date);
+
+    // Also include custom tasks in the expected count for past days if they were completed
+    const customCount = completed.filter(id => !STANDARD_TASKS.some(t => t.id === id)).length;
+    const expected = getExpectedTaskCount(date) + customCount;
+
     if (completed.length === 0) return "none";
     if (completed.length >= expected) return "complete";
     return "partial";
@@ -125,6 +143,7 @@ export function InteractiveCalendar({
               key={i}
               date={day}
               completedTasks={completedTasks}
+              allTasks={allTasks}
               onToggleTask={onToggleTask}
             >
               <button
@@ -171,7 +190,7 @@ export function InteractiveCalendar({
           <span className="text-xs text-muted-foreground">Today</span>
           <div className="flex items-center gap-2">
             <span className="text-xs font-medium">
-              {todayCompleted.length}/{todayTasks.length}
+              {todayCompleted.length}/{allTodayTasks.length}
             </span>
             <QuickAddTaskPopover date={today} onToggleTask={onToggleTask}>
               <button className="p-1 rounded hover:bg-muted transition-colors" title="Add task">
@@ -190,6 +209,7 @@ export function InteractiveCalendar({
                   key={task.id}
                   date={today}
                   completedTasks={completedTasks}
+                  allTasks={allTasks}
                   onToggleTask={onToggleTask}
                 >
                   <button className="flex items-center gap-1 text-[10px] px-2 py-1 rounded bg-muted/50 hover:bg-muted transition-colors">

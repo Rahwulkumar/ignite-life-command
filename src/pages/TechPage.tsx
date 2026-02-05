@@ -41,8 +41,9 @@ const TechPage = () => {
           component: (
             <TechOverview
               skillData={skillData}
-              certifications={mockCertifications}
-              research={mockResearch}
+              activeCertifications={mockCertifications}
+              recentResearch={mockResearch}
+              onNavigate={setActiveTab}
             />
           ),
         },

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { format } from "date-fns";
-import { Plus, BookOpen, TrendingUp, Dumbbell, Check } from "lucide-react";
+import { Plus, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Popover,
@@ -9,20 +9,14 @@ import {
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { STANDARD_TASKS } from "@/lib/constants";
+import { useAddPendingTask } from "@/hooks/useChecklistEntries";
 
 interface QuickAddTaskPopoverProps {
   date: Date;
   children: React.ReactNode;
   onToggleTask: (dateKey: string, taskId: string) => void;
 }
-
-// Pre-defined quick tasks
-const quickTasks = [
-  { id: "prayer", label: "Prayer", icon: BookOpen },
-  { id: "bible", label: "Bible Reading", icon: BookOpen },
-  { id: "trading", label: "Trading/Charts", icon: TrendingUp },
-  { id: "gym", label: "GYM", icon: Dumbbell },
-];
 
 export function QuickAddTaskPopover({
   date,
@@ -32,17 +26,23 @@ export function QuickAddTaskPopover({
   const [open, setOpen] = useState(false);
   const [customTask, setCustomTask] = useState("");
   const dateKey = format(date, "yyyy-MM-dd");
+  const addPendingTask = useAddPendingTask();
 
   const handleQuickAdd = (taskId: string) => {
-    onToggleTask(dateKey, taskId);
+    addPendingTask.mutate({
+      taskId,
+      entryDate: dateKey,
+    });
     setOpen(false);
   };
 
   const handleCustomAdd = () => {
     if (customTask.trim()) {
-      // For now, add as a custom task with sanitized ID
       const taskId = `custom_${customTask.toLowerCase().replace(/\s+/g, '_')}`;
-      onToggleTask(dateKey, taskId);
+      addPendingTask.mutate({
+        taskId,
+        entryDate: dateKey,
+      });
       setCustomTask("");
       setOpen(false);
     }
@@ -65,7 +65,7 @@ export function QuickAddTaskPopover({
 
         <div className="p-2 space-y-1">
           <AnimatePresence>
-            {quickTasks.map((task, index) => {
+            {STANDARD_TASKS.map((task, index) => {
               const Icon = task.icon;
               return (
                 <motion.button
