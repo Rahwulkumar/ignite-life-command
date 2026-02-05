@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { 
-  X, 
-  Timer, 
-  Play, 
-  Pause, 
-  Square, 
-  StickyNote, 
+import {
+  X,
+  Timer,
+  Play,
+  Pause,
+  Square,
+  StickyNote,
   Check,
-  Clock
+  Clock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -33,10 +33,18 @@ interface HabitDetailModalProps {
   habit: Habit | null;
   isOpen: boolean;
   onClose: () => void;
-  onSave: (habitId: string, updates: { notes?: string; timerSeconds?: number; completed?: boolean }) => void;
+  onSave: (
+    habitId: string,
+    updates: { notes?: string; timerSeconds?: number; completed?: boolean },
+  ) => void;
 }
 
-export function HabitDetailModal({ habit, isOpen, onClose, onSave }: HabitDetailModalProps) {
+export function HabitDetailModal({
+  habit,
+  isOpen,
+  onClose,
+  onSave,
+}: HabitDetailModalProps) {
   const [notes, setNotes] = useState("");
   const [timerActive, setTimerActive] = useState(false);
   const [timerSeconds, setTimerSeconds] = useState(0);
@@ -50,14 +58,14 @@ export function HabitDetailModal({ habit, isOpen, onClose, onSave }: HabitDetail
       setTimerActive(false);
       setShowTimer(habit.timerSeconds ? habit.timerSeconds > 0 : false);
     }
-  }, [habit?.id]);
+  }, [habit]);
 
   // Timer logic
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (timerActive) {
       interval = setInterval(() => {
-        setTimerSeconds(prev => prev + 1);
+        setTimerSeconds((prev) => prev + 1);
       }, 1000);
     }
     return () => clearInterval(interval);
@@ -68,9 +76,9 @@ export function HabitDetailModal({ habit, isOpen, onClose, onSave }: HabitDetail
     const mins = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
     if (hrs > 0) {
-      return `${hrs}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+      return `${hrs}:${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
     }
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
   const handleStartTimer = () => {
@@ -92,9 +100,9 @@ export function HabitDetailModal({ habit, isOpen, onClose, onSave }: HabitDetail
 
   const handleSave = () => {
     if (habit) {
-      onSave(habit.id, { 
-        notes, 
-        timerSeconds: showTimer ? timerSeconds : undefined 
+      onSave(habit.id, {
+        notes,
+        timerSeconds: showTimer ? timerSeconds : undefined,
       });
     }
     onClose();
@@ -102,10 +110,10 @@ export function HabitDetailModal({ habit, isOpen, onClose, onSave }: HabitDetail
 
   const handleMarkComplete = () => {
     if (habit) {
-      onSave(habit.id, { 
-        notes, 
+      onSave(habit.id, {
+        notes,
         timerSeconds: showTimer ? timerSeconds : undefined,
-        completed: !habit.completed 
+        completed: !habit.completed,
       });
     }
     onClose();
@@ -121,12 +129,14 @@ export function HabitDetailModal({ habit, isOpen, onClose, onSave }: HabitDetail
         {/* Header */}
         <DialogHeader className="p-4 pb-3 border-b border-border">
           <div className="flex items-center gap-3">
-            <div className={cn(
-              "w-10 h-10 rounded-full flex items-center justify-center",
-              habit.completed 
-                ? "bg-foreground text-background" 
-                : "bg-muted text-muted-foreground"
-            )}>
+            <div
+              className={cn(
+                "w-10 h-10 rounded-full flex items-center justify-center",
+                habit.completed
+                  ? "bg-foreground text-background"
+                  : "bg-muted text-muted-foreground",
+              )}
+            >
               {habit.completed ? (
                 <Check className="w-5 h-5" />
               ) : (
@@ -134,7 +144,9 @@ export function HabitDetailModal({ habit, isOpen, onClose, onSave }: HabitDetail
               )}
             </div>
             <div>
-              <DialogTitle className="text-base font-medium">{habit.label}</DialogTitle>
+              <DialogTitle className="text-base font-medium">
+                {habit.label}
+              </DialogTitle>
               <p className="text-xs text-muted-foreground mt-0.5">
                 {habit.completed ? "Completed" : "In progress"}
               </p>
@@ -155,7 +167,9 @@ export function HabitDetailModal({ habit, isOpen, onClose, onSave }: HabitDetail
               </div>
               <div className="text-left">
                 <p className="text-sm font-medium">Start Timer</p>
-                <p className="text-xs text-muted-foreground">Track time spent on this habit</p>
+                <p className="text-xs text-muted-foreground">
+                  Track time spent on this habit
+                </p>
               </div>
             </button>
           ) : (
@@ -173,9 +187,9 @@ export function HabitDetailModal({ habit, isOpen, onClose, onSave }: HabitDetail
                   />
                 )}
               </div>
-              
+
               <div className="text-center mb-4">
-                <motion.span 
+                <motion.span
                   key={timerSeconds}
                   initial={{ scale: 1.02 }}
                   animate={{ scale: 1 }}
@@ -187,9 +201,9 @@ export function HabitDetailModal({ habit, isOpen, onClose, onSave }: HabitDetail
 
               <div className="flex items-center justify-center gap-2">
                 {timerActive ? (
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={handlePauseTimer}
                     className="gap-2"
                   >
@@ -197,9 +211,9 @@ export function HabitDetailModal({ habit, isOpen, onClose, onSave }: HabitDetail
                     Pause
                   </Button>
                 ) : (
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={handleResumeTimer}
                     className="gap-2"
                   >
@@ -208,9 +222,9 @@ export function HabitDetailModal({ habit, isOpen, onClose, onSave }: HabitDetail
                   </Button>
                 )}
                 {timerSeconds > 0 && !timerActive && (
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={handleStopTimer}
                     className="gap-2 text-muted-foreground"
                   >
@@ -244,7 +258,8 @@ export function HabitDetailModal({ habit, isOpen, onClose, onSave }: HabitDetail
             onClick={handleMarkComplete}
             className={cn(
               "flex-1 gap-2",
-              habit.completed && "bg-foreground text-background hover:bg-foreground/90 hover:text-background"
+              habit.completed &&
+                "bg-foreground text-background hover:bg-foreground/90 hover:text-background",
             )}
           >
             <Check className="w-4 h-4" />
