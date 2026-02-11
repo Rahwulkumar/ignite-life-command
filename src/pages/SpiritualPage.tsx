@@ -13,21 +13,29 @@ import { useSpiritualGuide } from "@/hooks/useSpiritualGuide";
 import { toast } from "@/hooks/use-toast";
 import { spiritualMockData } from "@/lib/mockData";
 
-// Use centralized mock data
-const { verses: mockVerses, goals: mockGoals, bibleReading } = spiritualMockData;
-
-const stats = [
-  { icon: BookOpen, label: "Chapters", value: "245", suffix: "read", color: "text-spiritual" },
-  { icon: BookMarked, label: "Verses", value: "18", suffix: "memorized", color: "text-spiritual" },
-  { icon: Flame, label: "Streak", value: "7", suffix: "days", color: "text-trading" },
-  { icon: Heart, label: "Goals", value: "3", suffix: "active", color: "text-music" },
-];
+import { useState, useEffect } from "react";
+import { BookOpen, Flame, Heart, BookMarked } from "lucide-react";
+import { DomainPageTemplate } from "@/components/shared/DomainPageTemplate";
+import { BibleReadingCard } from "@/components/spiritual/BibleReadingCard";
+import { ScriptureMemoryCard } from "@/components/spiritual/ScriptureMemoryCard";
+import { SpiritualGoalsCard } from "@/components/spiritual/SpiritualGoalsCard";
+import { DevotionReminderCard } from "@/components/spiritual/DevotionReminderCard";
+import { CharacterStudyCard } from "@/components/spiritual/CharacterStudyCard";
+import { SpiritualJournalCard } from "@/components/spiritual/SpiritualJournalCard";
+import { JournalEntryModal } from "@/components/spiritual/JournalEntryModal";
+import { SageChat } from "@/components/spiritual/SageChat";
+import { AddGoalDialog } from "@/components/spiritual/AddGoalDialog";
+import { toast } from "@/hooks/use-toast";
+import { useBibleReadingPlan, useUpdateBibleProgress, useCreateBiblePlan } from "@/hooks/useBibleReading";
+import { useScriptureVerses, useUpdateVerseProgress } from "@/hooks/useScriptureMemory";
+import { useSpiritualGoals, useAddSpiritualGoal, useUpdateGoalProgress } from "@/hooks/useSpiritualGoals";
+import { useSpiritualJournal, useAddJournalEntry } from "@/hooks/useSpiritualJournal";
 
 const SpiritualPage = () => {
-  const { messages, isLoading, sendMessage } = useSpiritualGuide();
   const [showDevotionReminder, setShowDevotionReminder] = useState(true);
   const [activeTab, setActiveTab] = useState("reading");
   const [isJournalModalOpen, setIsJournalModalOpen] = useState(false);
+  const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
   const [currentCharacter, setCurrentCharacter] = useState<{
     name: string;
     daysCompleted: number;
@@ -39,6 +47,54 @@ const SpiritualPage = () => {
   // Determine time of day for devotion reminder
   const hour = new Date().getHours();
   const timeOfDay: "morning" | "evening" = hour < 12 ? "morning" : "evening";
+
+  // -- HOOKS --
+  const { data: biblePlan } = useBibleReadingPlan();
+  const updateBibleProgress = useUpdateBibleProgress();
+  const createBiblePlan = useCreateBiblePlan(); // In case no plan exists
+
+  const { data: verses = [] } = useScriptureVerses();
+  const updateVerseProgress = useUpdateVerseProgress();
+
+  const { data: goals = [] } = useSpiritualGoals();
+  const addGoal = useAddSpiritualGoal();
+  // const updateGoalProgress = useUpdateGoalProgress(); // Hook exists but not currently used in UI
+
+  const { data: journalEntries = [] } = useSpiritualJournal();
+  const addJournalEntry = useAddJournalEntry();
+
+  // -- DATA MAPPING --
+  const mappedGoals = goals.map(g => ({
+    id: g.id,
+    title: g.title,
+    progress: g.progress,
+    isCompleted: g.is_completed,
+    category: g.category || "growth",
+  }));
+
+  const mappedVerses = verses.map(v => ({
+    id: v.id,
+    reference: v.reference,
+    verseText: v.verse_text,
+    masteryLevel: v.mastery_level,
+  }));
+
+  const mappedEntries = journalEntries.map(e => ({
+    id: e.id,
+    date: e.created_at || new Date().toISOString(),
+    // @ts-ignore - content is Json type but we know structure
+    excerpt: e.title || (e.content?.body ? String(e.content.body).substring(0, 50) + "..." : "No content"),
+    characterName: undefined // Not stored in current separate field, could be added to metadata
+  }));
+
+  const stats = [
+    { icon: BookOpen, label: "Chapters", value: biblePlan?.completed_chapters.toString() || "0", suffix: "read", color: "text-spiritual" },
+    { icon: BookMarked, label: "Verses", value: verses.length.toString(), suffix: "memorized", color: "text-spiritual" },
+    { icon: Flame, label: "Streak", value: "0", suffix: "days", color: "text-trading" }, // Streak logic to be implemented
+    { icon: Heart, label: "Goals", value: goals.filter(g => !g.is_completed).length.toString(), suffix: "active", color: "text-music" },
+  ];
+
+  // -- HANDLERS --
 
   const handleSelectCharacter = (character: { id: string; name: string; description: string }) => {
     setCurrentCharacter({
@@ -60,50 +116,106 @@ const SpiritualPage = () => {
   };
 
   const handleMarkComplete = () => {
+    if (!biblePlan) {
+      // Create default plan if none exists
+      createBiblePlan.mutate({ name: "One Year Bible", totalChapters: 1189 }); // 1189 chapters in Bible
+      toast({ title: "Reading Plan Created", description: "Started a new Bible reading plan." });
+      return;
+    }
+
+    // Increment chapter
+    const newCount = (biblePlan.completed_chapters || 0) + 1;
+    updateBibleProgress.mutate({
+      id: biblePlan.id,
+      completedChapters: newCount,
+    });
+
     toast({
       title: "Chapter Completed",
       description: "Great job! Your reading progress has been updated.",
     });
-    // TODO: Implement actual chapter completion logic with Supabase
   };
 
   const handleViewEntry = (id: string) => {
+    // In future: Open modal with entry details
+    // For now find entry and show toast
+    const entry = journalEntries.find(e => e.id === id);
+    if (!entry) return;
+
+    // Retrieve body from JSON content if structure matches
+    // @ts-ignore
+    const body = entry.content?.body || "No content";
+
     toast({
-      title: "Opening Journal Entry",
-      description: `Loading entry ${id}...`,
+      title: entry.title,
+      description: body.substring(0, 100) + (body.length > 100 ? "..." : ""),
     });
-    // TODO: Implement journal entry viewing
   };
 
   const handleReviewComplete = (id: string, correct: boolean) => {
+    // Determine mastery level change
+    const verse = verses.find(v => v.id === id);
+    if (!verse) return;
+
+    let newLevel = verse.mastery_level;
+    if (correct && newLevel < 5) newLevel++;
+    if (!correct && newLevel > 0) newLevel--; // Only decrease if not correct? Or reset? Logic choice.
+
+    updateVerseProgress.mutate({ id, masteryLevel: newLevel, correct });
+
     toast({
       title: correct ? "Correct!" : "Keep Practicing",
       description: correct
         ? "Your mastery level has increased."
         : "Review this verse again tomorrow.",
     });
-    // TODO: Implement spaced repetition logic
   };
 
   const handleAddGoal = () => {
-    toast({
-      title: "Add New Goal",
-      description: "Goal creation feature coming soon.",
-    });
-    // TODO: Implement goal creation
+    setIsGoalModalOpen(true);
   };
 
-  const handleSaveJournalEntry = (entry: {
-    title: string;
-    content: string;
-    characterName?: string;
+  const handleSaveGoal = (goal: { title: string; category: string; targetDate?: Date }) => {
+    addGoal.mutate(goal);
+    toast({
+      title: "Goal Added",
+      description: "Your new spiritual goal has been set.",
+    });
+  };
+
+  const handleSaveJournalEntry = (data: {
+    characterInsights: string;
+    attributesOfGod: string[];
+    scriptureMeditation: string;
+    personalReflection: string;
+    prayerPoints: string[];
   }) => {
+    // Format the structured data into a single content string for the note
+    const content = `
+## Character Insights
+${data.characterInsights}
+
+## Attributes of God
+${data.attributesOfGod.join(", ")}
+
+## Scripture Meditation
+${data.scriptureMeditation}
+
+## Personal Reflection
+${data.personalReflection}
+
+## Prayer Points
+${data.prayerPoints.map(p => `- ${p}`).join("\n")}
+    `.trim();
+
+    const title = `Journal: ${data.attributesOfGod[0] || "Reflection"} - ${new Date().toLocaleDateString()}`;
+
+    addJournalEntry.mutate({ title, content });
     toast({
       title: "Journal Entry Saved",
       description: "Your reflection has been saved successfully.",
     });
     setIsJournalModalOpen(false);
-    // TODO: Implement journal entry saving to Supabase
   };
 
   return (
@@ -121,10 +233,10 @@ const SpiritualPage = () => {
           label: "Reading",
           component: (
             <BibleReadingCard
-              currentBook={bibleReading.currentBook}
-              currentChapter={bibleReading.currentChapter}
-              completedChapters={bibleReading.completedChapters}
-              totalChapters={bibleReading.totalChapters}
+              currentBook={biblePlan?.current_book || "Genesis"}
+              currentChapter={biblePlan?.current_chapter || 1}
+              completedChapters={biblePlan?.completed_chapters || 0}
+              totalChapters={biblePlan?.total_chapters || 1189}
               onMarkComplete={handleMarkComplete}
             />
           ),
@@ -134,9 +246,17 @@ const SpiritualPage = () => {
           label: "Character Study",
           component: (
             <CharacterStudyCard
+              characters={[
+                { id: "david", name: "David", description: "A man after God's own heart" },
+                { id: "moses", name: "Moses", description: "Leader of the Exodus" },
+                { id: "joseph", name: "Joseph", description: "From pit to palace" },
+                { id: "paul", name: "Paul", description: "Apostle to the Gentiles" },
+                { id: "esther", name: "Esther", description: "For such a time as this" },
+                { id: "abraham", name: "Abraham", description: "Father of faith" },
+              ]}
               currentCharacter={currentCharacter}
               onSelectCharacter={handleSelectCharacter}
-              onStartDiscussion={() => { }} // Opens AI chat sidebar
+              onStartDiscussion={() => { /* Open AI side? */ }}
               onReadScripture={() => setActiveTab("reading")}
             />
           ),
@@ -146,7 +266,7 @@ const SpiritualPage = () => {
           label: "Journal",
           component: (
             <SpiritualJournalCard
-              recentEntries={[]}
+              recentEntries={mappedEntries}
               onNewEntry={() => setIsJournalModalOpen(true)}
               onViewEntry={handleViewEntry}
             />
@@ -157,7 +277,7 @@ const SpiritualPage = () => {
           label: "Memory",
           component: (
             <ScriptureMemoryCard
-              verses={mockVerses}
+              verses={mappedVerses}
               onReviewComplete={handleReviewComplete}
             />
           ),
@@ -167,7 +287,7 @@ const SpiritualPage = () => {
           label: "Goals",
           component: (
             <SpiritualGoalsCard
-              goals={mockGoals}
+              goals={mappedGoals}
               onAddGoal={handleAddGoal}
             />
           ),
@@ -177,11 +297,7 @@ const SpiritualPage = () => {
         name: "Sage",
         role: "Spiritual Guide",
         component: (
-          <SageChat
-            messages={messages}
-            onSendMessage={sendMessage}
-            isLoading={isLoading}
-          />
+          <SageChat />
         ),
       }}
       activeTab={activeTab}
@@ -204,6 +320,13 @@ const SpiritualPage = () => {
         onClose={() => setIsJournalModalOpen(false)}
         characterName={currentCharacter?.name}
         onSave={handleSaveJournalEntry}
+      />
+
+      {/* Add Goal Dialog */}
+      <AddGoalDialog
+        open={isGoalModalOpen}
+        onOpenChange={setIsGoalModalOpen}
+        onSave={handleSaveGoal}
       />
     </DomainPageTemplate>
   );

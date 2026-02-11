@@ -156,6 +156,7 @@ export function InvestmentDetailSheet({ holding, isOpen, onClose }: InvestmentDe
       }
     } catch (error) {
       console.error("Chat error:", error);
+      toast.error("Failed to get AI response. Please try again.");
     } finally {
       setIsLoading(false);
     }

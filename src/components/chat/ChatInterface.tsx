@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Send, Sparkles, Mic } from "lucide-react";
 
-interface Message {
+export interface ChatMessage {
   id: string;
   role: "user" | "assistant";
   content: string;
@@ -12,39 +12,30 @@ interface Message {
   timestamp: Date;
 }
 
-const sampleMessages: Message[] = [
-  {
-    id: "1",
-    role: "assistant",
-    content: "You've logged 2 hours of DSA study today. That's good, but I noticed you skipped the recursion exercises. Are you deliberately pacing yourself, or are you avoiding recursion because it's uncomfortable?",
-    agent: "Nova",
-    agentColor: "bg-tech",
-    timestamp: new Date(Date.now() - 1000 * 60 * 30),
-  },
-  {
-    id: "2",
-    role: "user",
-    content: "I learned about binary search today. The concept of dividing the search space in half each time finally clicked.",
-    timestamp: new Date(Date.now() - 1000 * 60 * 25),
-  },
-  {
-    id: "3",
-    role: "assistant",
-    content: "Good that it clicked. But let me push you: Can you explain why binary search requires the array to be sorted? What would happen if you tried to apply binary search to an unsorted array? Walk me through the exact mechanism.",
-    agent: "Nova",
-    agentColor: "bg-tech",
-    timestamp: new Date(Date.now() - 1000 * 60 * 20),
-  },
-];
+interface AgentConfig {
+  name: string;
+  role: string;
+  color: string;
+}
 
-export function ChatInterface() {
-  const [messages, setMessages] = useState<Message[]>(sampleMessages);
+interface ChatInterfaceProps {
+  initialMessages?: ChatMessage[];
+  agent: AgentConfig;
+  onSendMessage?: (message: string) => void;
+}
+
+export function ChatInterface({
+  initialMessages = [],
+  agent,
+  onSendMessage
+}: ChatInterfaceProps) {
+  const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [input, setInput] = useState("");
 
   const handleSend = () => {
     if (!input.trim()) return;
 
-    const newMessage: Message = {
+    const newMessage: ChatMessage = {
       id: Date.now().toString(),
       role: "user",
       content: input,
@@ -52,6 +43,7 @@ export function ChatInterface() {
     };
 
     setMessages((prev) => [...prev, newMessage]);
+    onSendMessage?.(input);
     setInput("");
   };
 
@@ -59,57 +51,66 @@ export function ChatInterface() {
     <div className="glass rounded-xl flex flex-col h-[500px]">
       {/* Header */}
       <div className="flex items-center gap-3 p-4 border-b border-border">
-        <div className="w-10 h-10 rounded-full bg-tech flex items-center justify-center text-sm font-bold text-background">
-          N
+        <div className={cn(
+          "w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-background",
+          agent.color
+        )}>
+          {agent.name[0]}
         </div>
         <div>
-          <h3 className="font-display font-semibold">Nova</h3>
-          <p className="text-xs text-muted-foreground">Tech & Learning Coach</p>
+          <h3 className="font-display font-semibold">{agent.name}</h3>
+          <p className="text-xs text-muted-foreground">{agent.role}</p>
         </div>
-        <div className="ml-auto flex items-center gap-1 text-tech">
-          <span className="w-2 h-2 rounded-full bg-tech animate-pulse" />
+        <div className="ml-auto flex items-center gap-1" style={{ color: `var(--${agent.color.replace('bg-', '')})` }}>
+          <span className={cn("w-2 h-2 rounded-full animate-pulse", agent.color)} />
           <span className="text-xs">Active</span>
         </div>
       </div>
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={cn(
-              "flex gap-3",
-              message.role === "user" && "flex-row-reverse"
-            )}
-          >
-            {message.role === "assistant" && (
-              <div
-                className={cn(
-                  "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-background flex-shrink-0",
-                  message.agentColor
-                )}
-              >
-                {message.agent?.[0]}
-              </div>
-            )}
+        {messages.length > 0 ? (
+          messages.map((message) => (
             <div
+              key={message.id}
               className={cn(
-                "max-w-[75%] rounded-xl p-3",
-                message.role === "user"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted"
+                "flex gap-3",
+                message.role === "user" && "flex-row-reverse"
               )}
             >
-              <p className="text-sm leading-relaxed">{message.content}</p>
-              <span className="text-[10px] opacity-60 mt-1 block">
-                {message.timestamp.toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </span>
+              {message.role === "assistant" && (
+                <div
+                  className={cn(
+                    "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-background flex-shrink-0",
+                    message.agentColor || agent.color
+                  )}
+                >
+                  {message.agent?.[0] || agent.name[0]}
+                </div>
+              )}
+              <div
+                className={cn(
+                  "max-w-[75%] rounded-xl p-3",
+                  message.role === "user"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted"
+                )}
+              >
+                <p className="text-sm leading-relaxed">{message.content}</p>
+                <span className="text-[10px] opacity-60 mt-1 block">
+                  {message.timestamp.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </span>
+              </div>
             </div>
+          ))
+        ) : (
+          <div className="flex-1 flex items-center justify-center h-full">
+            <p className="text-sm text-muted-foreground">Start a conversation with {agent.name}</p>
           </div>
-        ))}
+        )}
       </div>
 
       {/* Input */}
@@ -142,7 +143,7 @@ export function ChatInterface() {
         <div className="flex items-center gap-2 mt-2">
           <Sparkles className="w-3 h-3 text-muted-foreground" />
           <span className="text-xs text-muted-foreground">
-            Nova is analyzing your learning patterns for personalized insights
+            {agent.name} is analyzing your learning patterns for personalized insights
           </span>
         </div>
       </div>

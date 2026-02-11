@@ -1,8 +1,9 @@
 import { useMemo } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { format, subDays, eachDayOfInterval, startOfWeek, endOfWeek, getDay } from "date-fns";
+import { dashboardMockData } from "@/lib/mockData";
 
-interface ChecklistEntry {
+export interface ChecklistEntry {
   id: string;
   task_id: string;
   entry_date: string;
@@ -12,10 +13,15 @@ interface ChecklistEntry {
 interface CompletionChartProps {
   entries: ChecklistEntry[];
   timeFilter: "week" | "month" | "all";
+  compact?: boolean;
+  useDummyData?: boolean;
 }
 
-export function CompletionChart({ entries, timeFilter }: CompletionChartProps) {
+export function CompletionChart({ entries, timeFilter, compact = false, useDummyData = false }: CompletionChartProps) {
   const chartData = useMemo(() => {
+    // Use dummy data if flag is enabled
+    const dataSource = useDummyData ? dashboardMockData.completionChart : entries;
+
     const today = new Date();
     let days: Date[];
 
@@ -36,7 +42,7 @@ export function CompletionChart({ entries, timeFilter }: CompletionChartProps) {
     }
 
     // Group entries by date
-    const byDate = entries.reduce((acc, entry) => {
+    const byDate = dataSource.reduce((acc, entry) => {
       if (!acc[entry.entry_date]) {
         acc[entry.entry_date] = new Set<string>();
       }
@@ -54,17 +60,17 @@ export function CompletionChart({ entries, timeFilter }: CompletionChartProps) {
 
       return {
         date: day,
-        label: timeFilter === "week" 
-          ? format(day, "EEE") 
+        label: timeFilter === "week"
+          ? format(day, "EEE")
           : timeFilter === "month"
-          ? format(day, "d")
-          : format(day, "M/d"),
+            ? format(day, "d")
+            : format(day, "M/d"),
         completed,
         expected,
         percentage: Math.min(percentage, 100),
       };
     });
-  }, [entries, timeFilter]);
+  }, [entries, timeFilter, useDummyData]);
 
   const getBarColor = (percentage: number) => {
     if (percentage === 100) return "hsl(var(--chart-2))";
@@ -74,26 +80,28 @@ export function CompletionChart({ entries, timeFilter }: CompletionChartProps) {
   };
 
   return (
-    <div className="p-3 sm:p-4 h-full flex flex-col">
+    <div className={`p-3 sm:p-4 h-full flex flex-col ${compact ? "p-0 sm:p-0" : ""}`}>
       {/* Header */}
-      <div className="flex items-center gap-2 mb-3">
-        <div className="w-4 h-4 rounded bg-chart-2/20 flex items-center justify-center">
-          <div className="w-2 h-2 rounded-sm bg-chart-2" />
+      {!compact && (
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-4 h-4 rounded bg-chart-2/20 flex items-center justify-center">
+            <div className="w-2 h-2 rounded-sm bg-chart-2" />
+          </div>
+          <h3 className="text-sm font-medium">Completion Rate</h3>
         </div>
-        <h3 className="text-sm font-medium">Completion Rate</h3>
-      </div>
+      )}
 
       {/* Chart */}
-      <div className="flex-1 min-h-[120px]">
+      <div className="flex-1 min-h-[80px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} margin={{ top: 5, right: 5, bottom: 5, left: -20 }}>
-            <XAxis 
-              dataKey="label" 
+            <XAxis
+              dataKey="label"
               tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
               tickLine={false}
               axisLine={false}
             />
-            <YAxis 
+            <YAxis
               domain={[0, 100]}
               tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
               tickLine={false}

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, X, ChevronRight, Layers, Brain, Server, Smartphone, Database, Cloud, Shield, Palette } from "lucide-react";
+import { Plus, ChevronRight, Layers, Brain, Server, Smartphone, Database, Cloud, Shield, Palette } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Dialog,
@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-interface TechCategory {
+export interface TechCategory {
   id: string;
   name: string;
   icon: string;
@@ -48,19 +48,13 @@ const iconOptions = [
   { name: "Design", value: "palette" },
 ];
 
-const defaultCategories: TechCategory[] = [
-  { id: "1", name: "Frontend", icon: "layers", color: "hsl(217, 91%, 60%)", topicsCount: 12, completedCount: 8 },
-  { id: "2", name: "AI/ML", icon: "brain", color: "hsl(262, 83%, 58%)", topicsCount: 15, completedCount: 5 },
-  { id: "3", name: "Backend", icon: "server", color: "hsl(142, 71%, 45%)", topicsCount: 10, completedCount: 7 },
-  { id: "4", name: "System Design", icon: "cloud", color: "hsl(24, 95%, 53%)", topicsCount: 8, completedCount: 3 },
-];
-
 interface TechCategoriesProps {
+  initialCategories: TechCategory[];
   onSelectCategory: (category: TechCategory) => void;
 }
 
-export function TechCategories({ onSelectCategory }: TechCategoriesProps) {
-  const [categories, setCategories] = useState<TechCategory[]>(defaultCategories);
+export function TechCategories({ initialCategories, onSelectCategory }: TechCategoriesProps) {
+  const [categories, setCategories] = useState<TechCategory[]>(initialCategories);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newCategory, setNewCategory] = useState({
     name: "",
@@ -101,8 +95,8 @@ export function TechCategories({ onSelectCategory }: TechCategoriesProps) {
       <div className="grid grid-cols-2 gap-3">
         {categories.map((category) => {
           const Icon = iconMap[category.icon] || Layers;
-          const progress = category.topicsCount > 0 
-            ? (category.completedCount / category.topicsCount) * 100 
+          const progress = category.topicsCount > 0
+            ? (category.completedCount / category.topicsCount) * 100
             : 0;
 
           return (

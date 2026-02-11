@@ -67,8 +67,8 @@ export function extractTiptapPreviewText(
         }
 
         return text;
-    } catch (error) {
-        console.warn('Failed to extract preview text from Tiptap content:', error);
+    } catch {
+        // Silently return null for invalid content
         return null;
     }
 }
@@ -102,8 +102,8 @@ export function extractTiptapFullText(content: unknown): string {
         };
 
         return doc.content.map(extractTextFromNode).join('\n\n').trim();
-    } catch (error) {
-        console.warn('Failed to extract full text from Tiptap content:', error);
+    } catch {
+        // Silently return empty string for invalid content
         return '';
     }
 }

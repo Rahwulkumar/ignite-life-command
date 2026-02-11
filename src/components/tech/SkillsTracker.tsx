@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
+import {
   Plus, Search, ArrowLeft, Sparkles, Edit2, Trash2, X,
-  Code, Server, Cloud, Shield, Brain, Smartphone, 
+  Code, Server, Cloud, Shield, Brain, Smartphone,
   Globe, Database, Terminal, Cpu
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-interface Skill {
+export interface Skill {
   id: string;
   name: string;
   proficiency: "beginner" | "intermediate" | "advanced" | "expert";
@@ -32,7 +32,7 @@ interface Skill {
   lastUpdated: string;
 }
 
-interface SkillDomain {
+export interface SkillDomain {
   id: string;
   name: string;
   icon: React.ReactNode;
@@ -53,27 +53,6 @@ const iconMap: Record<string, React.ReactNode> = {
   Cpu: <Cpu className="w-5 h-5" />,
 };
 
-const defaultDomains: SkillDomain[] = [
-  { id: "frontend", name: "Frontend", icon: <Code className="w-5 h-5" />, color: "tech", skills: [
-    { id: "1", name: "React", proficiency: "advanced", lastUpdated: "2025-01-10" },
-    { id: "2", name: "TypeScript", proficiency: "advanced", lastUpdated: "2025-01-08" },
-    { id: "3", name: "Next.js", proficiency: "intermediate", lastUpdated: "2025-01-05" },
-  ]},
-  { id: "backend", name: "Backend", icon: <Server className="w-5 h-5" />, color: "finance", skills: [
-    { id: "4", name: "Node.js", proficiency: "intermediate", lastUpdated: "2025-01-07" },
-    { id: "5", name: "Python", proficiency: "intermediate", lastUpdated: "2025-01-03" },
-  ]},
-  { id: "cloud", name: "Cloud & DevOps", icon: <Cloud className="w-5 h-5" />, color: "trading", skills: [
-    { id: "6", name: "AWS", proficiency: "beginner", lastUpdated: "2025-01-01" },
-    { id: "7", name: "Docker", proficiency: "intermediate", lastUpdated: "2024-12-28" },
-  ]},
-  { id: "ai", name: "AI & Machine Learning", icon: <Brain className="w-5 h-5" />, color: "spiritual", skills: [
-    { id: "8", name: "LangChain", proficiency: "beginner", lastUpdated: "2025-01-09" },
-  ]},
-  { id: "mobile", name: "Mobile Development", icon: <Smartphone className="w-5 h-5" />, color: "music", skills: []},
-  { id: "security", name: "Security", icon: <Shield className="w-5 h-5" />, color: "content", skills: []},
-];
-
 const proficiencyLevels = [
   { value: "beginner", label: "Beginner", color: "bg-muted text-muted-foreground" },
   { value: "intermediate", label: "Intermediate", color: "bg-tech/20 text-tech" },
@@ -81,14 +60,18 @@ const proficiencyLevels = [
   { value: "expert", label: "Expert", color: "bg-trading/20 text-trading" },
 ];
 
-export function SkillsTracker() {
-  const [domains, setDomains] = useState<SkillDomain[]>(defaultDomains);
+interface SkillsTrackerProps {
+  initialDomains: SkillDomain[];
+}
+
+export function SkillsTracker({ initialDomains }: SkillsTrackerProps) {
+  const [domains, setDomains] = useState<SkillDomain[]>(initialDomains);
   const [selectedDomain, setSelectedDomain] = useState<SkillDomain | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddSkillOpen, setIsAddSkillOpen] = useState(false);
   const [isAddDomainOpen, setIsAddDomainOpen] = useState(false);
   const [editingSkill, setEditingSkill] = useState<Skill | null>(null);
-  
+
   const [newSkill, setNewSkill] = useState({
     name: "",
     proficiency: "beginner" as Skill["proficiency"],
@@ -100,14 +83,14 @@ export function SkillsTracker() {
     icon: "Code",
   });
 
-  const filteredDomains = domains.filter(d => 
+  const filteredDomains = domains.filter(d =>
     d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     d.skills.some(s => s.name.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   const handleAddSkill = () => {
     if (!selectedDomain || !newSkill.name.trim()) return;
-    
+
     const skill: Skill = {
       id: Date.now().toString(),
       name: newSkill.name.trim(),
@@ -116,8 +99,8 @@ export function SkillsTracker() {
       lastUpdated: new Date().toISOString().split('T')[0],
     };
 
-    setDomains(domains.map(d => 
-      d.id === selectedDomain.id 
+    setDomains(domains.map(d =>
+      d.id === selectedDomain.id
         ? { ...d, skills: [...d.skills, skill] }
         : d
     ));
@@ -128,18 +111,18 @@ export function SkillsTracker() {
 
   const handleUpdateSkill = () => {
     if (!selectedDomain || !editingSkill) return;
-    
+
     const updatedSkill = {
       ...editingSkill,
       lastUpdated: new Date().toISOString().split('T')[0],
     };
 
-    setDomains(domains.map(d => 
-      d.id === selectedDomain.id 
+    setDomains(domains.map(d =>
+      d.id === selectedDomain.id
         ? { ...d, skills: d.skills.map(s => s.id === editingSkill.id ? updatedSkill : s) }
         : d
     ));
-    setSelectedDomain(prev => prev 
+    setSelectedDomain(prev => prev
       ? { ...prev, skills: prev.skills.map(s => s.id === editingSkill.id ? updatedSkill : s) }
       : null
     );
@@ -148,13 +131,13 @@ export function SkillsTracker() {
 
   const handleDeleteSkill = (skillId: string) => {
     if (!selectedDomain) return;
-    
-    setDomains(domains.map(d => 
-      d.id === selectedDomain.id 
+
+    setDomains(domains.map(d =>
+      d.id === selectedDomain.id
         ? { ...d, skills: d.skills.filter(s => s.id !== skillId) }
         : d
     ));
-    setSelectedDomain(prev => prev 
+    setSelectedDomain(prev => prev
       ? { ...prev, skills: prev.skills.filter(s => s.id !== skillId) }
       : null
     );
@@ -162,7 +145,7 @@ export function SkillsTracker() {
 
   const handleAddDomain = () => {
     if (!newDomain.name.trim()) return;
-    
+
     const domain: SkillDomain = {
       id: Date.now().toString(),
       name: newDomain.name.trim(),
@@ -187,8 +170,8 @@ export function SkillsTracker() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="icon"
               onClick={() => setSelectedDomain(null)}
             >
@@ -219,15 +202,15 @@ export function SkillsTracker() {
         <div className="space-y-3">
           <AnimatePresence mode="popLayout">
             {selectedDomain.skills.length === 0 ? (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="text-center py-12 border border-dashed border-border rounded-xl"
               >
                 <Sparkles className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
                 <p className="text-muted-foreground">No skills added yet</p>
-                <Button 
-                  variant="link" 
+                <Button
+                  variant="link"
                   onClick={() => setIsAddSkillOpen(true)}
                   className="text-tech"
                 >
@@ -237,7 +220,7 @@ export function SkillsTracker() {
             ) : (
               selectedDomain.skills.map((skill, index) => {
                 const profLevel = proficiencyLevels.find(p => p.value === skill.proficiency);
-                
+
                 return (
                   <motion.div
                     key={skill.id}
@@ -272,17 +255,17 @@ export function SkillsTracker() {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button 
-                        variant="ghost" 
+                      <Button
+                        variant="ghost"
                         size="icon"
                         onClick={() => setEditingSkill(skill)}
                       >
                         <Edit2 className="w-4 h-4" />
                       </Button>
-                      <Button 
-                        variant="ghost" 
+                      <Button
+                        variant="ghost"
                         size="icon"
                         onClick={() => handleDeleteSkill(skill.id)}
                         className="text-destructive hover:text-destructive"
@@ -314,7 +297,7 @@ export function SkillsTracker() {
               </div>
               <div>
                 <label className="text-sm font-medium mb-2 block">Proficiency Level</label>
-                <Select 
+                <Select
                   value={newSkill.proficiency}
                   onValueChange={(v) => setNewSkill({ ...newSkill, proficiency: v as Skill["proficiency"] })}
                 >
@@ -364,7 +347,7 @@ export function SkillsTracker() {
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-2 block">Proficiency Level</label>
-                  <Select 
+                  <Select
                     value={editingSkill.proficiency}
                     onValueChange={(v) => setEditingSkill({ ...editingSkill, proficiency: v as Skill["proficiency"] })}
                   >
@@ -432,9 +415,9 @@ export function SkillsTracker() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.05 }}
           >
-            <SkillDomainCard 
-              domain={domain} 
-              onSelect={() => setSelectedDomain(domain)} 
+            <SkillDomainCard
+              domain={domain}
+              onSelect={() => setSelectedDomain(domain)}
             />
           </motion.div>
         ))}
@@ -457,7 +440,7 @@ export function SkillsTracker() {
             </div>
             <div>
               <label className="text-sm font-medium mb-2 block">Icon</label>
-              <Select 
+              <Select
                 value={newDomain.icon}
                 onValueChange={(v) => setNewDomain({ ...newDomain, icon: v })}
               >

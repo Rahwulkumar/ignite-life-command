@@ -1,7 +1,7 @@
 import { TrendingUp, TrendingDown, PiggyBank } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-interface Investment {
+export interface Investment {
   id: number;
   name: string;
   type: string;
@@ -10,18 +10,15 @@ interface Investment {
   change: number;
 }
 
-const mockInvestments: Investment[] = [
-  { id: 1, name: "Emergency Fund", type: "Savings", invested: 500000, current: 520000, change: 4.0 },
-  { id: 2, name: "Stock Portfolio", type: "Equity", invested: 300000, current: 342000, change: 14.0 },
-  { id: 3, name: "Mutual Fund", type: "Fund", invested: 200000, current: 218000, change: 9.0 },
-  { id: 4, name: "Treasury Bills", type: "Fixed Income", invested: 150000, current: 157500, change: 5.0 },
-];
+interface InvestmentTrackerProps {
+  investments: Investment[];
+}
 
-export function InvestmentTracker() {
-  const totalInvested = mockInvestments.reduce((sum, inv) => sum + inv.invested, 0);
-  const totalCurrent = mockInvestments.reduce((sum, inv) => sum + inv.current, 0);
+export function InvestmentTracker({ investments }: InvestmentTrackerProps) {
+  const totalInvested = investments.reduce((sum, inv) => sum + inv.invested, 0);
+  const totalCurrent = investments.reduce((sum, inv) => sum + inv.current, 0);
   const totalGain = totalCurrent - totalInvested;
-  const totalPercentage = ((totalGain / totalInvested) * 100).toFixed(1);
+  const totalPercentage = totalInvested > 0 ? ((totalGain / totalInvested) * 100).toFixed(1) : "0";
 
   return (
     <div className="space-y-6">
@@ -47,27 +44,33 @@ export function InvestmentTracker() {
 
       {/* Investment List */}
       <div className="space-y-0">
-        {mockInvestments.map((inv) => (
-          <div
-            key={inv.id}
-            className="flex items-center justify-between py-4 border-b border-border/50"
-          >
-            <div>
-              <p className="font-medium">{inv.name}</p>
-              <p className="text-sm text-muted-foreground">{inv.type}</p>
+        {investments.length > 0 ? (
+          investments.map((inv) => (
+            <div
+              key={inv.id}
+              className="flex items-center justify-between py-4 border-b border-border/50"
+            >
+              <div>
+                <p className="font-medium">{inv.name}</p>
+                <p className="text-sm text-muted-foreground">{inv.type}</p>
+              </div>
+              <div className="text-right">
+                <p className="font-medium tabular-nums">₦{inv.current.toLocaleString()}</p>
+                <p className={cn(
+                  "text-sm tabular-nums flex items-center gap-1 justify-end",
+                  inv.change > 0 ? "text-finance" : "text-destructive"
+                )}>
+                  {inv.change > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                  {inv.change > 0 ? "+" : ""}{inv.change}%
+                </p>
+              </div>
             </div>
-            <div className="text-right">
-              <p className="font-medium tabular-nums">₦{inv.current.toLocaleString()}</p>
-              <p className={cn(
-                "text-sm tabular-nums flex items-center gap-1 justify-end",
-                inv.change > 0 ? "text-finance" : "text-destructive"
-              )}>
-                {inv.change > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                {inv.change > 0 ? "+" : ""}{inv.change}%
-              </p>
-            </div>
+          ))
+        ) : (
+          <div className="text-center py-8 text-muted-foreground text-sm">
+            No investments tracked
           </div>
-        ))}
+        )}
       </div>
     </div>
   );

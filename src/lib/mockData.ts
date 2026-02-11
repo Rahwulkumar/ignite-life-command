@@ -349,6 +349,59 @@ export const projectsMockData = {
 };
 
 // ============================================================================
+// DASHBOARD DOMAIN
+// ============================================================================
+
+export const dashboardMockData = {
+    weeklyActivity: [
+        { day: "Mon", tasks: 6, total: 8, hours: 4.5, points: 25, completed: true, completionRate: 75, isToday: false, domainBreakdown: { tech: 3, finance: 2, spiritual: 1 } },
+        { day: "Tue", tasks: 8, total: 8, hours: 6.2, points: 40, completed: true, completionRate: 100, isToday: false, domainBreakdown: { tech: 4, trading: 2, other: 2 } },
+        { day: "Wed", tasks: 4, total: 8, hours: 3.1, points: 15, completed: false, completionRate: 50, isToday: false, domainBreakdown: { music: 2, work: 2 } },
+        { day: "Thu", tasks: 7, total: 9, hours: 5.5, points: 35, completed: true, completionRate: 77, isToday: false, domainBreakdown: { finance: 3, spiritual: 2, tech: 2 } },
+        { day: "Fri", tasks: 5, total: 8, hours: 4.0, points: 20, completed: false, completionRate: 62, isToday: true, domainBreakdown: { content: 2, tech: 1, trading: 2 } },
+        { day: "Sat", tasks: 3, total: 6, hours: 2.5, points: 10, completed: false, completionRate: 50, isToday: false, domainBreakdown: { music: 3 } },
+        { day: "Sun", tasks: 2, total: 5, hours: 1.5, points: 5, completed: false, completionRate: 40, isToday: false, domainBreakdown: { spiritual: 2 } },
+    ],
+    domainFocus: [
+        { domain: "Tech", tasks: 12, fullMark: 15 },
+        { domain: "Finance", tasks: 9, fullMark: 15 },
+        { domain: "Trading", tasks: 8, fullMark: 15 },
+        { domain: "Spiritual", tasks: 7, fullMark: 15 },
+        { domain: "Music", tasks: 5, fullMark: 15 },
+        { domain: "Content", tasks: 4, fullMark: 15 },
+    ],
+    completionChart: [
+        { id: "1", task_id: "spiritual_prayer", entry_date: "2026-02-03", is_completed: true },
+        { id: "2", task_id: "spiritual_bible", entry_date: "2026-02-03", is_completed: true },
+        { id: "3", task_id: "finance_budget", entry_date: "2026-02-03", is_completed: true },
+        { id: "4", task_id: "tech_dsa", entry_date: "2026-02-03", is_completed: true },
+
+        { id: "5", task_id: "spiritual_prayer", entry_date: "2026-02-04", is_completed: true },
+        { id: "6", task_id: "spiritual_bible", entry_date: "2026-02-04", is_completed: true },
+        { id: "7", task_id: "finance_budget", entry_date: "2026-02-04", is_completed: true },
+        { id: "8", task_id: "tech_dsa", entry_date: "2026-02-04", is_completed: true },
+        { id: "9", task_id: "trading_research", entry_date: "2026-02-04", is_completed: true },
+
+        { id: "10", task_id: "spiritual_prayer", entry_date: "2026-02-05", is_completed: true },
+        { id: "11", task_id: "finance_budget", entry_date: "2026-02-05", is_completed: true },
+
+        { id: "12", task_id: "spiritual_prayer", entry_date: "2026-02-06", is_completed: true },
+        { id: "13", task_id: "spiritual_bible", entry_date: "2026-02-06", is_completed: true },
+        { id: "14", task_id: "finance_budget", entry_date: "2026-02-06", is_completed: true },
+        { id: "15", task_id: "tech_dsa", entry_date: "2026-02-06", is_completed: true },
+
+        { id: "16", task_id: "spiritual_prayer", entry_date: "2026-02-07", is_completed: true },
+        { id: "17", task_id: "finance_budget", entry_date: "2026-02-07", is_completed: true },
+        { id: "18", task_id: "tech_dsa", entry_date: "2026-02-07", is_completed: true },
+
+        { id: "19", task_id: "spiritual_prayer", entry_date: "2026-02-08", is_completed: true },
+        { id: "20", task_id: "spiritual_bible", entry_date: "2026-02-08", is_completed: true },
+
+        { id: "21", task_id: "spiritual_prayer", entry_date: "2026-02-09", is_completed: true },
+    ]
+};
+
+// ============================================================================
 // EXPORT ALL MOCK DATA
 // ============================================================================
 
@@ -360,6 +413,7 @@ export const mockData = {
     music: musicMockData,
     content: contentMockData,
     projects: projectsMockData,
+    dashboard: dashboardMockData,
 } as const;
 
 // Type exports for convenience
@@ -370,3 +424,4 @@ export type TradingMockData = typeof tradingMockData;
 export type MusicMockData = typeof musicMockData;
 export type ContentMockData = typeof contentMockData;
 export type ProjectsMockData = typeof projectsMockData;
+export type DashboardMockData = typeof dashboardMockData;

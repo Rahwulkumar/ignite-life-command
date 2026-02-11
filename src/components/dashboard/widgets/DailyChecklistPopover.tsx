@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { format, getDay } from "date-fns";
-import { Check, PenLine } from "lucide-react";
+import { Check, PenLine, Plus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
@@ -8,8 +8,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useCreateNote } from "@/hooks/useNotes";
+import { useAddPendingTask } from "@/hooks/useChecklistEntries";
 import { toast } from "sonner";
 import {
   STANDARD_TASKS,
@@ -23,9 +25,9 @@ import { TaskJournalDialog } from "./TaskJournalDialog";
 interface DailyChecklistPopoverProps {
   date: Date;
   children: React.ReactNode;
-  completedTasks: Record<string, string[]>; // dateKey -> taskIds[]
-  allTasks?: Record<string, string[]>; // dateKey -> taskIds[] (including pending)
-  onToggleTask: (dateKey: string, taskId: string) => void;
+  completedTasks: Record<string, string[]>;
+  allTasks?: Record<string, string[]>;
+  onToggleTask: (dateKey: string, taskId: string, metricsData?: Record<string, any>) => void;
 }
 
 export function DailyChecklistPopover({
@@ -38,8 +40,13 @@ export function DailyChecklistPopover({
   const [open, setOpen] = useState(false);
   const [journalDialogOpen, setJournalDialogOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<TaskDefinition | null>(null);
+  const [showAddSection, setShowAddSection] = useState(false);
+  const [customTask, setCustomTask] = useState("");
+
   const navigate = useNavigate();
   const createNote = useCreateNote();
+  const addPendingTask = useAddPendingTask();
+
   const dateKey = format(date, "yyyy-MM-dd");
   const dayOfWeek = getDay(date);
   const completedForDate = completedTasks[dateKey] || [];
@@ -54,7 +61,7 @@ export function DailyChecklistPopover({
     return false;
   });
 
-  // Identify custom tasks (Tasks in all tasks list but not in standard list)
+  // Identify custom tasks
   const customTasksForDay: TaskDefinition[] = allTasksForDate
     .filter(id => !STANDARD_TASKS.some(t => t.id === id))
     .map(id => ({
@@ -64,23 +71,25 @@ export function DailyChecklistPopover({
       frequency: "daily"
     }));
 
-  const allTasks = [...standardTasksForDay, ...customTasksForDay];
+  const tasksForDay = [...standardTasksForDay, ...customTasksForDay];
 
   const allCompleted =
-    allTasks.length > 0 && allTasks.every((t) => completedForDate.includes(t.id));
+    tasksForDay.length > 0 && tasksForDay.every((t) => completedForDate.includes(t.id));
+
+  // Tasks available to add (not already in the day's list)
+  const availableToAdd = STANDARD_TASKS.filter(
+    task => !tasksForDay.some(t => t.id === task.id)
+  );
 
   const handleTaskClick = (task: TaskDefinition) => {
     const isCompleted = completedForDate.includes(task.id);
 
     if (allCompleted) {
-      // Read-only mode: navigate to notes
       navigate("/notes");
     } else if (!isCompleted) {
-      // Completing a task → show journal dialog
       setSelectedTask(task);
       setJournalDialogOpen(true);
     } else {
-      // Uncompleting a task → direct toggle
       onToggleTask(dateKey, task.id);
     }
   };
@@ -95,10 +104,8 @@ export function DailyChecklistPopover({
   const handleCompleteWithJournal = async (reflection: string) => {
     if (!selectedTask) return;
 
-    // Complete the task
     onToggleTask(dateKey, selectedTask.id);
 
-    // Create journal entry (use 'general' as default domain for custom tasks)
     const domain = TASK_TO_DOMAIN[selectedTask.id] || "general";
     if (reflection.trim()) {
       try {
@@ -158,19 +165,43 @@ export function DailyChecklistPopover({
     }
   };
 
+  const handleQuickAdd = (taskId: string) => {
+    addPendingTask.mutate({
+      taskId,
+      entryDate: dateKey,
+    });
+    setShowAddSection(false);
+  };
+
+  const handleCustomAdd = () => {
+    if (customTask.trim()) {
+      const taskId = `custom_${customTask.toLowerCase().replace(/\s+/g, '_')}`;
+      addPendingTask.mutate({
+        taskId,
+        entryDate: dateKey,
+      });
+      setCustomTask("");
+      setShowAddSection(false);
+    }
+  };
+
   return (
     <>
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover open={open} onOpenChange={(isOpen) => {
+        setOpen(isOpen);
+        if (!isOpen) setShowAddSection(false);
+      }}>
         <PopoverTrigger asChild>{children}</PopoverTrigger>
         <PopoverContent
           className="w-64 p-0 bg-card/95 backdrop-blur-md border-border/50"
           align="start"
           sideOffset={8}
         >
+          {/* Header */}
           <div className="p-3 border-b border-border/30">
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-medium">{format(date, "EEEE, MMM d")}</h4>
-              {allCompleted && allTasks.length > 0 && (
+              {allCompleted && tasksForDay.length > 0 && (
                 <span className="text-xs text-emerald-500 flex items-center gap-1">
                   <Check className="w-3 h-3" /> Complete
                 </span>
@@ -179,9 +210,10 @@ export function DailyChecklistPopover({
             <p className="text-xs text-muted-foreground mt-0.5">Daily checklist</p>
           </div>
 
-          <div className="p-2 space-y-1">
+          {/* Task List - Hidden scrollbar */}
+          <div className="p-2 space-y-1 max-h-[280px] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             <AnimatePresence>
-              {allTasks.map((task, index) => {
+              {tasksForDay.map((task, index) => {
                 const isCompleted = completedForDate.includes(task.id);
                 const Icon = task.icon;
 
@@ -190,7 +222,7 @@ export function DailyChecklistPopover({
                     key={task.id}
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.05 }}
+                    transition={{ delay: index * 0.03 }}
                     className="flex items-center gap-1"
                   >
                     <button
@@ -247,10 +279,74 @@ export function DailyChecklistPopover({
               })}
             </AnimatePresence>
 
-            {allTasks.length === 0 && (
+            {tasksForDay.length === 0 && (
               <div className="text-center py-4 text-sm text-muted-foreground">
                 No tasks scheduled
               </div>
+            )}
+          </div>
+
+          {/* Add Task Section */}
+          <div className="p-2 pt-0 border-t border-border/30">
+            {!showAddSection ? (
+              <button
+                onClick={() => setShowAddSection(true)}
+                className="w-full flex items-center justify-center gap-2 p-2 mt-1 rounded-lg hover:bg-muted transition-colors text-sm text-muted-foreground"
+              >
+                <Plus className="w-4 h-4" />
+                Add Task
+              </button>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                className="space-y-2 mt-2"
+              >
+                {/* Available tasks to add */}
+                <div className="max-h-[120px] overflow-y-auto space-y-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                  {availableToAdd.slice(0, 4).map((task) => {
+                    const Icon = task.icon;
+                    return (
+                      <button
+                        key={task.id}
+                        onClick={() => handleQuickAdd(task.id)}
+                        className="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-muted transition-colors text-left"
+                      >
+                        <div className="w-4 h-4 rounded border border-muted-foreground/40 flex items-center justify-center">
+                          <Plus className="w-2.5 h-2.5 text-muted-foreground" />
+                        </div>
+                        <Icon className="w-3.5 h-3.5 text-muted-foreground" />
+                        <span className="text-xs flex-1">{task.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Custom task input */}
+                <div className="flex gap-1.5">
+                  <Input
+                    value={customTask}
+                    onChange={(e) => setCustomTask(e.target.value)}
+                    placeholder="Custom task..."
+                    className="h-8 text-xs"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleCustomAdd();
+                    }}
+                  />
+                  <button
+                    onClick={handleCustomAdd}
+                    disabled={!customTask.trim()}
+                    className={cn(
+                      "px-2 rounded-md transition-colors",
+                      customTask.trim()
+                        ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                        : "bg-muted text-muted-foreground cursor-not-allowed"
+                    )}
+                  >
+                    <Check className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </motion.div>
             )}
           </div>
         </PopoverContent>

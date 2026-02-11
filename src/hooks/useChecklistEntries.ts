@@ -1,8 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format, startOfMonth, endOfMonth, subMonths } from "date-fns";
+import { MetricsData } from "@/types/domain";
 
-interface ChecklistEntry {
+export interface ChecklistEntry {
   id: string;
   user_id: string;
   task_id: string;
@@ -10,6 +11,7 @@ interface ChecklistEntry {
   is_completed: boolean;
   duration_seconds: number | null;
   notes: string | null;
+  metrics_data: MetricsData;
   created_at: string;
   updated_at: string;
 }
@@ -65,21 +67,26 @@ export function useToggleChecklistEntry() {
       taskId,
       entryDate,
       isCompleted,
+      metricsData,
     }: {
       taskId: string;
       entryDate: string;
       isCompleted: boolean;
+      metricsData?: MetricsData;
     }) => {
       if (isCompleted) {
         // Upsert the entry as completed
+        const payload = {
+          task_id: taskId,
+          entry_date: entryDate,
+          is_completed: true,
+          metrics_data: metricsData ?? {},
+        };
+
         const { data, error } = await supabase
           .from("daily_checklist_entries")
           .upsert(
-            {
-              task_id: taskId,
-              entry_date: entryDate,
-              is_completed: true,
-            },
+            payload,
             {
               onConflict: "user_id,task_id,entry_date",
             }
@@ -111,7 +118,7 @@ export function useToggleChecklistEntry() {
       }
     },
     // Optimistic update for instant UI feedback
-    onMutate: async ({ taskId, entryDate, isCompleted }) => {
+    onMutate: async ({ taskId, entryDate, isCompleted, metricsData }) => {
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: ["checklist-entries"] });
       await queryClient.cancelQueries({ queryKey: ["checklist-analytics"] });
@@ -145,6 +152,7 @@ export function useToggleChecklistEntry() {
             is_completed: isCompleted,
             duration_seconds: null,
             notes: null,
+            metrics_data: metricsData || {},
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           };
@@ -164,6 +172,7 @@ export function useToggleChecklistEntry() {
             is_completed: true,
             duration_seconds: null,
             notes: null,
+            metrics_data: metricsData || {},
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           };

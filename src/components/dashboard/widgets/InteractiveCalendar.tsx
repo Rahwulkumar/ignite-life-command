@@ -2,7 +2,6 @@ import { useState } from "react";
 import { ChevronLeft, ChevronRight, Check, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DailyChecklistPopover } from "./DailyChecklistPopover";
-import { QuickAddTaskPopover } from "./QuickAddTaskPopover";
 import {
   startOfMonth,
   endOfMonth,
@@ -22,13 +21,16 @@ import {
   getTaskIcon,
   TaskDefinition
 } from "@/lib/constants";
+import { CompletionChart, ChecklistEntry } from "./CompletionChart";
+import { TaskDetailDialog } from "./TaskDetailDialog";
 
 interface InteractiveCalendarProps {
   selectedDate: Date;
   onSelectDate: (date: Date) => void;
   completedTasks: Record<string, string[]>;
   allTasks?: Record<string, string[]>;
-  onToggleTask: (dateKey: string, taskId: string) => void;
+  onToggleTask: (dateKey: string, taskId: string, metricsData?: Record<string, any>) => void;
+  entries?: ChecklistEntry[];
 }
 
 const getExpectedTaskCount = (date: Date) => {
@@ -49,9 +51,14 @@ export function InteractiveCalendar({
   selectedDate,
   onSelectDate,
   completedTasks,
+  allTasks,
   onToggleTask,
+  entries = [], // Default to empty array if not provided
 }: InteractiveCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [detailTask, setDetailTask] = useState<TaskDefinition | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+
   const today = new Date();
   const dayOfWeek = getDay(today);
   const todayKey = format(today, "yyyy-MM-dd");
@@ -100,8 +107,21 @@ export function InteractiveCalendar({
     return "partial";
   };
 
+  const handleTaskClick = (task: TaskDefinition) => {
+    setDetailTask(task);
+    setIsDetailOpen(true);
+  };
+
+  const handleTaskComplete = (data: any) => {
+    // data contains { taskId, date, notes, metricsData }
+    const dateKey = format(data.date, "yyyy-MM-dd");
+
+    // Call onToggleTask with metrics data
+    onToggleTask(dateKey, data.taskId, data.metricsData);
+  };
+
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center justify-between mb-2">
         <h3 className="text-sm font-medium">{format(currentMonth, "MMM yyyy")}</h3>
@@ -185,18 +205,23 @@ export function InteractiveCalendar({
       </div>
 
       {/* Today's Progress Footer */}
-      <div className="pt-3 border-t border-border/30">
+      <div className="pt-3 border-t border-border/30 mb-3">
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs text-muted-foreground">Today</span>
           <div className="flex items-center gap-2">
             <span className="text-xs font-medium">
               {todayCompleted.length}/{allTodayTasks.length}
             </span>
-            <QuickAddTaskPopover date={today} onToggleTask={onToggleTask}>
+            <DailyChecklistPopover
+              date={today}
+              completedTasks={completedTasks}
+              allTasks={allTasks}
+              onToggleTask={onToggleTask}
+            >
               <button className="p-1 rounded hover:bg-muted transition-colors" title="Add task">
                 <Plus className="w-4 h-4 text-muted-foreground" />
               </button>
-            </QuickAddTaskPopover>
+            </DailyChecklistPopover>
           </div>
         </div>
 
@@ -205,18 +230,14 @@ export function InteractiveCalendar({
             {remainingTasks.map((task) => {
               const Icon = task.icon;
               return (
-                <DailyChecklistPopover
+                <button
                   key={task.id}
-                  date={today}
-                  completedTasks={completedTasks}
-                  allTasks={allTasks}
-                  onToggleTask={onToggleTask}
+                  onClick={() => handleTaskClick(task)}
+                  className="flex items-center gap-1 text-[10px] px-2 py-1 rounded bg-muted/50 hover:bg-muted transition-colors"
                 >
-                  <button className="flex items-center gap-1 text-[10px] px-2 py-1 rounded bg-muted/50 hover:bg-muted transition-colors">
-                    <Icon className="w-3 h-3 text-muted-foreground" />
-                    <span className="text-muted-foreground">{task.label}</span>
-                  </button>
-                </DailyChecklistPopover>
+                  <Icon className="w-3 h-3 text-muted-foreground" />
+                  <span className="text-muted-foreground">{task.label}</span>
+                </button>
               );
             })}
           </div>
@@ -227,6 +248,24 @@ export function InteractiveCalendar({
           </div>
         )}
       </div>
+
+      {/* Integrated Activity Chart */}
+      <div className="flex-1 min-h-[80px] -mx-2">
+        <CompletionChart entries={entries} timeFilter="week" compact={true} />
+      </div>
+
+
+
+
+      {detailTask && (
+        <TaskDetailDialog
+          open={isDetailOpen}
+          onOpenChange={setIsDetailOpen}
+          task={detailTask}
+          date={today}
+          onComplete={handleTaskComplete}
+        />
+      )}
     </div>
   );
 }

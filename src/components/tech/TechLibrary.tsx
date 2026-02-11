@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  ExternalLink, BookOpen, Video, FileText, Plus, Star, 
+import {
+  ExternalLink, BookOpen, Video, FileText, Plus, Star,
   GraduationCap, Pin, PinOff, MoreHorizontal, Trash2,
   Search, Filter, Grid3X3, List
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { 
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -28,7 +28,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-interface Resource {
+export interface TechResource {
   id: string;
   title: string;
   type: "article" | "video" | "course" | "book";
@@ -49,25 +49,19 @@ const typeConfig = {
   book: { icon: BookOpen, color: "text-amber-400", bg: "bg-amber-500/10" },
 };
 
-const defaultResources: Resource[] = [
-  { id: "1", title: "Designing Data-Intensive Applications", type: "book", source: "O'Reilly", url: "#", category: "System Design", pinned: true, rating: 5 },
-  { id: "2", title: "React 19 Deep Dive", type: "article", source: "React Blog", url: "#", category: "Frontend", pinned: true, rating: 4 },
-  { id: "3", title: "Building LLM Apps with LangChain", type: "video", source: "YouTube", url: "#", category: "AI/ML", pinned: false, rating: 5 },
-  { id: "4", title: "AWS Solutions Architect Course", type: "course", source: "Udemy", url: "#", category: "Cloud", pinned: false, rating: 4 },
-  { id: "5", title: "Clean Code", type: "book", source: "Robert Martin", url: "#", category: "Backend", pinned: false, rating: 5 },
-  { id: "6", title: "Docker for Beginners", type: "video", source: "freeCodeCamp", url: "#", category: "DevOps", pinned: false, rating: 3 },
-  { id: "7", title: "Kubernetes Patterns", type: "book", source: "O'Reilly", url: "#", category: "DevOps", pinned: false, rating: 4 },
-];
+interface TechLibraryProps {
+  initialResources: TechResource[];
+}
 
-export function TechLibrary() {
-  const [resources, setResources] = useState<Resource[]>(defaultResources);
+export function TechLibrary({ initialResources }: TechLibraryProps) {
+  const [resources, setResources] = useState<TechResource[]>(initialResources);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [newResource, setNewResource] = useState({
     title: "",
-    type: "article" as Resource["type"],
+    type: "article" as TechResource["type"],
     source: "",
     url: "",
     category: "Frontend",
@@ -76,7 +70,7 @@ export function TechLibrary() {
 
   const filteredResources = resources
     .filter(r => selectedCategory === "All" || r.category === selectedCategory)
-    .filter(r => 
+    .filter(r =>
       r.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       r.source.toLowerCase().includes(searchQuery.toLowerCase())
     );
@@ -85,7 +79,7 @@ export function TechLibrary() {
   const unpinnedResources = filteredResources.filter(r => !r.pinned);
 
   const togglePin = (id: string) => {
-    setResources(resources.map(r => 
+    setResources(resources.map(r =>
       r.id === id ? { ...r, pinned: !r.pinned } : r
     ));
   };
@@ -96,7 +90,7 @@ export function TechLibrary() {
 
   const handleAddResource = () => {
     if (!newResource.title.trim()) return;
-    const resource: Resource = {
+    const resource: TechResource = {
       id: Date.now().toString(),
       title: newResource.title.trim(),
       type: newResource.type,
@@ -111,7 +105,7 @@ export function TechLibrary() {
     setIsAddOpen(false);
   };
 
-  const ResourceCard = ({ resource }: { resource: Resource }) => {
+  const ResourceCard = ({ resource }: { resource: TechResource }) => {
     const config = typeConfig[resource.type];
     const Icon = config.icon;
 
@@ -129,7 +123,7 @@ export function TechLibrary() {
           <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center shrink-0", config.bg)}>
             <Icon className={cn("w-5 h-5", config.color)} />
           </div>
-          
+
           <div className="flex-1 min-w-0">
             <h4 className="font-medium truncate">{resource.title}</h4>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -142,20 +136,20 @@ export function TechLibrary() {
           {resource.rating && (
             <div className="flex items-center gap-0.5 shrink-0">
               {Array.from({ length: 5 }).map((_, i) => (
-                <Star 
-                  key={i} 
+                <Star
+                  key={i}
                   className={cn(
                     "w-3.5 h-3.5",
                     i < resource.rating! ? "text-amber-400 fill-amber-400" : "text-muted"
-                  )} 
+                  )}
                 />
               ))}
             </div>
           )}
 
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="icon"
               onClick={() => togglePin(resource.id)}
             >
@@ -176,7 +170,7 @@ export function TechLibrary() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   onClick={() => deleteResource(resource.id)}
                   className="text-destructive"
                 >
@@ -221,12 +215,12 @@ export function TechLibrary() {
         {resource.rating && (
           <div className="flex items-center gap-0.5 mb-4">
             {Array.from({ length: 5 }).map((_, i) => (
-              <Star 
-                key={i} 
+              <Star
+                key={i}
                 className={cn(
                   "w-3.5 h-3.5",
                   i < resource.rating! ? "text-amber-400 fill-amber-400" : "text-muted"
-                )} 
+                )}
               />
             ))}
           </div>
@@ -235,8 +229,8 @@ export function TechLibrary() {
         <div className="flex items-center justify-between pt-3 border-t border-border/50">
           <span className="text-xs text-muted-foreground">{resource.category}</span>
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="icon"
               className="h-7 w-7"
               onClick={() => togglePin(resource.id)}
@@ -298,7 +292,7 @@ export function TechLibrary() {
               <List className="w-4 h-4" />
             </button>
           </div>
-          
+
           <Button onClick={() => setIsAddOpen(true)} className="gap-2">
             <Plus className="w-4 h-4" />
             Add Resource
@@ -332,7 +326,7 @@ export function TechLibrary() {
             Pinned Resources
           </h3>
           <div className={cn(
-            viewMode === "grid" 
+            viewMode === "grid"
               ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
               : "space-y-2"
           )}>
@@ -352,7 +346,7 @@ export function TechLibrary() {
             </h3>
           )}
           <div className={cn(
-            viewMode === "grid" 
+            viewMode === "grid"
               ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
               : "space-y-2"
           )}>
@@ -372,7 +366,7 @@ export function TechLibrary() {
 
       {/* Empty state */}
       {filteredResources.length === 0 && (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="text-center py-16 border border-dashed border-border rounded-xl"
@@ -408,9 +402,9 @@ export function TechLibrary() {
             </div>
             <div>
               <label className="text-sm font-medium mb-2 block">Type</label>
-              <Select 
-                value={newResource.type} 
-                onValueChange={(v) => setNewResource({ ...newResource, type: v as Resource["type"] })}
+              <Select
+                value={newResource.type}
+                onValueChange={(v) => setNewResource({ ...newResource, type: v as TechResource["type"] })}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -432,8 +426,8 @@ export function TechLibrary() {
             </div>
             <div>
               <label className="text-sm font-medium mb-2 block">Category</label>
-              <Select 
-                value={newResource.category} 
+              <Select
+                value={newResource.category}
                 onValueChange={(v) => setNewResource({ ...newResource, category: v })}
               >
                 <SelectTrigger>
@@ -464,11 +458,11 @@ export function TechLibrary() {
                     onClick={() => setNewResource({ ...newResource, rating: i + 1 })}
                     className="p-1"
                   >
-                    <Star 
+                    <Star
                       className={cn(
                         "w-5 h-5 transition-colors",
                         i < newResource.rating ? "text-amber-400 fill-amber-400" : "text-muted hover:text-amber-400"
-                      )} 
+                      )}
                     />
                   </button>
                 ))}
