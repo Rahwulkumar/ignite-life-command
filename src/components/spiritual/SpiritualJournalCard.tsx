@@ -2,7 +2,7 @@ import { PenLine, Plus, ChevronRight, Calendar } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
 
-interface JournalEntry {
+export interface JournalEntry {
   id: string;
   date: string;
   characterName?: string;
@@ -10,31 +10,14 @@ interface JournalEntry {
   excerpt?: string;
 }
 
-const mockEntries: JournalEntry[] = [
-  {
-    id: "1",
-    date: "2024-12-30",
-    characterName: "David",
-    attributesOfGod: ["Faithful", "Protector"],
-    excerpt: "Today I learned about David's trust in God...",
-  },
-  {
-    id: "2",
-    date: "2024-12-29",
-    characterName: "David",
-    attributesOfGod: ["Merciful"],
-    excerpt: "Reflecting on God's forgiveness...",
-  },
-];
-
 interface SpiritualJournalCardProps {
-  recentEntries?: JournalEntry[];
+  recentEntries: JournalEntry[];
   onNewEntry: () => void;
   onViewEntry: (id: string) => void;
 }
 
 export const SpiritualJournalCard = ({
-  recentEntries = mockEntries,
+  recentEntries,
   onNewEntry,
   onViewEntry,
 }: SpiritualJournalCardProps) => {

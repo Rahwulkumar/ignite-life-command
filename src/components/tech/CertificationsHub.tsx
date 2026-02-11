@@ -22,49 +22,19 @@ import {
 
 const providers = ["AWS", "Google", "Azure", "CompTIA", "Meta", "Cisco", "Other"];
 
-const defaultCertifications: Certification[] = [
-  {
-    id: "1",
-    name: "Solutions Architect Associate",
-    provider: "AWS",
-    status: "preparing",
-    targetDate: "2025-03-15",
-    progress: 45,
-  },
-  {
-    id: "2",
-    name: "Professional Cloud Architect",
-    provider: "Google",
-    status: "preparing",
-    targetDate: "2025-06-01",
-    progress: 20,
-  },
-  {
-    id: "3",
-    name: "Developer Associate",
-    provider: "AWS",
-    status: "earned",
-    earnedDate: "2024-08-20",
-    credentialUrl: "https://aws.amazon.com/verification",
-  },
-  {
-    id: "4",
-    name: "React Developer Certificate",
-    provider: "Meta",
-    status: "earned",
-    earnedDate: "2024-05-10",
-  },
-];
-
 type FilterType = "all" | "preparing" | "earned";
 
-export function CertificationsHub() {
-  const [certifications, setCertifications] = useState<Certification[]>(defaultCertifications);
+interface CertificationsHubProps {
+  initialCertifications: Certification[];
+}
+
+export function CertificationsHub({ initialCertifications }: CertificationsHubProps) {
+  const [certifications, setCertifications] = useState<Certification[]>(initialCertifications);
   const [filter, setFilter] = useState<FilterType>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [editingCert, setEditingCert] = useState<Certification | null>(null);
-  
+
   const [newCert, setNewCert] = useState({
     name: "",
     provider: "AWS",
@@ -77,7 +47,7 @@ export function CertificationsHub() {
 
   const filteredCerts = certifications
     .filter(c => filter === "all" || c.status === filter)
-    .filter(c => 
+    .filter(c =>
       c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       c.provider.toLowerCase().includes(searchQuery.toLowerCase())
     );
@@ -87,7 +57,7 @@ export function CertificationsHub() {
 
   const handleAdd = () => {
     if (!newCert.name.trim()) return;
-    
+
     const cert: Certification = {
       id: Date.now().toString(),
       name: newCert.name.trim(),
@@ -118,8 +88,8 @@ export function CertificationsHub() {
 
   const handleUpdate = () => {
     if (!editingCert) return;
-    
-    setCertifications(certifications.map(c => 
+
+    setCertifications(certifications.map(c =>
       c.id === editingCert.id ? editingCert : c
     ));
     setEditingCert(null);
@@ -167,7 +137,7 @@ export function CertificationsHub() {
               </button>
             ))}
           </div>
-          
+
           <Button onClick={() => setIsAddOpen(true)} className="gap-2">
             <Plus className="w-4 h-4" />
             Add Certification
@@ -185,25 +155,25 @@ export function CertificationsHub() {
               ({preparingCerts.length})
             </span>
           </h3>
-          
+
           {/* Featured card for first preparing cert */}
           {preparingCerts[0] && (
             <div className="mb-4">
-              <CertificationCard 
-                certification={preparingCerts[0]} 
+              <CertificationCard
+                certification={preparingCerts[0]}
                 variant="featured"
                 onEdit={handleEdit}
                 onDelete={handleDelete}
               />
             </div>
           )}
-          
+
           {/* List for remaining */}
           {preparingCerts.length > 1 && (
             <div className="space-y-3">
               {preparingCerts.slice(1).map((cert) => (
-                <CertificationCard 
-                  key={cert.id} 
+                <CertificationCard
+                  key={cert.id}
                   certification={cert}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
@@ -232,7 +202,7 @@ export function CertificationsHub() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
               >
-                <CertificationCard 
+                <CertificationCard
                   certification={cert}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
@@ -245,7 +215,7 @@ export function CertificationsHub() {
 
       {/* Empty state */}
       {filteredCerts.length === 0 && (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="text-center py-16 border border-dashed border-border rounded-xl"
@@ -253,7 +223,7 @@ export function CertificationsHub() {
           <Award className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-lg font-semibold mb-2">No certifications found</h3>
           <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
-            {searchQuery 
+            {searchQuery
               ? "Try adjusting your search terms"
               : "Start tracking your certifications to monitor your progress"
             }
@@ -282,10 +252,10 @@ export function CertificationsHub() {
                 placeholder="e.g., Solutions Architect Associate"
               />
             </div>
-            
+
             <div>
               <label className="text-sm font-medium mb-2 block">Provider</label>
-              <Select 
+              <Select
                 value={newCert.provider}
                 onValueChange={(v) => setNewCert({ ...newCert, provider: v })}
               >
@@ -302,7 +272,7 @@ export function CertificationsHub() {
 
             <div>
               <label className="text-sm font-medium mb-2 block">Status</label>
-              <Select 
+              <Select
                 value={newCert.status}
                 onValueChange={(v) => setNewCert({ ...newCert, status: v as Certification["status"] })}
               >
@@ -383,10 +353,10 @@ export function CertificationsHub() {
                   onChange={(e) => setEditingCert({ ...editingCert, name: e.target.value })}
                 />
               </div>
-              
+
               <div>
                 <label className="text-sm font-medium mb-2 block">Provider</label>
-                <Select 
+                <Select
                   value={editingCert.provider}
                   onValueChange={(v) => setEditingCert({ ...editingCert, provider: v })}
                 >

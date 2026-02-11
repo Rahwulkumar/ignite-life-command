@@ -1,8 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format, startOfMonth, endOfMonth, subMonths } from "date-fns";
+import { MetricsData } from "@/types/domain";
 
-interface ChecklistEntry {
+export interface ChecklistEntry {
   id: string;
   user_id: string;
   task_id: string;
@@ -10,6 +11,7 @@ interface ChecklistEntry {
   is_completed: boolean;
   duration_seconds: number | null;
   notes: string | null;
+  metrics_data: MetricsData;
   created_at: string;
   updated_at: string;
 }
@@ -65,21 +67,26 @@ export function useToggleChecklistEntry() {
       taskId,
       entryDate,
       isCompleted,
+      metricsData,
     }: {
       taskId: string;
       entryDate: string;
       isCompleted: boolean;
+      metricsData?: MetricsData;
     }) => {
       if (isCompleted) {
-        // Upsert the entry
+        // Upsert the entry as completed
+        const payload = {
+          task_id: taskId,
+          entry_date: entryDate,
+          is_completed: true,
+          metrics_data: metricsData ?? {},
+        };
+
         const { data, error } = await supabase
           .from("daily_checklist_entries")
           .upsert(
-            {
-              task_id: taskId,
-              entry_date: entryDate,
-              is_completed: true,
-            },
+            payload,
             {
               onConflict: "user_id,task_id,entry_date",
             }
@@ -90,19 +97,28 @@ export function useToggleChecklistEntry() {
         if (error) throw error;
         return data;
       } else {
-        // Delete the entry
-        const { error } = await supabase
+        // Upsert with is_completed: false to keep pending tasks
+        const { data, error } = await supabase
           .from("daily_checklist_entries")
-          .delete()
-          .eq("task_id", taskId)
-          .eq("entry_date", entryDate);
+          .upsert(
+            {
+              task_id: taskId,
+              entry_date: entryDate,
+              is_completed: false,
+            },
+            {
+              onConflict: "user_id,task_id,entry_date",
+            }
+          )
+          .select()
+          .single();
 
         if (error) throw error;
-        return null;
+        return data;
       }
     },
     // Optimistic update for instant UI feedback
-    onMutate: async ({ taskId, entryDate, isCompleted }) => {
+    onMutate: async ({ taskId, entryDate, isCompleted, metricsData }) => {
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: ["checklist-entries"] });
       await queryClient.cancelQueries({ queryKey: ["checklist-analytics"] });
@@ -114,32 +130,40 @@ export function useToggleChecklistEntry() {
       // Optimistically update checklist-entries caches
       queryClient.setQueriesData({ queryKey: ["checklist-entries"] }, (old: ChecklistEntry[] | undefined) => {
         if (!old) return old;
-        
-        if (isCompleted) {
+
+        const existingIndex = old.findIndex((e) => e.task_id === taskId && e.entry_date === entryDate);
+
+        if (existingIndex >= 0) {
+          // Update existing entry
+          const updated = [...old];
+          updated[existingIndex] = {
+            ...updated[existingIndex],
+            is_completed: isCompleted,
+            updated_at: new Date().toISOString(),
+          };
+          return updated;
+        } else {
           // Add new entry
           const newEntry: ChecklistEntry = {
             id: `temp-${Date.now()}`,
             user_id: "",
             task_id: taskId,
             entry_date: entryDate,
-            is_completed: true,
+            is_completed: isCompleted,
             duration_seconds: null,
             notes: null,
+            metrics_data: metricsData || {},
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           };
           return [...old, newEntry];
-        } else {
-          // Remove entry
-          return old.filter((e) => !(e.task_id === taskId && e.entry_date === entryDate));
         }
       });
 
-      // Also update analytics cache
-      queryClient.setQueriesData({ queryKey: ["checklist-analytics"] }, (old: ChecklistEntry[] | undefined) => {
-        if (!old) return old;
-        
-        if (isCompleted) {
+      // Also update analytics cache (only for completed tasks)
+      if (isCompleted) {
+        queryClient.setQueriesData({ queryKey: ["checklist-analytics"] }, (old: ChecklistEntry[] | undefined) => {
+          if (!old) return old;
           const newEntry: ChecklistEntry = {
             id: `temp-${Date.now()}`,
             user_id: "",
@@ -148,14 +172,13 @@ export function useToggleChecklistEntry() {
             is_completed: true,
             duration_seconds: null,
             notes: null,
+            metrics_data: metricsData || {},
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           };
           return [...old, newEntry];
-        } else {
-          return old.filter((e) => !(e.task_id === taskId && e.entry_date === entryDate));
-        }
-      });
+        });
+      }
 
       return { previousEntries, previousAnalytics };
     },
@@ -176,6 +199,42 @@ export function useToggleChecklistEntry() {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["checklist-entries"] });
       queryClient.invalidateQueries({ queryKey: ["checklist-analytics"] });
+    },
+  });
+}
+
+// Add a pending (not yet completed) task
+export function useAddPendingTask() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      taskId,
+      entryDate,
+    }: {
+      taskId: string;
+      entryDate: string;
+    }) => {
+      const { data, error } = await supabase
+        .from("daily_checklist_entries")
+        .upsert(
+          {
+            task_id: taskId,
+            entry_date: entryDate,
+            is_completed: false,
+          },
+          {
+            onConflict: "user_id,task_id,entry_date",
+          }
+        )
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["checklist-entries"] });
     },
   });
 }

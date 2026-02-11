@@ -1,7 +1,7 @@
 // Centralized domain configuration for the notes system
-import { Heart, TrendingUp, Code, Wallet, Music, FolderKanban, BookOpen, type LucideIcon } from "lucide-react";
+import { Heart, TrendingUp, Code, Wallet, Music, FolderKanban, BookOpen, ListTodo, type LucideIcon } from "lucide-react";
 
-export type DomainId = 'spiritual' | 'trading' | 'tech' | 'finance' | 'music' | 'projects' | 'content';
+export type DomainId = 'spiritual' | 'trading' | 'tech' | 'finance' | 'music' | 'projects' | 'content' | 'general';
 
 export interface Domain {
   id: DomainId;
@@ -19,6 +19,7 @@ export const DOMAINS: Domain[] = [
   { id: 'music', label: 'Music', iconName: 'music', path: '/music', description: 'Music practice and study' },
   { id: 'projects', label: 'Projects', iconName: 'folder-kanban', path: '/projects', description: 'Project documentation' },
   { id: 'content', label: 'Content', iconName: 'book-open', path: '/content', description: 'Content consumption log' },
+  { id: 'general', label: 'General', iconName: 'list-todo', path: '/general', description: 'General notes and custom tasks' },
 ];
 
 // Lucide icon mapping for each domain
@@ -30,6 +31,7 @@ export const DOMAIN_ICONS: Record<DomainId, LucideIcon> = {
   music: Music,
   projects: FolderKanban,
   content: BookOpen,
+  general: ListTodo,
 };
 
 export const getDomainById = (id: DomainId | string | null): Domain | undefined => {
@@ -37,11 +39,11 @@ export const getDomainById = (id: DomainId | string | null): Domain | undefined 
 };
 
 // DomainIcon component for rendering domain icons
-export function DomainIcon({ 
-  domainId, 
-  className 
-}: { 
-  domainId: DomainId | string | null; 
+export function DomainIcon({
+  domainId,
+  className
+}: {
+  domainId: DomainId | string | null;
   className?: string;
 }) {
   if (!domainId) return null;

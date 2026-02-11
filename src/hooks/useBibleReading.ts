@@ -1,0 +1,84 @@
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Database } from "@/integrations/supabase/types";
+
+type BibleReadingPlan = Database["public"]["Tables"]["bible_reading_plans"]["Row"];
+
+export function useBibleReadingPlan() {
+    return useQuery({
+        queryKey: ["bible-reading-plan"],
+        queryFn: async () => {
+            const { data, error } = await supabase
+                .from("bible_reading_plans")
+                .select("*")
+                .single();
+
+            if (error && error.code !== "PGRST116") throw error; // PGRST116 is "no rows found"
+            return data as BibleReadingPlan | null;
+        },
+    });
+}
+
+export function useUpdateBibleProgress() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async ({
+            id,
+            completedChapters,
+            currentBook,
+            currentChapter,
+        }: {
+            id: string;
+            completedChapters: number;
+            currentBook?: string;
+            currentChapter?: number;
+        }) => {
+            const { data, error } = await supabase
+                .from("bible_reading_plans")
+                .update({
+                    completed_chapters: completedChapters,
+                    current_book: currentBook,
+                    current_chapter: currentChapter,
+                    updated_at: new Date().toISOString(),
+                })
+                .eq("id", id)
+                .select()
+                .single();
+
+            if (error) throw error;
+            return data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["bible-reading-plan"] });
+        },
+    });
+}
+
+export function useCreateBiblePlan() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async ({ name, totalChapters }: { name: string; totalChapters: number }) => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error("User not authenticated");
+
+            const { data, error } = await supabase
+                .from("bible_reading_plans")
+                .insert({
+                    name,
+                    total_chapters: totalChapters,
+                    completed_chapters: 0,
+                    user_id: user.id,
+                })
+                .select()
+                .single();
+
+            if (error) throw error;
+            return data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["bible-reading-plan"] });
+        },
+    });
+}

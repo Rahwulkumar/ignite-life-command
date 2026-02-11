@@ -4,7 +4,7 @@ import { TrendingUp, TrendingDown, Plus, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-interface Transaction {
+export interface Transaction {
   id: number;
   description: string;
   amount: number;
@@ -12,30 +12,25 @@ interface Transaction {
   category: string;
 }
 
-const mockTransactions: Transaction[] = [
-  { id: 1, description: "Grocery Shopping", amount: -15000, date: "Today", category: "Food" },
-  { id: 2, description: "Freelance Payment", amount: 150000, date: "Yesterday", category: "Income" },
-  { id: 3, description: "Netflix Subscription", amount: -4500, date: "Dec 27", category: "Entertainment" },
-  { id: 4, description: "Electricity Bill", amount: -8200, date: "Dec 26", category: "Utilities" },
-  { id: 5, description: "Side Project Payment", amount: 75000, date: "Dec 25", category: "Income" },
-  { id: 6, description: "Restaurant Dinner", amount: -12000, date: "Dec 24", category: "Food" },
-  { id: 7, description: "Uber Rides", amount: -5500, date: "Dec 23", category: "Transport" },
-];
+interface ExpenseTrackerProps {
+  transactions: Transaction[];
+  onAddTransaction?: () => void;
+}
 
 const categories = ["All", "Income", "Food", "Entertainment", "Utilities", "Transport"];
 
-export function ExpenseTracker() {
+export function ExpenseTracker({ transactions, onAddTransaction }: ExpenseTrackerProps) {
   const [selectedCategory, setSelectedCategory] = useState("All");
-  
-  const filteredTransactions = selectedCategory === "All" 
-    ? mockTransactions 
-    : mockTransactions.filter(tx => tx.category === selectedCategory);
 
-  const totalIncome = mockTransactions.filter(tx => tx.amount > 0).reduce((sum, tx) => sum + tx.amount, 0);
-  const totalExpenses = mockTransactions.filter(tx => tx.amount < 0).reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
+  const filteredTransactions = selectedCategory === "All"
+    ? transactions
+    : transactions.filter(tx => tx.category === selectedCategory);
+
+  const totalIncome = transactions.filter(tx => tx.amount > 0).reduce((sum, tx) => sum + tx.amount, 0);
+  const totalExpenses = transactions.filter(tx => tx.amount < 0).reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
@@ -48,7 +43,7 @@ export function ExpenseTracker() {
             <Filter className="w-3 h-3" />
             Filter
           </Button>
-          <Button variant="outline" size="sm" className="gap-2">
+          <Button variant="outline" size="sm" className="gap-2" onClick={onAddTransaction}>
             <Plus className="w-3 h-3" />
             Add
           </Button>
@@ -89,37 +84,43 @@ export function ExpenseTracker() {
 
       {/* Transaction List */}
       <div className="space-y-0">
-        {filteredTransactions.map((tx, index) => (
-          <motion.div
-            key={tx.id}
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3, delay: index * 0.03 }}
-            className="flex items-center justify-between py-4 border-b border-border/50 hover:bg-muted/20 transition-colors cursor-pointer"
-          >
-            <div className="flex items-center gap-4">
-              {tx.amount > 0 ? (
-                <div className="w-8 h-8 rounded-full bg-finance/10 flex items-center justify-center">
-                  <TrendingUp className="w-4 h-4 text-finance" />
+        {filteredTransactions.length > 0 ? (
+          filteredTransactions.map((tx, index) => (
+            <motion.div
+              key={tx.id}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, delay: index * 0.03 }}
+              className="flex items-center justify-between py-4 border-b border-border/50 hover:bg-muted/20 transition-colors cursor-pointer"
+            >
+              <div className="flex items-center gap-4">
+                {tx.amount > 0 ? (
+                  <div className="w-8 h-8 rounded-full bg-finance/10 flex items-center justify-center">
+                    <TrendingUp className="w-4 h-4 text-finance" />
+                  </div>
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+                    <TrendingDown className="w-4 h-4 text-muted-foreground" />
+                  </div>
+                )}
+                <div>
+                  <p className="font-medium">{tx.description}</p>
+                  <p className="text-sm text-muted-foreground">{tx.category} · {tx.date}</p>
                 </div>
-              ) : (
-                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-                  <TrendingDown className="w-4 h-4 text-muted-foreground" />
-                </div>
-              )}
-              <div>
-                <p className="font-medium">{tx.description}</p>
-                <p className="text-sm text-muted-foreground">{tx.category} · {tx.date}</p>
               </div>
-            </div>
-            <span className={cn(
-              "tabular-nums font-medium",
-              tx.amount > 0 ? "text-finance" : "text-foreground"
-            )}>
-              {tx.amount > 0 ? "+" : ""}₦{Math.abs(tx.amount).toLocaleString()}
-            </span>
-          </motion.div>
-        ))}
+              <span className={cn(
+                "tabular-nums font-medium",
+                tx.amount > 0 ? "text-finance" : "text-foreground"
+              )}>
+                {tx.amount > 0 ? "+" : ""}₦{Math.abs(tx.amount).toLocaleString()}
+              </span>
+            </motion.div>
+          ))
+        ) : (
+          <div className="text-center py-8 text-muted-foreground text-sm">
+            No transactions found
+          </div>
+        )}
       </div>
     </motion.div>
   );

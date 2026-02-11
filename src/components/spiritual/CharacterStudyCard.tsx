@@ -2,22 +2,14 @@ import { User, Calendar, ChevronRight, Plus } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
 
-interface Character {
+export interface Character {
   id: string;
   name: string;
   description: string;
 }
 
-const popularCharacters: Character[] = [
-  { id: "david", name: "David", description: "A man after God's own heart" },
-  { id: "moses", name: "Moses", description: "Leader of the Exodus" },
-  { id: "joseph", name: "Joseph", description: "From pit to palace" },
-  { id: "paul", name: "Paul", description: "Apostle to the Gentiles" },
-  { id: "esther", name: "Esther", description: "For such a time as this" },
-  { id: "abraham", name: "Abraham", description: "Father of faith" },
-];
-
 interface CharacterStudyCardProps {
+  characters: Character[];
   currentCharacter?: {
     name: string;
     daysCompleted: number;
@@ -30,6 +22,7 @@ interface CharacterStudyCardProps {
 }
 
 export const CharacterStudyCard = ({
+  characters,
   currentCharacter,
   onSelectCharacter,
   onStartDiscussion,
@@ -50,7 +43,7 @@ export const CharacterStudyCard = ({
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          {popularCharacters.map((character) => (
+          {characters.map((character) => (
             <button
               key={character.id}
               onClick={() => onSelectCharacter(character)}
