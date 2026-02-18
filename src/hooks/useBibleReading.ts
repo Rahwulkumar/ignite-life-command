@@ -25,21 +25,21 @@ export function useUpdateBibleProgress() {
     return useMutation({
         mutationFn: async ({
             id,
-            completedChapters,
             currentBook,
             currentChapter,
+            currentVerse,
         }: {
             id: string;
-            completedChapters: number;
-            currentBook?: string;
-            currentChapter?: number;
+            currentBook: string;
+            currentChapter: number;
+            currentVerse: number;
         }) => {
             const { data, error } = await supabase
                 .from("bible_reading_plans")
                 .update({
-                    completed_chapters: completedChapters,
                     current_book: currentBook,
                     current_chapter: currentChapter,
+                    current_verse: currentVerse,
                     updated_at: new Date().toISOString(),
                 })
                 .eq("id", id)
@@ -59,16 +59,25 @@ export function useCreateBiblePlan() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async ({ name, totalChapters }: { name: string; totalChapters: number }) => {
+        mutationFn: async ({
+            bookName,
+            chapter = 1,
+            verse = 1,
+        }: {
+            bookName: string;
+            chapter?: number;
+            verse?: number;
+        }) => {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error("User not authenticated");
 
             const { data, error } = await supabase
                 .from("bible_reading_plans")
                 .insert({
-                    name,
-                    total_chapters: totalChapters,
-                    completed_chapters: 0,
+                    name: `Reading ${bookName}`,
+                    current_book: bookName,
+                    current_chapter: chapter,
+                    current_verse: verse,
                     user_id: user.id,
                 })
                 .select()

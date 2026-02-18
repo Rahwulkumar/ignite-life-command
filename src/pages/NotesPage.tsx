@@ -9,15 +9,16 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
-import { 
-  useNotes, 
-  useNote, 
-  useCreateNote, 
-  useUpdateNote, 
+import {
+  useNotes,
+  useNote,
+  useCreateNote,
+  useUpdateNote,
+  useDeleteNote,
   useInitializeHubs,
-  buildNoteTree, 
+  buildNoteTree,
   groupNotesByDomain,
-  type Note 
+  type Note
 } from "@/hooks/useNotes";
 import { debounce } from "@/lib/utils";
 import { DOMAINS, type DomainId } from "@/lib/domains";
@@ -34,7 +35,7 @@ export default function NotesPage() {
   const locationState = location.state as LocationState | null;
   const isMobile = useIsMobile();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  
+
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
   const [activeDomain, setActiveDomain] = useState<DomainId | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -44,6 +45,7 @@ export default function NotesPage() {
   const { data: selectedNote } = useNote(selectedNoteId);
   const createNote = useCreateNote();
   const updateNote = useUpdateNote();
+  const deleteNote = useDeleteNote();
   const initializeHubs = useInitializeHubs();
 
   const groupedNotes = groupNotesByDomain(notes);
@@ -120,7 +122,7 @@ export default function NotesPage() {
       setSelectedNoteId(noteId);
       setActiveDomain(note.domain);
       setSidebarOpen(false);
-      
+
       // If it's a hub, show hub view; otherwise show editor
       if (note.note_type === 'hub') {
         setViewMode('hub');
@@ -134,7 +136,7 @@ export default function NotesPage() {
     setActiveDomain(domainId);
     setViewMode('hub');
     setSidebarOpen(false);
-    
+
     const hub = notes.find(n => n.domain === domainId && n.note_type === 'hub');
     if (hub) {
       setSelectedNoteId(hub.id);
@@ -163,6 +165,15 @@ export default function NotesPage() {
     }
   };
 
+  const handleDeleteNote = async (noteId: string) => {
+    await deleteNote.mutateAsync(noteId);
+    // If the deleted note was selected, clear selection
+    if (selectedNoteId === noteId) {
+      setSelectedNoteId(null);
+      setViewMode('hub');
+    }
+  };
+
   // Get current domain data
   const currentDomainData = activeDomain ? groupedNotes[activeDomain] : null;
   const currentPages = currentDomainData?.pages || [];
@@ -181,6 +192,7 @@ export default function NotesPage() {
       onSelectHub={handleSelectHub}
       onCreateNote={handleCreateNote}
       onTogglePin={handleTogglePin}
+      onDeleteNote={handleDeleteNote}
       isLoading={notesLoading}
     />
   );

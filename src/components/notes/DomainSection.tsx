@@ -10,6 +10,8 @@ import { cn } from "@/lib/utils";
 import { DomainIcon, type Domain, type DomainId } from "@/lib/domains";
 import type { Note } from "@/hooks/useNotes";
 
+import { SidebarFileTree } from "@/components/notes/SidebarFileTree";
+
 type NoteWithChildren = Note & { children: NoteWithChildren[] };
 
 interface DomainSectionProps {
@@ -21,6 +23,7 @@ interface DomainSectionProps {
   onSelectNote: (id: string) => void;
   onSelectHub: (domainId: DomainId) => void;
   onCreatePage: (domainId: DomainId) => void;
+  onDeleteNote?: (noteId: string) => void;
 }
 
 export function DomainSection({
@@ -32,32 +35,22 @@ export function DomainSection({
   onSelectNote,
   onSelectHub,
   onCreatePage,
+  onDeleteNote,
 }: DomainSectionProps) {
   const [isExpanded, setIsExpanded] = useState(true);
 
-  const renderNoteItem = (note: NoteWithChildren, depth = 0) => {
-    const isSelected = note.id === selectedNoteId;
+  // State for expanded folders separate from SidebarFileTree
+  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
 
-    return (
-      <div key={note.id}>
-        <button
-          onClick={() => onSelectNote(note.id)}
-          className={cn(
-            "w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left text-sm transition-colors",
-            isSelected ? "bg-muted" : "hover:bg-muted/50"
-          )}
-          style={{ paddingLeft: `${8 + depth * 12}px` }}
-        >
-          <FileText className="w-3.5 h-3.5 text-muted-foreground" />
-          <span className="truncate flex-1">{note.title}</span>
-        </button>
-        {note.children.length > 0 && (
-          <div>
-            {note.children.map((child) => renderNoteItem(child, depth + 1))}
-          </div>
-        )}
-      </div>
-    );
+  const toggleFolder = (folderId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const newExpanded = new Set(expandedFolders);
+    if (newExpanded.has(folderId)) {
+      newExpanded.delete(folderId);
+    } else {
+      newExpanded.add(folderId);
+    }
+    setExpandedFolders(newExpanded);
   };
 
   return (
@@ -104,8 +97,17 @@ export function DomainSection({
               </button>
             )}
 
-            {/* Pages */}
-            {pages.map((page) => renderNoteItem(page))}
+            {/* Pages - Using shared SidebarFileTree */}
+            <SidebarFileTree
+              data={pages}
+              expandedFolders={expandedFolders}
+              toggleFolder={toggleFolder}
+              selectedNoteId={selectedNoteId}
+              onSelectNote={onSelectNote}
+              onDeleteNote={onDeleteNote}
+              // Main sidebar doesn't support inline creation yet, keeping parity
+              onCreateItem={undefined}
+            />
 
             {/* Journal indicator */}
             {journalCount > 0 && (

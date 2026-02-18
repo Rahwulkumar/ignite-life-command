@@ -14,7 +14,7 @@ export interface Note {
   is_pinned: boolean | null;
   is_template: boolean | null;
   domain: DomainId | null;
-  note_type: 'hub' | 'page' | 'journal' | null;
+  note_type: 'hub' | 'page' | 'journal' | 'folder' | null;
   created_at: string | null;
   updated_at: string | null;
 }
@@ -42,7 +42,7 @@ export function useNotesByDomain(domain: DomainId | null) {
     queryKey: ["notes", "domain", domain],
     queryFn: async () => {
       if (!domain) return [];
-      
+
       const { data, error } = await supabase
         .from("office_notes")
         .select("*")
@@ -103,16 +103,16 @@ export function useSearchNotes(searchQuery: string, domain?: DomainId | null) {
     queryKey: ["notes-search", searchQuery, domain],
     queryFn: async () => {
       if (!searchQuery.trim()) return [];
-      
+
       let query = supabase
         .from("office_notes")
         .select("*")
         .ilike("title", `%${searchQuery}%`);
-      
+
       if (domain) {
         query = query.eq("domain", domain);
       }
-      
+
       const { data, error } = await query
         .order("updated_at", { ascending: false })
         .limit(10);
@@ -144,7 +144,7 @@ export function useCreateNote() {
       is_template?: boolean;
       content?: Json | null;
       domain?: DomainId | null;
-      note_type?: 'hub' | 'page' | 'journal';
+      note_type?: 'hub' | 'page' | 'journal' | 'folder';
     }) => {
       const { data, error } = await supabase
         .from("office_notes")
@@ -186,7 +186,7 @@ export function useUpdateNote() {
       is_pinned?: boolean;
       parent_id?: string | null;
       domain?: DomainId | null;
-      note_type?: 'hub' | 'page' | 'journal';
+      note_type?: 'hub' | 'page' | 'journal' | 'folder';
     }) => {
       const { data, error } = await supabase
         .from("office_notes")
@@ -233,9 +233,9 @@ export function useInitializeHubs() {
     mutationFn: async (existingNotes: Note[]) => {
       const existingHubs = existingNotes.filter(n => n.note_type === 'hub');
       const existingDomains = new Set(existingHubs.map(h => h.domain));
-      
+
       const hubsToCreate = DOMAINS.filter(d => !existingDomains.has(d.id));
-      
+
       if (hubsToCreate.length === 0) return [];
 
       const createdHubs = await Promise.all(
@@ -294,11 +294,12 @@ export function groupNotesByDomain(notes: Note[]) {
     music: { hub: null, pages: [], journal: [] },
     projects: { hub: null, pages: [], journal: [] },
     content: { hub: null, pages: [], journal: [] },
+    general: { hub: null, pages: [], journal: [] },
   };
 
   notes.forEach(note => {
     if (!note.domain) return;
-    
+
     const domain = note.domain as DomainId;
     if (!grouped[domain]) return;
 

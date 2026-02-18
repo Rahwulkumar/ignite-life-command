@@ -22,6 +22,8 @@ const MusicPage = lazy(() => import("./pages/MusicPage"));
 const ContentPage = lazy(() => import("./pages/ContentPage"));
 const ProjectsPage = lazy(() => import("./pages/ProjectsPage"));
 const NotesPage = lazy(() => import("./pages/NotesPage"));
+const CharacterLibraryPage = lazy(() => import("./pages/spiritual/CharacterLibraryPage"));
+const CharacterWorkspacePage = lazy(() => import("./pages/spiritual/CharacterWorkspacePage"));
 
 const queryClient = new QueryClient();
 
@@ -63,6 +65,8 @@ const App = () => (
               <Route path="/content" element={<ProtectedRoute><ContentPage /></ProtectedRoute>} />
               <Route path="/projects" element={<ProtectedRoute><ProjectsPage /></ProtectedRoute>} />
               <Route path="/notes" element={<ProtectedRoute><NotesPage /></ProtectedRoute>} />
+              <Route path="/spiritual/library" element={<ProtectedRoute><CharacterLibraryPage /></ProtectedRoute>} />
+              <Route path="/spiritual/character/:id" element={<ProtectedRoute><CharacterWorkspacePage /></ProtectedRoute>} />
 
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

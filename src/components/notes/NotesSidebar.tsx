@@ -19,6 +19,7 @@ interface NotesSidebarProps {
   onSelectHub: (domainId: DomainId) => void;
   onCreateNote: (domainId: DomainId) => void;
   onTogglePin: (noteId: string) => void;
+  onDeleteNote?: (noteId: string) => void;
   isLoading: boolean;
 }
 
@@ -31,6 +32,7 @@ export function NotesSidebar({
   onSelectHub,
   onCreateNote,
   onTogglePin,
+  onDeleteNote,
   isLoading,
 }: NotesSidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -51,7 +53,7 @@ export function NotesSidebar({
   const activeDomainPages = activeDomainData?.pages || [];
   const activeDomainJournalCount = activeDomainData?.journal?.length || 0;
   const activeDomainHubId = activeDomainData?.hub?.id || null;
-  
+
   const pageTree = buildNoteTree(
     activeDomainPages.filter(p => !p.is_template && p.note_type === 'page')
   ) as NoteWithChildren[];
@@ -68,8 +70,8 @@ export function NotesSidebar({
                   onClick={() => onSelectHub(domain.id)}
                   className={cn(
                     "p-2 rounded-md flex-shrink-0 transition-colors",
-                    activeDomain === domain.id 
-                      ? "bg-primary text-primary-foreground" 
+                    activeDomain === domain.id
+                      ? "bg-primary text-primary-foreground"
                       : "hover:bg-muted text-muted-foreground"
                   )}
                 >
@@ -164,6 +166,7 @@ export function NotesSidebar({
                   onSelectNote={onSelectNote}
                   onSelectHub={onSelectHub}
                   onCreatePage={onCreateNote}
+                  onDeleteNote={onDeleteNote}
                 />
               ) : (
                 <div className="px-2 py-4 text-center text-sm text-muted-foreground">

@@ -1,126 +1,55 @@
-import { User, Calendar, ChevronRight, Plus } from "lucide-react";
-import { motion } from "framer-motion";
-import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Library, ArrowRight } from "lucide-react";
+import { BaseDomainCard } from "@/components/shared/BaseDomainCard";
+import { Button } from "@/components/ui/button";
 
-export interface Character {
-  id: string;
-  name: string;
-  description: string;
-}
-
-interface CharacterStudyCardProps {
-  characters: Character[];
-  currentCharacter?: {
-    name: string;
-    daysCompleted: number;
-    totalDays: number;
-    todayScripture: string;
-  };
-  onSelectCharacter: (character: Character) => void;
-  onStartDiscussion: () => void;
-  onReadScripture: () => void;
-}
-
-export const CharacterStudyCard = ({
-  characters,
-  currentCharacter,
-  onSelectCharacter,
-  onStartDiscussion,
-  onReadScripture,
-}: CharacterStudyCardProps) => {
-  const [showPicker, setShowPicker] = useState(!currentCharacter);
-
-  if (showPicker && !currentCharacter) {
-    return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="bg-card border border-border rounded-xl p-6"
-      >
-        <div className="flex items-center gap-3 mb-6">
-          <User className="w-4 h-4 text-muted-foreground" />
-          <p className="font-medium">Choose a Character</p>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          {characters.map((character) => (
-            <button
-              key={character.id}
-              onClick={() => onSelectCharacter(character)}
-              className="p-4 rounded-lg border border-border hover:border-foreground/20 transition-colors text-left"
-            >
-              <p className="font-medium text-sm">{character.name}</p>
-              <p className="text-xs text-muted-foreground">{character.description}</p>
-            </button>
-          ))}
-        </div>
-      </motion.div>
-    );
-  }
-
-  const progress = currentCharacter
-    ? (currentCharacter.daysCompleted / currentCharacter.totalDays) * 100
-    : 0;
+export const CharacterStudyCard = () => {
+  const navigate = useNavigate();
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="bg-card border border-border rounded-xl p-6"
-    >
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-            <span className="font-medium">{currentCharacter?.name[0]}</span>
-          </div>
-          <div>
-            <p className="font-medium">{currentCharacter?.name}</p>
-            <p className="text-xs text-muted-foreground">30-Day Study</p>
-          </div>
+    <BaseDomainCard
+      domainColor="spiritual"
+      icon={<Library className="w-5 h-5 text-spiritual" />}
+      title="Character Studies"
+      subtitle="Explore the lives of biblical figures"
+      className="h-full"
+      headerAction={
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 -mr-2 text-muted-foreground hover:text-spiritual"
+          onClick={() => navigate("/spiritual/library")}
+        >
+          <ArrowRight className="w-4 h-4" />
+        </Button>
+      }
+      footer={
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
+          <span>0 Active Studies</span>
+          <span className="group-hover:text-spiritual transition-colors">View Library →</span>
         </div>
-        <span className="text-xs text-muted-foreground">
-          Day {currentCharacter?.daysCompleted}/{currentCharacter?.totalDays}
-        </span>
-      </div>
-
-      <div className="h-1 bg-muted rounded-full mb-6 overflow-hidden">
-        <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: `${progress}%` }}
-          className="h-full bg-foreground rounded-full"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <button
-          onClick={onReadScripture}
-          className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors text-left"
-        >
-          <div>
-            <p className="text-sm font-medium">Today's Reading</p>
-            <p className="text-xs text-muted-foreground">{currentCharacter?.todayScripture}</p>
-          </div>
-          <ChevronRight className="w-4 h-4 text-muted-foreground" />
-        </button>
-
-        <button
-          onClick={onStartDiscussion}
-          className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors text-left"
-        >
-          <div>
-            <p className="text-sm font-medium">Discuss with Sage</p>
-            <p className="text-xs text-muted-foreground">AI-guided conversation</p>
-          </div>
-          <ChevronRight className="w-4 h-4 text-muted-foreground" />
-        </button>
-      </div>
-
-      <button
-        onClick={() => setShowPicker(true)}
-        className="w-full mt-4 text-xs text-muted-foreground hover:text-foreground transition-colors"
+      }
+    >
+      <div
+        className="flex flex-col gap-4 cursor-pointer group"
+        onClick={() => navigate("/spiritual/library")}
       >
-        Change character
-      </button>
-    </motion.div>
+        <div className="p-4 rounded-lg bg-muted/30 border border-border/50 group-hover:bg-spiritual/5 group-hover:border-spiritual/20 transition-all duration-300">
+          <div className="flex items-center gap-4 mb-2">
+            <div className="flex -space-x-3">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="w-8 h-8 rounded-full bg-muted border-2 border-background flex items-center justify-center text-[10px] font-medium text-muted-foreground">
+                  ?
+                </div>
+              ))}
+            </div>
+            <p className="text-sm font-medium">Start a new study</p>
+          </div>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Dive deep into the context, history, and spiritual lessons of characters like David, Moses, and Paul.
+          </p>
+        </div>
+      </div>
+    </BaseDomainCard>
   );
 };
