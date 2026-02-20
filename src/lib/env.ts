@@ -76,7 +76,7 @@ function validateEnvironment(): void {
             '\n\nPlease check your .env file. See .env.example for reference.'
         );
     } else if (env.isDevelopment) {
-
+      // All environment variables are present — no action needed
     }
 }
 

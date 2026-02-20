@@ -11,7 +11,9 @@ export function useBibleReadingPlan() {
             const { data, error } = await supabase
                 .from("bible_reading_plans")
                 .select("*")
-                .single();
+                .order("updated_at", { ascending: false })
+                .limit(1)
+                .maybeSingle();
 
             if (error && error.code !== "PGRST116") throw error; // PGRST116 is "no rows found"
             return data as BibleReadingPlan | null;

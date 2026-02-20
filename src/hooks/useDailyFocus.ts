@@ -8,7 +8,8 @@ export function useDailyFocus() {
     return useQuery({
         queryKey: ["daily-focus"],
         queryFn: async () => {
-            const today = new Date().toISOString().split('T')[0];
+            // Use local date to match user's perspective
+            const today = new Date().toLocaleDateString('en-CA');
             const { data, error } = await supabase
                 .from("daily_focus")
                 .select("*")
@@ -35,7 +36,8 @@ export function useSetDailyFocus() {
             }
             console.log("User authenticated:", user.id);
 
-            const today = new Date().toISOString().split('T')[0];
+            // Use local date
+            const today = new Date().toLocaleDateString('en-CA');
 
             const { data, error } = await supabase
                 .from("daily_focus")

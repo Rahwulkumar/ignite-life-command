@@ -18,16 +18,21 @@ import {
   TASK_TO_DOMAIN,
   formattedIdToLabel,
   getTaskIcon,
-  TaskDefinition
+  TaskDefinition,
 } from "@/lib/constants";
 import { TaskJournalDialog } from "./TaskJournalDialog";
+import { MetricsData } from "@/types/domain";
 
 interface DailyChecklistPopoverProps {
   date: Date;
   children: React.ReactNode;
   completedTasks: Record<string, string[]>;
   allTasks?: Record<string, string[]>;
-  onToggleTask: (dateKey: string, taskId: string, metricsData?: Record<string, any>) => void;
+  onToggleTask: (
+    dateKey: string,
+    taskId: string,
+    metricsData?: MetricsData,
+  ) => void;
 }
 
 export function DailyChecklistPopover({
@@ -63,22 +68,23 @@ export function DailyChecklistPopover({
 
   // Identify custom tasks
   const customTasksForDay: TaskDefinition[] = allTasksForDate
-    .filter(id => !STANDARD_TASKS.some(t => t.id === id))
-    .map(id => ({
+    .filter((id) => !STANDARD_TASKS.some((t) => t.id === id))
+    .map((id) => ({
       id,
       label: formattedIdToLabel(id),
       icon: getTaskIcon(id),
-      frequency: "daily"
+      frequency: "daily",
     }));
 
   const tasksForDay = [...standardTasksForDay, ...customTasksForDay];
 
   const allCompleted =
-    tasksForDay.length > 0 && tasksForDay.every((t) => completedForDate.includes(t.id));
+    tasksForDay.length > 0 &&
+    tasksForDay.every((t) => completedForDate.includes(t.id));
 
   // Tasks available to add (not already in the day's list)
   const availableToAdd = STANDARD_TASKS.filter(
-    task => !tasksForDay.some(t => t.id === task.id)
+    (task) => !tasksForDay.some((t) => t.id === task.id),
   );
 
   const handleTaskClick = (task: TaskDefinition) => {
@@ -175,7 +181,7 @@ export function DailyChecklistPopover({
 
   const handleCustomAdd = () => {
     if (customTask.trim()) {
-      const taskId = `custom_${customTask.toLowerCase().replace(/\s+/g, '_')}`;
+      const taskId = `custom_${customTask.toLowerCase().replace(/\s+/g, "_")}`;
       addPendingTask.mutate({
         taskId,
         entryDate: dateKey,
@@ -187,10 +193,13 @@ export function DailyChecklistPopover({
 
   return (
     <>
-      <Popover open={open} onOpenChange={(isOpen) => {
-        setOpen(isOpen);
-        if (!isOpen) setShowAddSection(false);
-      }}>
+      <Popover
+        open={open}
+        onOpenChange={(isOpen) => {
+          setOpen(isOpen);
+          if (!isOpen) setShowAddSection(false);
+        }}
+      >
         <PopoverTrigger asChild>{children}</PopoverTrigger>
         <PopoverContent
           className="w-64 p-0 bg-card/95 backdrop-blur-md border-border/50"
@@ -200,14 +209,18 @@ export function DailyChecklistPopover({
           {/* Header */}
           <div className="p-3 border-b border-border/30">
             <div className="flex items-center justify-between">
-              <h4 className="text-sm font-medium">{format(date, "EEEE, MMM d")}</h4>
+              <h4 className="text-sm font-medium">
+                {format(date, "EEEE, MMM d")}
+              </h4>
               {allCompleted && tasksForDay.length > 0 && (
                 <span className="text-xs text-emerald-500 flex items-center gap-1">
                   <Check className="w-3 h-3" /> Complete
                 </span>
               )}
             </div>
-            <p className="text-xs text-muted-foreground mt-0.5">Daily checklist</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Daily checklist
+            </p>
           </div>
 
           {/* Task List - Hidden scrollbar */}
@@ -229,8 +242,10 @@ export function DailyChecklistPopover({
                       onClick={() => handleTaskClick(task)}
                       className={cn(
                         "flex-1 flex items-center gap-3 p-2.5 rounded-lg transition-all text-left",
-                        isCompleted ? "bg-emerald-500/10 text-emerald-600" : "hover:bg-muted",
-                        allCompleted && "cursor-pointer"
+                        isCompleted
+                          ? "bg-emerald-500/10 text-emerald-600"
+                          : "hover:bg-muted",
+                        allCompleted && "cursor-pointer",
                       )}
                     >
                       <div
@@ -238,21 +253,25 @@ export function DailyChecklistPopover({
                           "w-5 h-5 rounded border-2 flex items-center justify-center transition-all",
                           isCompleted
                             ? "bg-emerald-500 border-emerald-500"
-                            : "border-muted-foreground/40"
+                            : "border-muted-foreground/40",
                         )}
                       >
-                        {isCompleted && <Check className="w-3 h-3 text-white" />}
+                        {isCompleted && (
+                          <Check className="w-3 h-3 text-white" />
+                        )}
                       </div>
                       <Icon
                         className={cn(
                           "w-4 h-4",
-                          isCompleted ? "text-emerald-500" : "text-muted-foreground"
+                          isCompleted
+                            ? "text-emerald-500"
+                            : "text-muted-foreground",
                         )}
                       />
                       <span
                         className={cn(
                           "text-sm flex-1",
-                          isCompleted && "line-through opacity-70"
+                          isCompleted && "line-through opacity-70",
                         )}
                       >
                         {task.label}
@@ -340,7 +359,7 @@ export function DailyChecklistPopover({
                       "px-2 rounded-md transition-colors",
                       customTask.trim()
                         ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                        : "bg-muted text-muted-foreground cursor-not-allowed"
+                        : "bg-muted text-muted-foreground cursor-not-allowed",
                     )}
                   >
                     <Check className="w-3.5 h-3.5" />

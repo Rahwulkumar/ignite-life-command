@@ -19,6 +19,13 @@ export interface CreateCharacterInput {
     testament?: string | null;
 }
 
+interface CharacterNoteContent {
+    type?: string;
+    description?: string;
+    role?: string;
+    testament?: string;
+}
+
 // Fetch all spiritual characters (stored in office_notes with markers)
 export function useSpiritualCharacters() {
     return useQuery({
@@ -35,12 +42,12 @@ export function useSpiritualCharacters() {
 
             // Filter for character entries and map to our interface
             const characters = (data || [])
-                .filter((note: any) => {
-                    const content = note.content as any;
+                .filter((note) => {
+                    const content = note.content as unknown as CharacterNoteContent;
                     return content?.type === "character";
                 })
-                .map((note: any) => {
-                    const content = note.content as any;
+                .map((note) => {
+                    const content = note.content as unknown as CharacterNoteContent;
                     return {
                         id: note.id,
                         name: note.title,
@@ -73,7 +80,7 @@ export function useSpiritualCharacter(id: string | undefined) {
             if (error) throw error;
             if (!data) return null;
 
-            const content = data.content as any;
+            const content = data.content as unknown as CharacterNoteContent;
             return {
                 id: data.id,
                 name: data.title,
@@ -118,7 +125,7 @@ export function useCreateCharacter() {
             if (error) throw error;
 
             // Map back to SpiritualCharacter interface
-            const content = data.content as any;
+            const content = data.content as unknown as CharacterNoteContent;
             return {
                 id: data.id,
                 name: data.title,

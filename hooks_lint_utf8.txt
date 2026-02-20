@@ -1,0 +1,11 @@
+﻿
+F:\ignite-life-command\src\hooks\useSpiritualCharacters.ts
+   38:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   39:53  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   42:29  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   43:53  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   76:45  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  121:45  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+Γ£û 6 problems (6 errors, 0 warnings)
+

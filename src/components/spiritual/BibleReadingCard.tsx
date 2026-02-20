@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Book, Edit2, Check, X, Search } from "lucide-react";
 import { BaseDomainCard } from "@/components/shared/BaseDomainCard";
 import { Button } from "@/components/ui/button";
@@ -29,16 +29,28 @@ export const BibleReadingCard = ({
   const [showDropdown, setShowDropdown] = useState(false);
   const { toast } = useToast();
 
-  const progress = calculateReadingProgress(currentBook, currentChapter, currentVerse);
+  // Sync state with props when they change
+  useEffect(() => {
+    setSelectedBook(currentBook);
+    setChapter(currentChapter.toString());
+    setVerse(currentVerse.toString());
+  }, [currentBook, currentChapter, currentVerse]);
+
+  const progress = calculateReadingProgress(
+    currentBook,
+    currentChapter,
+    currentVerse,
+  );
 
   // Filter books based on search query
-  const filteredBooks = BIBLE_BOOKS.filter(book =>
-    book.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    book.abbreviation.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredBooks = BIBLE_BOOKS.filter(
+    (book) =>
+      book.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      book.abbreviation.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   // Get the selected book's chapter count for validation
-  const selectedBookData = BIBLE_BOOKS.find(b => b.name === selectedBook);
+  const selectedBookData = BIBLE_BOOKS.find((b) => b.name === selectedBook);
   const maxChapters = selectedBookData?.chapters || 999;
 
   const handleSave = () => {
@@ -114,7 +126,9 @@ export const BibleReadingCard = ({
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Progress</span>
-            <span className="font-medium text-spiritual">{progress.toFixed(1)}%</span>
+            <span className="font-medium text-spiritual">
+              {progress.toFixed(1)}%
+            </span>
           </div>
           <div className="h-2 bg-muted rounded-full overflow-hidden">
             <div
@@ -156,23 +170,25 @@ export const BibleReadingCard = ({
                 {showDropdown && filteredBooks.length > 0 && (
                   <div className="absolute z-50 w-full mt-1 max-h-[280px] overflow-y-auto rounded-lg border border-border bg-card shadow-lg">
                     {/* Old Testament */}
-                    {filteredBooks.some(b => b.testament === 'old') && (
+                    {filteredBooks.some((b) => b.testament === "old") && (
                       <>
                         <div className="sticky top-0 bg-card px-3 py-2 text-xs font-medium text-muted-foreground border-b border-border/50">
                           Old Testament
                         </div>
                         {filteredBooks
-                          .filter(b => b.testament === 'old')
-                          .map(book => (
+                          .filter((b) => b.testament === "old")
+                          .map((book) => (
                             <button
                               key={book.id}
                               onClick={() => handleSelectBook(book.name)}
                               className={cn(
                                 "w-full px-3 py-2.5 text-left hover:bg-spiritual/10 transition-colors flex items-center justify-between group",
-                                selectedBook === book.name && "bg-spiritual/5"
+                                selectedBook === book.name && "bg-spiritual/5",
                               )}
                             >
-                              <span className="font-serif text-sm">{book.name}</span>
+                              <span className="font-serif text-sm">
+                                {book.name}
+                              </span>
                               <span className="text-xs text-muted-foreground group-hover:text-spiritual">
                                 {book.chapters} ch
                               </span>
@@ -182,23 +198,25 @@ export const BibleReadingCard = ({
                     )}
 
                     {/* New Testament */}
-                    {filteredBooks.some(b => b.testament === 'new') && (
+                    {filteredBooks.some((b) => b.testament === "new") && (
                       <>
                         <div className="sticky top-0 bg-card px-3 py-2 text-xs font-medium text-muted-foreground border-b border-t border-border/50">
                           New Testament
                         </div>
                         {filteredBooks
-                          .filter(b => b.testament === 'new')
-                          .map(book => (
+                          .filter((b) => b.testament === "new")
+                          .map((book) => (
                             <button
                               key={book.id}
                               onClick={() => handleSelectBook(book.name)}
                               className={cn(
                                 "w-full px-3 py-2.5 text-left hover:bg-spiritual/10 transition-colors flex items-center justify-between group",
-                                selectedBook === book.name && "bg-spiritual/5"
+                                selectedBook === book.name && "bg-spiritual/5",
                               )}
                             >
-                              <span className="font-serif text-sm">{book.name}</span>
+                              <span className="font-serif text-sm">
+                                {book.name}
+                              </span>
                               <span className="text-xs text-muted-foreground group-hover:text-spiritual">
                                 {book.chapters} ch
                               </span>
@@ -214,8 +232,12 @@ export const BibleReadingCard = ({
             {/* Chapter and Verse Inputs */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
-                <Label htmlFor="chapter-input" className="text-xs font-medium text-muted-foreground">
-                  Chapter {selectedBookData && `(1-${selectedBookData.chapters})`}
+                <Label
+                  htmlFor="chapter-input"
+                  className="text-xs font-medium text-muted-foreground"
+                >
+                  Chapter{" "}
+                  {selectedBookData && `(1-${selectedBookData.chapters})`}
                 </Label>
                 <Input
                   id="chapter-input"
@@ -229,7 +251,10 @@ export const BibleReadingCard = ({
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="verse-input" className="text-xs font-medium text-muted-foreground">
+                <Label
+                  htmlFor="verse-input"
+                  className="text-xs font-medium text-muted-foreground"
+                >
                   Verse
                 </Label>
                 <Input
@@ -278,11 +303,15 @@ export const BibleReadingCard = ({
                 </p>
                 <div className="flex items-center gap-3 text-sm text-muted-foreground">
                   <span className="flex items-center gap-1">
-                    <span className="font-serif font-medium text-foreground">Ch {currentChapter}</span>
+                    <span className="font-serif font-medium text-foreground">
+                      Ch {currentChapter}
+                    </span>
                   </span>
                   <span className="text-border">•</span>
                   <span className="flex items-center gap-1">
-                    <span className="font-serif font-medium text-foreground">Vs {currentVerse}</span>
+                    <span className="font-serif font-medium text-foreground">
+                      Vs {currentVerse}
+                    </span>
                   </span>
                 </div>
               </div>

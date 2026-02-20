@@ -19,24 +19,29 @@ import {
   STANDARD_TASKS,
   formattedIdToLabel,
   getTaskIcon,
-  TaskDefinition
+  TaskDefinition,
 } from "@/lib/constants";
 import { CompletionChart, ChecklistEntry } from "./CompletionChart";
 import { TaskDetailDialog } from "./TaskDetailDialog";
+import { TaskCompletionPayload, MetricsData } from "@/types/domain";
 
 interface InteractiveCalendarProps {
   selectedDate: Date;
   onSelectDate: (date: Date) => void;
   completedTasks: Record<string, string[]>;
   allTasks?: Record<string, string[]>;
-  onToggleTask: (dateKey: string, taskId: string, metricsData?: Record<string, any>) => void;
+  onToggleTask: (
+    dateKey: string,
+    taskId: string,
+    metricsData?: MetricsData,
+  ) => void;
   entries?: ChecklistEntry[];
 }
 
 const getExpectedTaskCount = (date: Date) => {
   const dayOfWeek = getDay(date);
   // Calculate total standard tasks applicable for this day
-  const applicableStandard = STANDARD_TASKS.filter(task => {
+  const applicableStandard = STANDARD_TASKS.filter((task) => {
     if (task.frequency === "daily") return true;
     if (task.frequency === "weekly" && task.daysOfWeek) {
       return task.daysOfWeek.includes(dayOfWeek);
@@ -65,7 +70,7 @@ export function InteractiveCalendar({
   const todayCompleted = completedTasks[todayKey] || [];
 
   // Standard tasks for today
-  const standardTodayTasks = STANDARD_TASKS.filter(task => {
+  const standardTodayTasks = STANDARD_TASKS.filter((task) => {
     if (task.frequency === "daily") return true;
     if (task.frequency === "weekly" && task.daysOfWeek) {
       return task.daysOfWeek.includes(dayOfWeek);
@@ -75,16 +80,18 @@ export function InteractiveCalendar({
 
   // Custom tasks for today
   const customTodayTasks: TaskDefinition[] = todayCompleted
-    .filter(id => !STANDARD_TASKS.some(t => t.id === id))
-    .map(id => ({
+    .filter((id) => !STANDARD_TASKS.some((t) => t.id === id))
+    .map((id) => ({
       id,
       label: formattedIdToLabel(id),
       icon: getTaskIcon(id),
-      frequency: "daily"
+      frequency: "daily",
     }));
 
   const allTodayTasks = [...standardTodayTasks, ...customTodayTasks];
-  const remainingTasks = allTodayTasks.filter((t) => !todayCompleted.includes(t.id));
+  const remainingTasks = allTodayTasks.filter(
+    (t) => !todayCompleted.includes(t.id),
+  );
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
@@ -99,7 +106,9 @@ export function InteractiveCalendar({
     const completed = completedTasks[dateKey] || [];
 
     // Also include custom tasks in the expected count for past days if they were completed
-    const customCount = completed.filter(id => !STANDARD_TASKS.some(t => t.id === id)).length;
+    const customCount = completed.filter(
+      (id) => !STANDARD_TASKS.some((t) => t.id === id),
+    ).length;
     const expected = getExpectedTaskCount(date) + customCount;
 
     if (completed.length === 0) return "none";
@@ -112,7 +121,7 @@ export function InteractiveCalendar({
     setIsDetailOpen(true);
   };
 
-  const handleTaskComplete = (data: any) => {
+  const handleTaskComplete = (data: TaskCompletionPayload) => {
     // data contains { taskId, date, notes, metricsData }
     const dateKey = format(data.date, "yyyy-MM-dd");
 
@@ -124,7 +133,9 @@ export function InteractiveCalendar({
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-sm font-medium">{format(currentMonth, "MMM yyyy")}</h3>
+        <h3 className="text-sm font-medium">
+          {format(currentMonth, "MMM yyyy")}
+        </h3>
         <div className="flex gap-1">
           <button
             onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
@@ -144,7 +155,10 @@ export function InteractiveCalendar({
       {/* Week Days Header */}
       <div className="grid grid-cols-7 gap-1 mb-1">
         {weekDays.map((d, i) => (
-          <div key={i} className="text-center text-[11px] text-muted-foreground font-medium py-1">
+          <div
+            key={i}
+            className="text-center text-[11px] text-muted-foreground font-medium py-1"
+          >
             {d}
           </div>
         ))}
@@ -173,7 +187,7 @@ export function InteractiveCalendar({
                   !isCurrentMonth && "text-muted-foreground/30",
                   isCurrentMonth && !isSelected && "hover:bg-muted",
                   isSelected && "bg-foreground text-background",
-                  isToday && !isSelected && "ring-1 ring-foreground/30"
+                  isToday && !isSelected && "ring-1 ring-foreground/30",
                 )}
               >
                 <span>{format(day, "d")}</span>
@@ -185,14 +199,14 @@ export function InteractiveCalendar({
                       <Check
                         className={cn(
                           "w-2 h-2",
-                          isSelected ? "text-background" : "text-emerald-500"
+                          isSelected ? "text-background" : "text-emerald-500",
                         )}
                       />
                     ) : (
                       <div
                         className={cn(
                           "w-1 h-1 rounded-full",
-                          isSelected ? "bg-background/60" : "bg-amber-500"
+                          isSelected ? "bg-background/60" : "bg-amber-500",
                         )}
                       />
                     )}
@@ -218,7 +232,10 @@ export function InteractiveCalendar({
               allTasks={allTasks}
               onToggleTask={onToggleTask}
             >
-              <button className="p-1 rounded hover:bg-muted transition-colors" title="Add task">
+              <button
+                className="p-1 rounded hover:bg-muted transition-colors"
+                title="Add task"
+              >
                 <Plus className="w-4 h-4 text-muted-foreground" />
               </button>
             </DailyChecklistPopover>
@@ -253,9 +270,6 @@ export function InteractiveCalendar({
       <div className="flex-1 min-h-[80px] -mx-2">
         <CompletionChart entries={entries} timeFilter="week" compact={true} />
       </div>
-
-
-
 
       {detailTask && (
         <TaskDetailDialog

@@ -1,0 +1,10 @@
+﻿
+F:\ignite-life-command\src\pages\NotesPage.tsx
+  62:6   warning  React Hook useEffect has missing dependencies: 'initializeHubs' and 'notes'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  92:25  warning  React Hook useCallback received a function whose dependencies are unknown. Pass an inline function instead                       react-hooks/exhaustive-deps
+
+F:\ignite-life-command\src\pages\spiritual\CharacterWorkspacePage.tsx
+  39:27  warning  React Hook useCallback received a function whose dependencies are unknown. Pass an inline function instead  react-hooks/exhaustive-deps
+
+Γ£û 3 problems (0 errors, 3 warnings)
+
