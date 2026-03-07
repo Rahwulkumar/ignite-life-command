@@ -1,0 +1,29 @@
+{
+  "name": "ignite-life-command-api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "build": "tsc",
+    "db:push": "drizzle-kit push",
+    "db:generate": "drizzle-kit generate",
+    "db:studio": "drizzle-kit studio"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.7",
+    "@neondatabase/serverless": "^0.10.4",
+    "better-auth": "^1.2.7",
+    "dotenv": "^17.3.1",
+    "drizzle-orm": "^0.40.0",
+    "hono": "^4.7.4",
+    "openai": "^4.90.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "drizzle-kit": "^0.30.4",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  }
+}

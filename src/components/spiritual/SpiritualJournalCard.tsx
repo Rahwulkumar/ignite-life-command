@@ -1,6 +1,5 @@
-import { PenLine, Plus, ChevronRight, Calendar } from "lucide-react";
+import { PenLine, Plus, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
-import { useState } from "react";
 
 export interface JournalEntry {
   id: string;
@@ -14,12 +13,14 @@ interface SpiritualJournalCardProps {
   recentEntries: JournalEntry[];
   onNewEntry: () => void;
   onViewEntry: (id: string) => void;
+  onViewAll?: () => void; // FIX BUG 8: was dead button, now wired
 }
 
 export const SpiritualJournalCard = ({
   recentEntries,
   onNewEntry,
   onViewEntry,
+  onViewAll,
 }: SpiritualJournalCardProps) => {
   return (
     <motion.div
@@ -42,34 +43,45 @@ export const SpiritualJournalCard = ({
       </div>
 
       <div className="space-y-2">
-        {recentEntries.map((entry) => (
-          <button
-            key={entry.id}
-            onClick={() => onViewEntry(entry.id)}
-            className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors text-left"
-          >
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-xs text-muted-foreground">
-                  {new Date(entry.date).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </span>
-                {entry.characterName && (
-                  <span className="text-xs">· {entry.characterName}</span>
-                )}
+        {recentEntries.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-6">
+            No entries yet. Start your first reflection.
+          </p>
+        ) : (
+          recentEntries.map((entry) => (
+            <button
+              key={entry.id}
+              onClick={() => onViewEntry(entry.id)}
+              className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors text-left"
+            >
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs text-muted-foreground">
+                    {new Date(entry.date).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </span>
+                  {entry.characterName && (
+                    <span className="text-xs">· {entry.characterName}</span>
+                  )}
+                </div>
+                <p className="text-sm truncate">{entry.excerpt}</p>
               </div>
-              <p className="text-sm truncate">{entry.excerpt}</p>
-            </div>
-            <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-          </button>
-        ))}
+              <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+            </button>
+          ))
+        )}
       </div>
 
-      <button className="w-full mt-4 text-xs text-muted-foreground hover:text-foreground transition-colors">
-        View all entries
-      </button>
+      {recentEntries.length > 0 && (
+        <button
+          onClick={onViewAll}
+          className="w-full mt-4 text-xs text-muted-foreground hover:text-foreground transition-colors"
+        >
+          View all entries →
+        </button>
+      )}
     </motion.div>
   );
 };

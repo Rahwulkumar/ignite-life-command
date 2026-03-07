@@ -1,57 +1,55 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { Database } from "@/integrations/supabase/types";
+import { api } from "@/lib/api";
 
-// Reusing office_notes table with domain='spiritual' and note_type='journal'
-type JournalEntry = Database["public"]["Tables"]["office_notes"]["Row"];
+// Journal entries are stored in office_notes with domain='spiritual', noteType='journal'
+export interface JournalEntry {
+  id: string;
+  user_id: string;
+  title: string;
+  content: unknown;
+  icon: string | null;
+  domain: string | null;
+  note_type: string | null;
+  is_pinned: boolean | null;
+  created_at: string;
+  updated_at: string;
+}
 
 export function useSpiritualJournal() {
-    return useQuery({
-        queryKey: ["spiritual-journal"],
-        queryFn: async () => {
-            const { data, error } = await supabase
-                .from("office_notes")
-                .select("*")
-                .eq("domain", "spiritual")
-                .eq("note_type", "journal")
-                .order("created_at", { ascending: false });
-
-            if (error) throw error;
-            return data as JournalEntry[];
-        },
-    });
+  return useQuery({
+    queryKey: ["spiritual-journal"],
+    queryFn: () =>
+      api.get<JournalEntry[]>("/api/notes?domain=spiritual&noteType=journal"),
+  });
 }
 
 export function useAddJournalEntry() {
-    const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-    return useMutation({
-        mutationFn: async ({ title, content }: { title: string; content: string }) => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error("User not authenticated");
+  return useMutation({
+    mutationFn: ({ title, content }: { title: string; content: string }) =>
+      api.post<JournalEntry>("/api/notes", {
+        title,
+        content: { body: content },
+        domain: "spiritual",
+        noteType: "journal",
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["spiritual-journal"] });
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+    },
+  });
+}
 
-            // Content is JSONB, so we wrap the string content
-            const contentJson = { body: content };
+export function useDeleteJournalEntry() {
+  const queryClient = useQueryClient();
 
-            const { data, error } = await supabase
-                .from("office_notes")
-                .insert({
-                    title,
-                    content: contentJson,
-                    domain: "spiritual",
-                    note_type: "journal",
-                    user_id: user.id,
-                    is_pinned: false,
-                    is_template: false,
-                })
-                .select()
-                .single();
-
-            if (error) throw error;
-            return data;
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["spiritual-journal"] });
-        },
-    });
+  return useMutation({
+    mutationFn: (id: string) =>
+      api.delete<{ success: boolean }>(`/api/notes/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["spiritual-journal"] });
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+    },
+  });
 }

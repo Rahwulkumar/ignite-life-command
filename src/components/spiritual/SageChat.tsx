@@ -1,14 +1,9 @@
+import { useCallback } from "react";
 import { BookOpen } from "lucide-react";
 import { AgentChat } from "@/components/shared/AgentChat";
+import { streamRequest } from "@/lib/api";
 
 const SAGE_INTRO = `Grace and peace to you. I am Sage, your Spiritual Guide. I can help you deepen your understanding of Scripture, explore theological concepts, or provide biblical wisdom for your daily walk. What is on your heart today?`;
-
-const MOCK_RESPONSES = [
-  "In Romans 8:28, Paul isn't saying everything is 'good' in itself, but that God orchestrates all things—even suffering—towards the ultimate good of conformity to Christ.",
-  "To build a consistent prayer habit, start small. Daniel prayed three times a day, but key was his consistency. Try 5 minutes each morning before checking your phone.",
-  "The Fruit of the Spirit in Galatians 5 is singular 'fruit', not 'fruits'. It's a singular package deal of character that the Holy Spirit produces in us.",
-  "Lectio Divina is a beautiful way to read Scripture. It involves four steps: Reading (Lectio), Meditation (Meditatio), Prayer (Oratio), and Contemplation (Contemplatio).",
-];
 
 const SUGGESTIONS = [
   "Explain Romans 8:28 in context",
@@ -18,6 +13,47 @@ const SUGGESTIONS = [
 ];
 
 export function SageChat() {
+  // FIX BUG 1: Wire the real useSpiritualGuide hook's streaming API instead of mock responses
+  const onSendMessage = useCallback(async (content: string) => {
+    let assistantContent = "";
+
+    const response = await streamRequest("/api/ai/sage", {
+      messages: [{ role: "user", content }],
+    });
+
+    if (!response.body) throw new Error("No response body from Sage");
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      let newlineIndex: number;
+      while ((newlineIndex = buffer.indexOf("\n")) !== -1) {
+        let line = buffer.slice(0, newlineIndex);
+        buffer = buffer.slice(newlineIndex + 1);
+        if (line.endsWith("\r")) line = line.slice(0, -1);
+        if (line.startsWith(":") || line.trim() === "") continue;
+        if (!line.startsWith("data: ")) continue;
+        const jsonStr = line.slice(6).trim();
+        if (jsonStr === "[DONE]") continue;
+        try {
+          const parsed = JSON.parse(jsonStr);
+          const delta = parsed.choices?.[0]?.delta?.content;
+          if (delta) assistantContent += delta;
+        } catch {
+          /* incomplete chunk, ignore */
+        }
+      }
+    }
+
+    return assistantContent;
+  }, []);
+
   return (
     <AgentChat
       agentName="Sage"
@@ -27,7 +63,7 @@ export function SageChat() {
       introMessage={SAGE_INTRO}
       placeholder="Ask about Scripture, theology, or spiritual growth..."
       suggestions={SUGGESTIONS}
-      mockResponses={MOCK_RESPONSES}
+      onSendMessage={onSendMessage}
     />
   );
 }

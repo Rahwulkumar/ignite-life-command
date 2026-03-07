@@ -2,9 +2,12 @@ import { useNavigate } from "react-router-dom";
 import { Library, ArrowRight } from "lucide-react";
 import { BaseDomainCard } from "@/components/shared/BaseDomainCard";
 import { Button } from "@/components/ui/button";
+import { useSpiritualCharacters } from "@/hooks/useSpiritualCharacters";
 
 export const CharacterStudyCard = () => {
   const navigate = useNavigate();
+  const { data: characters = [] } = useSpiritualCharacters();
+  const activeCount = characters.length;
 
   return (
     <BaseDomainCard
@@ -25,8 +28,13 @@ export const CharacterStudyCard = () => {
       }
       footer={
         <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>0 Active Studies</span>
-          <span className="group-hover:text-spiritual transition-colors">View Library →</span>
+          {/* FIX BUG 5: use real count from hook */}
+          <span>
+            {activeCount} Active {activeCount === 1 ? "Study" : "Studies"}
+          </span>
+          <span className="group-hover:text-spiritual transition-colors">
+            View Library →
+          </span>
         </div>
       }
     >
@@ -37,16 +45,24 @@ export const CharacterStudyCard = () => {
         <div className="p-4 rounded-lg bg-muted/30 border border-border/50 group-hover:bg-spiritual/5 group-hover:border-spiritual/20 transition-all duration-300">
           <div className="flex items-center gap-4 mb-2">
             <div className="flex -space-x-3">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="w-8 h-8 rounded-full bg-muted border-2 border-background flex items-center justify-center text-[10px] font-medium text-muted-foreground">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="w-8 h-8 rounded-full bg-muted border-2 border-background flex items-center justify-center text-[10px] font-medium text-muted-foreground"
+                >
                   ?
                 </div>
               ))}
             </div>
-            <p className="text-sm font-medium">Start a new study</p>
+            <p className="text-sm font-medium">
+              {activeCount > 0
+                ? `${activeCount} character${activeCount !== 1 ? "s" : ""} studied`
+                : "Start a new study"}
+            </p>
           </div>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Dive deep into the context, history, and spiritual lessons of characters like David, Moses, and Paul.
+            Dive deep into the context, history, and spiritual lessons of
+            characters like David, Moses, and Paul.
           </p>
         </div>
       </div>

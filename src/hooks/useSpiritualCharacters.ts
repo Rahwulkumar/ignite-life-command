@@ -1,231 +1,124 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { api } from "@/lib/api";
 
 export interface SpiritualCharacter {
-    id: string;
-    name: string;
-    description: string | null;
-    role: string | null;
-    testament: string | null;
-    notion_folder_id: string | null;
-    created_at: string;
-    user_id: string;
+  id: string;
+  name: string;
+  description: string | null;
+  role: string | null;
+  testament: string | null;
+  notion_folder_id: string | null;
+  created_at: string | null;
+  user_id: string;
 }
 
 export interface CreateCharacterInput {
-    name: string;
-    description?: string | null;
-    role?: string | null;
-    testament?: string | null;
+  name: string;
+  description?: string | null;
+  role?: string | null;
+  testament?: string | null;
 }
 
-interface CharacterNoteContent {
-    type?: string;
+interface CharacterNote {
+  id: string;
+  user_id: string;
+  title: string;
+  content: {
+    type: string;
     description?: string;
     role?: string;
     testament?: string;
+  } | null;
+  parent_id: string | null;
+  domain: string | null;
+  note_type: string | null;
+  created_at: string | null;
 }
 
-// Fetch all spiritual characters (stored in office_notes with markers)
+// Characters are stored in office_notes with domain='spiritual', noteType='character'
 export function useSpiritualCharacters() {
-    return useQuery({
-        queryKey: ["spiritual-characters"],
-        queryFn: async () => {
-            const { data, error } = await supabase
-                .from("office_notes")
-                .select("*")
-                .eq("domain", "spiritual")
-                .eq("note_type", "character")
-                .not("content", "is", null);
-
-            if (error) throw error;
-
-            // Filter for character entries and map to our interface
-            const characters = (data || [])
-                .filter((note) => {
-                    const content = note.content as unknown as CharacterNoteContent;
-                    return content?.type === "character";
-                })
-                .map((note) => {
-                    const content = note.content as unknown as CharacterNoteContent;
-                    return {
-                        id: note.id,
-                        name: note.title,
-                        description: content.description || null,
-                        role: content.role || null,
-                        testament: content.testament || null,
-                        notion_folder_id: note.parent_id,
-                        created_at: note.created_at,
-                        user_id: note.user_id
-                    } as SpiritualCharacter;
-                });
-
-            return characters;
-        },
-    });
+  return useQuery({
+    queryKey: ["spiritual-characters"],
+    queryFn: async () => {
+      const notes = await api.get<CharacterNote[]>(
+        "/api/notes?domain=spiritual&noteType=character"
+      );
+      return notes
+        .filter((note) => note.content?.type === "character")
+        .map((note) => ({
+          id: note.id,
+          name: note.title,
+          description: note.content?.description ?? null,
+          role: note.content?.role ?? null,
+          testament: note.content?.testament ?? null,
+          notion_folder_id: note.parent_id,
+          created_at: note.created_at,
+          user_id: note.user_id,
+        })) as SpiritualCharacter[];
+    },
+  });
 }
 
-// Fetch a single spiritual character (from office_notes)
-export function useSpiritualCharacter(id: string | undefined) {
-    return useQuery({
-        queryKey: ["spiritual-character", id],
-        queryFn: async () => {
-            if (!id) return null;
-            const { data, error } = await supabase
-                .from("office_notes")
-                .select("*")
-                .eq("id", id)
-                .single();
+export function useCreateSpiritualCharacter() {
+  const queryClient = useQueryClient();
 
-            if (error) throw error;
-            if (!data) return null;
-
-            const content = data.content as unknown as CharacterNoteContent;
-            return {
-                id: data.id,
-                name: data.title,
-                description: content?.description || null,
-                role: content?.role || null,
-                testament: content?.testament || null,
-                notion_folder_id: data.parent_id,
-                created_at: data.created_at,
-                user_id: data.user_id
-            } as SpiritualCharacter;
+  return useMutation({
+    mutationFn: (input: CreateCharacterInput) =>
+      api.post<CharacterNote>("/api/notes", {
+        title: input.name,
+        content: {
+          type: "character",
+          description: input.description,
+          role: input.role,
+          testament: input.testament,
         },
-        enabled: !!id,
-    });
+        domain: "spiritual",
+        noteType: "character",
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["spiritual-characters"] });
+    },
+  });
 }
 
-// Create a new spiritual character (stored in office_notes)
-export function useCreateCharacter() {
-    const queryClient = useQueryClient();
+export function useDeleteSpiritualCharacter() {
+  const queryClient = useQueryClient();
 
-    return useMutation({
-        mutationFn: async (newCharacter: CreateCharacterInput) => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error("User not authenticated");
-
-            const { data, error } = await supabase
-                .from("office_notes")
-                .insert({
-                    title: newCharacter.name,
-                    domain: "spiritual",
-                    note_type: "character",
-                    content: {
-                        type: "character",
-                        description: newCharacter.description || null,
-                        role: newCharacter.role || null,
-                        testament: newCharacter.testament || null
-                    },
-                    user_id: user.id
-                })
-                .select()
-                .single();
-
-            if (error) throw error;
-
-            // Map back to SpiritualCharacter interface
-            const content = data.content as unknown as CharacterNoteContent;
-            return {
-                id: data.id,
-                name: data.title,
-                description: content.description || null,
-                role: content.role || null,
-                testament: content.testament || null,
-                notion_folder_id: data.parent_id,
-                created_at: data.created_at,
-                user_id: data.user_id
-            } as SpiritualCharacter;
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["spiritual-characters"] });
-        },
-    });
+  return useMutation({
+    mutationFn: (id: string) =>
+      api.delete<{ success: boolean }>(`/api/notes/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["spiritual-characters"] });
+    },
+  });
 }
 
-// Delete a spiritual character
-export function useDeleteCharacter() {
-    const queryClient = useQueryClient();
+export function useUpdateSpiritualCharacter() {
+  const queryClient = useQueryClient();
 
-    return useMutation({
-        mutationFn: async (characterId: string) => {
-            const { error } = await supabase
-                .from("office_notes")
-                .delete()
-                .eq("id", characterId);
-
-            if (error) throw error;
+  return useMutation({
+    mutationFn: ({
+      id,
+      updates,
+    }: {
+      id: string;
+      updates: Partial<CreateCharacterInput>;
+    }) =>
+      api.patch<CharacterNote>(`/api/notes/${id}`, {
+        title: updates.name,
+        content: {
+          type: "character",
+          ...(updates.description !== undefined && {
+            description: updates.description,
+          }),
+          ...(updates.role !== undefined && { role: updates.role }),
+          ...(updates.testament !== undefined && {
+            testament: updates.testament,
+          }),
         },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["spiritual-characters"] });
-            queryClient.invalidateQueries({ queryKey: ["notes"] });
-        },
-    });
-}
-
-// Ensure a folder exists for the character in office_notes
-export function useEnsureCharacterFolder() {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: async (character: SpiritualCharacter) => {
-            if (character.notion_folder_id) return character.notion_folder_id;
-
-            // 1. Check/Create "Character Studies" root folder (Using standard table access as office_notes is fine)
-            const { data: rootFolder } = await supabase
-                .from("office_notes")
-                .select("id")
-                .eq("title", "Character Studies")
-                .eq("domain", "spiritual")
-                .is("parent_id", null)
-                .maybeSingle();
-
-            let rootId = rootFolder?.id;
-
-            if (!rootId) {
-                const { data: newRoot, error: createRootError } = await supabase
-                    .from("office_notes")
-                    .insert({
-                        title: "Character Studies",
-                        domain: "spiritual",
-                        note_type: "hub",
-                        icon: "📚",
-                    })
-                    .select("id")
-                    .single();
-
-                if (createRootError) throw createRootError;
-                rootId = newRoot.id;
-            }
-
-            // 2. Create Character Folder under Root
-            const { data: charFolder, error: charFolderError } = await supabase
-                .from("office_notes")
-                .insert({
-                    title: character.name,
-                    domain: "spiritual",
-                    parent_id: rootId,
-                    note_type: "hub",
-                    icon: "👤",
-                })
-                .select("id")
-                .single();
-
-            if (charFolderError) throw charFolderError;
-
-            // 3. Link folder by updating parent_id
-            const { error: updateError } = await supabase
-                .from("office_notes")
-                .update({ parent_id: charFolder.id })
-                .eq("id", character.id);
-
-            if (updateError) throw updateError;
-
-            return charFolder.id;
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["spiritual-characters"] });
-            queryClient.invalidateQueries({ queryKey: ["notes"] });
-        },
-    });
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["spiritual-characters"] });
+    },
+  });
 }
