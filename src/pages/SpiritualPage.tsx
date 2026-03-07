@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BookOpen, Brain, Target } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import { DomainPageTemplate } from "@/components/shared/DomainPageTemplate";
 import { BibleReadingCard } from "@/components/spiritual/BibleReadingCard";
 import { DailyFocusCard } from "@/components/spiritual/DailyFocusCard";
@@ -88,11 +88,12 @@ const SpiritualPage = () => {
     };
   });
 
+  // FIX: use camelCase fields matching Drizzle output (isCompleted, not is_completed)
   const mappedGoals = goals.map((g) => ({
     id: g.id,
     title: g.title,
     progress: g.progress ?? 0,
-    isCompleted: g.is_completed ?? false,
+    isCompleted: g.isCompleted ?? false,
     category: g.category ?? "general",
   }));
 

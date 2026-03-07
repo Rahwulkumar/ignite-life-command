@@ -1,16 +1,17 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 
+// Drizzle returns camelCase column names matching the schema definition
 export interface SpiritualGoal {
   id: string;
-  user_id: string;
+  userId: string;
   title: string;
   description: string | null;
-  target_date: string | null;
+  targetDate: string | null;
   progress: number;
-  is_completed: boolean;
+  isCompleted: boolean;
   category: string;
-  created_at: string;
+  createdAt: string;
 }
 
 export function useSpiritualGoals() {
