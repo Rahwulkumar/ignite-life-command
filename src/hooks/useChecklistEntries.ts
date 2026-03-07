@@ -157,3 +157,31 @@ export function useSaveChecklistMetrics() {
     },
   });
 }
+
+/**
+ * Add a task to a specific date's checklist as pending (not yet completed).
+ * Used by DailyChecklistPopover "Add Task" panel.
+ */
+export function useAddPendingTask() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      taskId,
+      entryDate,
+    }: {
+      taskId: string;
+      entryDate: string;
+    }) =>
+      api.post<ChecklistEntry>("/api/checklist-entries", {
+        taskId,
+        entryDate,
+        isCompleted: false,
+        metricsData: {},
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["checklist-entries"] });
+      queryClient.invalidateQueries({ queryKey: ["checklist-analytics"] });
+    },
+  });
+}

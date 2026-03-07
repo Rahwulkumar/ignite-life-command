@@ -90,13 +90,13 @@ export function DailyChecklistPopover({
   const handleTaskClick = (task: TaskDefinition) => {
     const isCompleted = completedForDate.includes(task.id);
 
-    if (allCompleted) {
-      navigate("/notes");
-    } else if (!isCompleted) {
+    if (isCompleted) {
+      // Already completed → un-complete it
+      onToggleTask(dateKey, task.id);
+    } else {
+      // Not completed → open journal dialog to complete
       setSelectedTask(task);
       setJournalDialogOpen(true);
-    } else {
-      onToggleTask(dateKey, task.id);
     }
   };
 
