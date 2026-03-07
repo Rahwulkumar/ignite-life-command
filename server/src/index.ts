@@ -21,8 +21,16 @@ app.use("*", logger());
 app.use(
   "*",
   cors({
-    origin: process.env.FRONTEND_URL ?? "http://localhost:5173",
-    allowHeaders: ["Content-Type", "Authorization"],
+    origin: (origin) => {
+      // Allow any localhost origin in dev (covers ports 5173, 8080, etc.)
+      if (!origin || origin.startsWith("http://localhost") || origin.startsWith("http://127.0.0.1")) {
+        return origin ?? "*";
+      }
+      // In production, only allow the configured FRONTEND_URL
+      const allowed = process.env.FRONTEND_URL ?? "http://localhost:8080";
+      return origin === allowed ? origin : null;
+    },
+    allowHeaders: ["Content-Type", "Authorization", "Cookie"],
     allowMethods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
   })
