@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import type { Json } from "@/integrations/supabase/types";
+import type { Json } from "@/lib/types";
 import { DOMAINS, type DomainId } from "@/lib/domains";
 
 export interface Note {

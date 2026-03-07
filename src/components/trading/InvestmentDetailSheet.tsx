@@ -1,13 +1,17 @@
 import { useState, useRef, useEffect } from "react";
-import { Send, LineChart, TrendingUp, TrendingDown, X } from "lucide-react";
+import { Send, LineChart, TrendingUp, TrendingDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { InvestmentChart } from "./InvestmentChart";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { env } from "@/lib/env";
+import { streamRequest } from "@/lib/api";
 
 interface Holding {
   id: string;
@@ -33,9 +37,13 @@ interface InvestmentDetailSheetProps {
   onClose: () => void;
 }
 
-const CHAT_URL = `${env.SUPABASE_URL}/functions/v1/nova-chat`;
+// AI chat routes through the Hono backend — no Supabase edge function needed
 
-export function InvestmentDetailSheet({ holding, isOpen, onClose }: InvestmentDetailSheetProps) {
+export function InvestmentDetailSheet({
+  holding,
+  isOpen,
+  onClose,
+}: InvestmentDetailSheetProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -43,11 +51,13 @@ export function InvestmentDetailSheet({ holding, isOpen, onClose }: InvestmentDe
 
   useEffect(() => {
     if (holding && isOpen) {
-      setMessages([{
-        id: "intro",
-        role: "assistant",
-        content: `I see you're looking at your ${holding.name} (${holding.symbol}) position. You're ${holding.returnsPercent >= 0 ? 'up' : 'down'} ${Math.abs(holding.returnsPercent)}%. What would you like to discuss—your thesis, exit strategy, or position sizing?`
-      }]);
+      setMessages([
+        {
+          id: "intro",
+          role: "assistant",
+          content: `I see you're looking at your ${holding.name} (${holding.symbol}) position. You're ${holding.returnsPercent >= 0 ? "up" : "down"} ${Math.abs(holding.returnsPercent)}%. What would you like to discuss—your thesis, exit strategy, or position sizing?`,
+        },
+      ]);
     }
   }, [holding, isOpen]);
 
@@ -56,24 +66,10 @@ export function InvestmentDetailSheet({ holding, isOpen, onClose }: InvestmentDe
   }, [messages]);
 
   const streamChat = async (userMessages: Message[]) => {
-    // Get user session for proper authentication
-    const { data: { session } } = await supabase.auth.getSession();
-
-    if (!session) {
-      toast.error("Please sign in to continue");
-      throw new Error("No active session");
-    }
-
-    const resp = await fetch(CHAT_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${session.access_token}`, // ✅ Use session token, not publishable key
-      },
-      body: JSON.stringify({
-        messages: userMessages.map(m => ({ role: m.role, content: m.content })),
-        investmentContext: holding
-      }),
+    // Uses Better Auth session cookie automatically via credentials:include
+    const resp = await streamRequest("/api/ai/nova", {
+      messages: userMessages.map((m) => ({ role: m.role, content: m.content })),
+      investmentContext: holding,
     });
 
     if (!resp.ok) {
@@ -81,7 +77,7 @@ export function InvestmentDetailSheet({ holding, isOpen, onClose }: InvestmentDe
       if (resp.status === 429) {
         toast.error("Rate limit exceeded. Please wait a moment.");
       } else if (resp.status === 402) {
-        toast.error("AI credits exhausted. Please add credits.");
+        toast.error("AI credits exhausted.");
       } else {
         toast.error(error.error || "Failed to get response");
       }
@@ -97,7 +93,7 @@ export function InvestmentDetailSheet({ holding, isOpen, onClose }: InvestmentDe
     const userMessage: Message = {
       id: Date.now().toString(),
       role: "user",
-      content: input.trim()
+      content: input.trim(),
     };
 
     const newMessages = [...messages, userMessage];
@@ -138,14 +134,23 @@ export function InvestmentDetailSheet({ holding, isOpen, onClose }: InvestmentDe
             const content = parsed.choices?.[0]?.delta?.content;
             if (content) {
               assistantContent += content;
-              setMessages(prev => {
+              setMessages((prev) => {
                 const last = prev[prev.length - 1];
                 if (last?.role === "assistant" && last.id !== "intro") {
                   return prev.map((m, i) =>
-                    i === prev.length - 1 ? { ...m, content: assistantContent } : m
+                    i === prev.length - 1
+                      ? { ...m, content: assistantContent }
+                      : m,
                   );
                 }
-                return [...prev, { id: Date.now().toString(), role: "assistant", content: assistantContent }];
+                return [
+                  ...prev,
+                  {
+                    id: Date.now().toString(),
+                    role: "assistant",
+                    content: assistantContent,
+                  },
+                ];
               });
             }
           } catch {
@@ -177,10 +182,25 @@ export function InvestmentDetailSheet({ holding, isOpen, onClose }: InvestmentDe
               <p className="text-sm text-muted-foreground">{holding.name}</p>
             </div>
             <div className="text-right">
-              <p className="font-medium tabular-nums">${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
-              <p className={cn("text-xs tabular-nums flex items-center gap-1 justify-end", isPositive ? "text-finance" : "text-destructive")}>
-                {isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                {isPositive ? "+" : ""}{holding.returnsPercent}%
+              <p className="font-medium tabular-nums">
+                $
+                {totalValue.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                })}
+              </p>
+              <p
+                className={cn(
+                  "text-xs tabular-nums flex items-center gap-1 justify-end",
+                  isPositive ? "text-finance" : "text-destructive",
+                )}
+              >
+                {isPositive ? (
+                  <TrendingUp className="w-3 h-3" />
+                ) : (
+                  <TrendingDown className="w-3 h-3" />
+                )}
+                {isPositive ? "+" : ""}
+                {holding.returnsPercent}%
               </p>
             </div>
           </div>
@@ -188,7 +208,9 @@ export function InvestmentDetailSheet({ holding, isOpen, onClose }: InvestmentDe
 
         {/* Chart */}
         <div className="p-4 border-b border-border">
-          <p className="text-xs text-muted-foreground mb-2">30 Day Performance</p>
+          <p className="text-xs text-muted-foreground mb-2">
+            30 Day Performance
+          </p>
           <InvestmentChart symbol={holding.symbol} isPositive={isPositive} />
         </div>
 
@@ -200,11 +222,15 @@ export function InvestmentDetailSheet({ holding, isOpen, onClose }: InvestmentDe
           </div>
           <div>
             <p className="text-xs text-muted-foreground">Avg Cost</p>
-            <p className="font-medium tabular-nums">${holding.avgCost.toLocaleString()}</p>
+            <p className="font-medium tabular-nums">
+              ${holding.avgCost.toLocaleString()}
+            </p>
           </div>
           <div>
             <p className="text-xs text-muted-foreground">Current</p>
-            <p className="font-medium tabular-nums">${holding.currentPrice.toLocaleString()}</p>
+            <p className="font-medium tabular-nums">
+              ${holding.currentPrice.toLocaleString()}
+            </p>
           </div>
         </div>
 
@@ -217,11 +243,21 @@ export function InvestmentDetailSheet({ holding, isOpen, onClose }: InvestmentDe
 
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
             {messages.map((msg) => (
-              <div key={msg.id} className={cn("flex", msg.role === "user" ? "justify-end" : "justify-start")}>
-                <div className={cn(
-                  "max-w-[85%] rounded-2xl px-3 py-2 text-sm",
-                  msg.role === "user" ? "bg-foreground text-background rounded-br-sm" : "bg-muted rounded-bl-sm"
-                )}>
+              <div
+                key={msg.id}
+                className={cn(
+                  "flex",
+                  msg.role === "user" ? "justify-end" : "justify-start",
+                )}
+              >
+                <div
+                  className={cn(
+                    "max-w-[85%] rounded-2xl px-3 py-2 text-sm",
+                    msg.role === "user"
+                      ? "bg-foreground text-background rounded-br-sm"
+                      : "bg-muted rounded-bl-sm",
+                  )}
+                >
                   {msg.content}
                 </div>
               </div>
@@ -231,8 +267,14 @@ export function InvestmentDetailSheet({ holding, isOpen, onClose }: InvestmentDe
                 <div className="bg-muted rounded-2xl rounded-bl-sm px-3 py-2">
                   <div className="flex gap-1">
                     <span className="w-1.5 h-1.5 bg-muted-foreground/50 rounded-full animate-bounce" />
-                    <span className="w-1.5 h-1.5 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                    <span className="w-1.5 h-1.5 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                    <span
+                      className="w-1.5 h-1.5 bg-muted-foreground/50 rounded-full animate-bounce"
+                      style={{ animationDelay: "150ms" }}
+                    />
+                    <span
+                      className="w-1.5 h-1.5 bg-muted-foreground/50 rounded-full animate-bounce"
+                      style={{ animationDelay: "300ms" }}
+                    />
                   </div>
                 </div>
               </div>
@@ -255,7 +297,12 @@ export function InvestmentDetailSheet({ holding, isOpen, onClose }: InvestmentDe
                 className="min-h-[40px] max-h-[80px] resize-none text-sm"
                 rows={1}
               />
-              <Button onClick={handleSend} disabled={!input.trim() || isLoading} size="icon" className="shrink-0">
+              <Button
+                onClick={handleSend}
+                disabled={!input.trim() || isLoading}
+                size="icon"
+                className="shrink-0"
+              >
                 <Send className="w-4 h-4" />
               </Button>
             </div>

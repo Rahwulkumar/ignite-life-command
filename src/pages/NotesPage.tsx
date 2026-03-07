@@ -18,11 +18,11 @@ import {
   useInitializeHubs,
   buildNoteTree,
   groupNotesByDomain,
-  type Note
+  type Note,
 } from "@/hooks/useNotes";
 import { debounce } from "@/lib/utils";
 import { DOMAINS, type DomainId } from "@/lib/domains";
-import type { Json } from "@/integrations/supabase/types";
+import type { Json } from "@/lib/types";
 
 type NoteWithChildren = Note & { children: NoteWithChildren[] };
 
@@ -39,7 +39,7 @@ export default function NotesPage() {
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
   const [activeDomain, setActiveDomain] = useState<DomainId | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [viewMode, setViewMode] = useState<'hub' | 'editor'>('hub');
+  const [viewMode, setViewMode] = useState<"hub" | "editor">("hub");
 
   const { data: notes = [], isLoading: notesLoading } = useNotes();
   const { data: selectedNote } = useNote(selectedNoteId);
@@ -49,12 +49,12 @@ export default function NotesPage() {
   const initializeHubs = useInitializeHubs();
 
   const groupedNotes = groupNotesByDomain(notes);
-  const pinnedNotes = notes.filter(n => n.is_pinned && !n.is_template);
+  const pinnedNotes = notes.filter((n) => n.is_pinned && !n.is_template);
 
   // Initialize hubs on first load
   useEffect(() => {
     if (!notesLoading && notes.length >= 0) {
-      const hubs = notes.filter(n => n.note_type === 'hub');
+      const hubs = notes.filter((n) => n.note_type === "hub");
       if (hubs.length < DOMAINS.length) {
         initializeHubs.mutate(notes);
       }
@@ -64,26 +64,36 @@ export default function NotesPage() {
   // Handle incoming domain from navigation state
   useEffect(() => {
     if (locationState?.domain && !activeDomain) {
-      const hub = notes.find(n => n.domain === locationState.domain && n.note_type === 'hub');
+      const hub = notes.find(
+        (n) => n.domain === locationState.domain && n.note_type === "hub",
+      );
       if (hub) {
         setActiveDomain(locationState.domain);
         setSelectedNoteId(hub.id);
-        setViewMode('hub');
+        setViewMode("hub");
       } else if (notes.length > 0) {
         setActiveDomain(locationState.domain);
-        setViewMode('hub');
+        setViewMode("hub");
       }
     }
   }, [locationState?.domain, notes, activeDomain]);
 
   // Auto-select first hub if nothing selected and no incoming state
   useEffect(() => {
-    if (!selectedNoteId && !activeDomain && !locationState?.domain && notes.length > 0 && !notesLoading) {
+    if (
+      !selectedNoteId &&
+      !activeDomain &&
+      !locationState?.domain &&
+      notes.length > 0 &&
+      !notesLoading
+    ) {
       // Default to spiritual hub
-      const spiritualHub = notes.find(n => n.domain === 'spiritual' && n.note_type === 'hub');
+      const spiritualHub = notes.find(
+        (n) => n.domain === "spiritual" && n.note_type === "hub",
+      );
       if (spiritualHub) {
-        setActiveDomain('spiritual');
-        setViewMode('hub');
+        setActiveDomain("spiritual");
+        setViewMode("hub");
       }
     }
   }, [notes, selectedNoteId, activeDomain, notesLoading, locationState]);
@@ -95,7 +105,7 @@ export default function NotesPage() {
       await updateNote.mutateAsync({ id, content });
       setIsSaving(false);
     }, 500),
-    [updateNote]
+    [updateNote],
   );
 
   const handleContentChange = (content: Json) => {
@@ -117,27 +127,29 @@ export default function NotesPage() {
   };
 
   const handleSelectNote = (noteId: string) => {
-    const note = notes.find(n => n.id === noteId);
+    const note = notes.find((n) => n.id === noteId);
     if (note) {
       setSelectedNoteId(noteId);
       setActiveDomain(note.domain);
       setSidebarOpen(false);
 
       // If it's a hub, show hub view; otherwise show editor
-      if (note.note_type === 'hub') {
-        setViewMode('hub');
+      if (note.note_type === "hub") {
+        setViewMode("hub");
       } else {
-        setViewMode('editor');
+        setViewMode("editor");
       }
     }
   };
 
   const handleSelectHub = (domainId: DomainId) => {
     setActiveDomain(domainId);
-    setViewMode('hub');
+    setViewMode("hub");
     setSidebarOpen(false);
 
-    const hub = notes.find(n => n.domain === domainId && n.note_type === 'hub');
+    const hub = notes.find(
+      (n) => n.domain === domainId && n.note_type === "hub",
+    );
     if (hub) {
       setSelectedNoteId(hub.id);
     } else {
@@ -149,17 +161,17 @@ export default function NotesPage() {
     const note = await createNote.mutateAsync({
       title: "Untitled",
       domain: domainId,
-      note_type: 'page',
+      note_type: "page",
       icon: null,
     });
     setSelectedNoteId(note.id);
     setActiveDomain(domainId);
-    setViewMode('editor');
+    setViewMode("editor");
     setSidebarOpen(false);
   };
 
   const handleTogglePin = (noteId: string) => {
-    const note = notes.find(n => n.id === noteId);
+    const note = notes.find((n) => n.id === noteId);
     if (note) {
       updateNote.mutate({ id: noteId, is_pinned: !note.is_pinned });
     }
@@ -170,7 +182,7 @@ export default function NotesPage() {
     // If the deleted note was selected, clear selection
     if (selectedNoteId === noteId) {
       setSelectedNoteId(null);
-      setViewMode('hub');
+      setViewMode("hub");
     }
   };
 
@@ -179,7 +191,7 @@ export default function NotesPage() {
   const currentPages = currentDomainData?.pages || [];
   const currentJournal = currentDomainData?.journal || [];
   const pageTree = buildNoteTree(
-    currentPages.filter(p => !p.is_template && p.note_type === 'page')
+    currentPages.filter((p) => !p.is_template && p.note_type === "page"),
   ) as NoteWithChildren[];
 
   const sidebarContent = (
@@ -224,7 +236,7 @@ export default function NotesPage() {
 
           {/* Main Content Area */}
           <div className="flex-1 min-w-0">
-            {viewMode === 'hub' && activeDomain ? (
+            {viewMode === "hub" && activeDomain ? (
               <HubView
                 domain={activeDomain}
                 pages={pageTree}
@@ -233,7 +245,7 @@ export default function NotesPage() {
                 onCreatePage={() => handleCreateNote(activeDomain)}
                 selectedNoteId={selectedNoteId}
               />
-            ) : selectedNote && viewMode === 'editor' ? (
+            ) : selectedNote && viewMode === "editor" ? (
               <NoteEditor
                 note={selectedNote}
                 onContentChange={handleContentChange}
@@ -244,8 +256,12 @@ export default function NotesPage() {
             ) : (
               <div className="h-full flex items-center justify-center text-muted-foreground p-4">
                 <div className="text-center">
-                  <p className="text-base sm:text-lg mb-2">Select a domain to get started</p>
-                  <p className="text-xs sm:text-sm">Choose a domain from the sidebar to view your notes</p>
+                  <p className="text-base sm:text-lg mb-2">
+                    Select a domain to get started
+                  </p>
+                  <p className="text-xs sm:text-sm">
+                    Choose a domain from the sidebar to view your notes
+                  </p>
                 </div>
               </div>
             )}

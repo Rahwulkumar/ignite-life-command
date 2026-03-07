@@ -13,7 +13,7 @@ import { Loader2, FileText } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { EditorToolbar } from "./EditorToolbar";
 import type { Note } from "@/hooks/useNotes";
-import type { Json } from "@/integrations/supabase/types";
+import type { Json } from "@/lib/types";
 
 const lowlight = createLowlight(common);
 
@@ -31,7 +31,6 @@ export function NoteEditor({
   onTitleChange,
   isSaving,
 }: NoteEditorProps) {
-
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -62,7 +61,8 @@ export function NoteEditor({
     },
     editorProps: {
       attributes: {
-        class: "prose prose-sm dark:prose-invert max-w-none focus:outline-none min-h-[250px] sm:min-h-[300px] px-4 sm:px-8 lg:px-12 py-6 sm:py-8",
+        class:
+          "prose prose-sm dark:prose-invert max-w-none focus:outline-none min-h-[250px] sm:min-h-[300px] px-4 sm:px-8 lg:px-12 py-6 sm:py-8",
       },
     },
   });
