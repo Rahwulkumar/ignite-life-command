@@ -35,7 +35,24 @@ interface CharacterNote {
   created_at: string | null;
 }
 
-// Characters are stored in office_notes with domain='spiritual', noteType='character'
+// ── Helpers ─────────────────────────────────────────────────────────────────
+
+function noteToCharacter(note: CharacterNote): SpiritualCharacter {
+  return {
+    id: note.id,
+    name: note.title,
+    description: note.content?.description ?? null,
+    role: note.content?.role ?? null,
+    testament: note.content?.testament ?? null,
+    notion_folder_id: note.parent_id,
+    created_at: note.created_at,
+    user_id: note.user_id,
+  };
+}
+
+// ── Hooks ────────────────────────────────────────────────────────────────────
+
+/** Fetch all characters (notes with domain=spiritual, noteType=character) */
 export function useSpiritualCharacters() {
   return useQuery({
     queryKey: ["spiritual-characters"],
@@ -45,20 +62,24 @@ export function useSpiritualCharacters() {
       );
       return notes
         .filter((note) => note.content?.type === "character")
-        .map((note) => ({
-          id: note.id,
-          name: note.title,
-          description: note.content?.description ?? null,
-          role: note.content?.role ?? null,
-          testament: note.content?.testament ?? null,
-          notion_folder_id: note.parent_id,
-          created_at: note.created_at,
-          user_id: note.user_id,
-        })) as SpiritualCharacter[];
+        .map(noteToCharacter);
     },
   });
 }
 
+/** Fetch a single character by ID */
+export function useSpiritualCharacter(id: string | undefined) {
+  return useQuery({
+    queryKey: ["spiritual-character", id],
+    queryFn: async () => {
+      const note = await api.get<CharacterNote>(`/api/notes/${id}`);
+      return noteToCharacter(note);
+    },
+    enabled: !!id,
+  });
+}
+
+/** Create a new character (stored as a note with noteType=character) */
 export function useCreateSpiritualCharacter() {
   const queryClient = useQueryClient();
 
@@ -81,6 +102,10 @@ export function useCreateSpiritualCharacter() {
   });
 }
 
+/** Alias used by AddCharacterDialog */
+export const useCreateCharacter = useCreateSpiritualCharacter;
+
+/** Delete a character (deletes the underlying note) */
 export function useDeleteSpiritualCharacter() {
   const queryClient = useQueryClient();
 
@@ -93,6 +118,10 @@ export function useDeleteSpiritualCharacter() {
   });
 }
 
+/** Alias used by CharacterCard */
+export const useDeleteCharacter = useDeleteSpiritualCharacter;
+
+/** Update a character's metadata */
 export function useUpdateSpiritualCharacter() {
   const queryClient = useQueryClient();
 
@@ -117,6 +146,41 @@ export function useUpdateSpiritualCharacter() {
           }),
         },
       }),
+    onSuccess: (_data, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ["spiritual-characters"] });
+      queryClient.invalidateQueries({ queryKey: ["spiritual-character", id] });
+    },
+  });
+}
+
+/**
+ * Ensures a "root folder" note exists for the character's workspace,
+ * and returns its ID. Stores the folder ID as `parent_id` on the character note.
+ * Used by CharacterWorkspacePage.
+ */
+export function useEnsureCharacterFolder() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (character: SpiritualCharacter): Promise<string> => {
+      // If already has a folder, return it
+      if (character.notion_folder_id) return character.notion_folder_id;
+
+      // Create the workspace root folder note
+      const folder = await api.post<CharacterNote>("/api/notes", {
+        title: `${character.name} — Workspace`,
+        domain: "spiritual",
+        noteType: "folder",
+        content: { type: "character-workspace", characterId: character.id },
+      });
+
+      // Store folder ID on the character note itself via parent_id
+      await api.patch(`/api/notes/${character.id}`, {
+        parentId: folder.id,
+      });
+
+      return folder.id;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["spiritual-characters"] });
     },

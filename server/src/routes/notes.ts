@@ -68,14 +68,35 @@ notes.post("/notes", async (c) => {
   return c.json(note, 201);
 });
 
-// PATCH /api/notes/:id — update note
+// PATCH /api/notes/:id — update note (explicit field picking — never allow userId override)
 notes.patch("/notes/:id", async (c) => {
   const user = c.get("user");
   const id = c.req.param("id");
-  const body = await c.req.json();
+  const body = await c.req.json<{
+    title?: string;
+    content?: unknown;
+    icon?: string;
+    coverImage?: string | null;
+    isPinned?: boolean;
+    parentId?: string | null;
+    domain?: string | null;
+    noteType?: string;
+  }>();
+
+  // Only pick explicitly allowed fields to prevent userId/id overwrite
+  const patch: Record<string, unknown> = { updatedAt: new Date() };
+  if (body.title !== undefined) patch.title = body.title;
+  if (body.content !== undefined) patch.content = body.content;
+  if (body.icon !== undefined) patch.icon = body.icon;
+  if (body.coverImage !== undefined) patch.coverImage = body.coverImage;
+  if (body.isPinned !== undefined) patch.isPinned = body.isPinned;
+  if (body.parentId !== undefined) patch.parentId = body.parentId;
+  if (body.domain !== undefined) patch.domain = body.domain;
+  if (body.noteType !== undefined) patch.noteType = body.noteType;
+
   const [updated] = await db
     .update(officeNotes)
-    .set({ ...body, updatedAt: new Date() })
+    .set(patch)
     .where(and(eq(officeNotes.id, id), eq(officeNotes.userId, user.id)))
     .returning();
   if (!updated) return c.json({ error: "Not found" }, 404);
