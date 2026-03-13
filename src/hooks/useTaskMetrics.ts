@@ -1,24 +1,22 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import {
+  normalizeTaskMetric,
+  type ApiTaskMetric,
+  type TaskMetricFieldType,
+  type TaskMetricRecord,
+} from "@/lib/api-normalizers";
 
-export interface TaskMetric {
-  id: string;
-  user_id: string;
-  task_id: string;
-  label: string;
-  field_type: "number" | "text" | "rating" | "boolean" | "duration";
-  unit: string | null;
-  order_index: number;
-  created_at: string;
-  updated_at: string;
-}
+export type TaskMetric = TaskMetricRecord;
 
 // Fetch all metrics for a specific task
 export function useTaskMetrics(taskId: string) {
   return useQuery({
     queryKey: ["task-metrics", taskId],
     queryFn: () =>
-      api.get<TaskMetric[]>(`/api/task-metrics?taskId=${taskId}`),
+      api
+        .get<ApiTaskMetric[]>(`/api/task-metrics?taskId=${taskId}`)
+        .then((metrics) => metrics.map(normalizeTaskMetric)),
     enabled: !!taskId,
   });
 }
@@ -31,17 +29,19 @@ export function useAddTaskMetric() {
     mutationFn: (metric: {
       task_id: string;
       label: string;
-      field_type: TaskMetric["field_type"];
+      field_type: TaskMetricFieldType;
       unit?: string;
       order_index?: number;
     }) =>
-      api.post<TaskMetric>("/api/task-metrics", {
-        taskId: metric.task_id,
-        label: metric.label,
-        fieldType: metric.field_type,
-        unit: metric.unit,
-        orderIndex: metric.order_index,
-      }),
+      api
+        .post<ApiTaskMetric>("/api/task-metrics", {
+          taskId: metric.task_id,
+          label: metric.label,
+          fieldType: metric.field_type,
+          unit: metric.unit,
+          orderIndex: metric.order_index,
+        })
+        .then(normalizeTaskMetric),
     onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: ["task-metrics", data.task_id],
@@ -62,7 +62,19 @@ export function useUpdateTaskMetric() {
       id: string;
       updates: Partial<Omit<TaskMetric, "id" | "user_id" | "created_at" | "updated_at">>;
     }) =>
-      api.patch<TaskMetric>(`/api/task-metrics/${id}`, updates),
+      api
+        .patch<ApiTaskMetric>(`/api/task-metrics/${id}`, {
+          ...(updates.task_id !== undefined && { taskId: updates.task_id }),
+          ...(updates.label !== undefined && { label: updates.label }),
+          ...(updates.field_type !== undefined && {
+            fieldType: updates.field_type,
+          }),
+          ...(updates.unit !== undefined && { unit: updates.unit }),
+          ...(updates.order_index !== undefined && {
+            orderIndex: updates.order_index,
+          }),
+        })
+        .then(normalizeTaskMetric),
     onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: ["task-metrics", data.task_id],

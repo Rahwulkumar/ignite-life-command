@@ -118,6 +118,35 @@ export const officeNotes = pgTable("office_notes", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const projects = pgTable("projects", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  description: text("description"),
+  targetDate: date("target_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const projectTasks = pgTable("project_tasks", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  projectId: uuid("project_id")
+    .notNull()
+    .references(() => projects.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  status: text("status").notNull().default("todo"), // todo | in-progress | done
+  dueDate: date("due_date"),
+  priority: text("priority").notNull().default("medium"), // high | medium | low
+  orderIndex: integer("order_index").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const dailyChecklistEntries = pgTable(
   "daily_checklist_entries",
   {
@@ -181,6 +210,8 @@ export const spiritualGoals = pgTable("spiritual_goals", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Legacy table kept only for historical migrations/backfill. Live journal
+// entries are stored in office_notes with domain='spiritual' and noteType='journal'.
 export const spiritualJournalEntries = pgTable("spiritual_journal_entries", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: text("user_id")

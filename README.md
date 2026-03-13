@@ -1,202 +1,129 @@
 # Ignite Life Command
 
-A personal life operating system. One authenticated dashboard to track every domain of your life — spiritual growth, finances, trading, technology learning, music, content, and projects — with domain-specific AI agents and a Notion-style notes system connecting everything.
+Ignite Life Command is a personal life operating system built as a React frontend plus a Hono API server. The current live stack is React + Better Auth + Hono + Drizzle + PostgreSQL, with domain-specific AI routes for Sage and Nova.
 
-> **Status:** Active development. Authentication, notes system, spiritual domain (Bible reading, daily focus, scripture memory, journal), daily habit tracking, and two AI agents (Nova + Sage) with real GPT-4 streaming backends are fully working. Finance, tech, music, content, and projects domains use placeholder data while their Supabase integrations are being built.
+## Current Status
 
----
+- Auth is live through Better Auth with cookie sessions.
+- Notes are live and act as the canonical content system.
+- The spiritual domain is the most complete feature area.
+- The dashboard uses a mix of live checklist data and placeholder domain content.
+- Finance, tech, music, content, and projects still rely heavily on mock data.
 
-## What This Is
+## Active Architecture
 
-Most productivity tools give you a place to log things. Ignite Life Command gives you a command center that understands what you log.
+- Frontend: React 18, Vite, TypeScript, React Router, TanStack Query, Tailwind, shadcn/ui, TipTap
+- Backend: Hono, Better Auth, Drizzle ORM
+- Database: PostgreSQL via `DATABASE_URL`
+- AI: OpenAI streaming responses served through `/api/ai/sage` and `/api/ai/nova`
+- Canonical content store: `office_notes`
 
-Each life domain has its own dedicated space — and where it matters, its own AI agent. The agents are not generic chatbots. Nova understands your trading context. Sage understands Biblical history and connects themes across books. Each agent has a real backend, a real system prompt, and streaming responses — not canned text.
+## Important Data Model Notes
 
-Everything is tied together through a universal Notion-style notes system that spans all domains.
+- `office_notes` is the live source of truth for notes, folders, hubs, spiritual journal entries, and spiritual character records.
+- `/api/journal-entries` still exists as a compatibility route, but it now reads and writes spiritual journal entries through `office_notes`.
+- `supabase/` is legacy project history from the earlier Supabase-based prototype. It is not the active runtime path.
 
----
+## Repo Layout
 
-## Domains
-
-| Domain | Status | What It Tracks |
-|---|---|---|
-| Spiritual | ✅ Live | Bible reading progress, daily focus scripture, scripture memory (flashcards), character library, journal, sermon notes, spiritual goals |
-| Trading | ✅ Live (Nova AI) | Investment tracking with AI analysis embedded in each position |
-| Dashboard | ✅ Live | Daily checklist, habit streaks, weekly activity chart, completion rates, calendar |
-| Notes | ✅ Live | Cross-domain Notion-style notes with rich text, folders, pinning, and domain tagging |
-| Finance | 🔧 In Progress | Structure built, Supabase integration pending |
-| Technology | 🔧 In Progress | Structure built, Supabase integration pending |
-| Music | 🔧 In Progress | Structure built, Supabase integration pending |
-| Content | 🔧 In Progress | Structure built, Supabase integration pending |
-| Projects | 🔧 In Progress | Kanban board built, persistence pending |
-
----
-
-## AI Agents
-
-### Nova — Trading Mentor ✅ Real Backend
-- **Persona:** Skeptical, pattern-focused, risk-conscious
-- **Backend:** Supabase Edge Function (Deno runtime) → OpenAI gpt-4-turbo-preview, streaming SSE
-- **Context:** Receives live investment data (symbol, position size, avg cost, current price, returns %) and uses it to frame every response
-- **What it does:** Questions your trade thesis, discusses position sizing and risk/reward, surfaces risk considerations — never suggests new trades
-- **Where it lives:** Embedded in the Investment Detail sheet on the Trading page
-
-### Sage — Spiritual Guide ✅ Real Backend
-- **Persona:** Wise, reflective, non-preachy
-- **Backend:** Supabase Edge Function (Deno runtime) → OpenAI gpt-4-turbo-preview, streaming SSE
-- **What it does:** Explains Biblical history and context, connects themes across books, suggests related passages, responds to prayer requests with Scripture, describes maps and timelines
-- **Where it lives:** Dedicated chat interface on the Spiritual page
-
-### Marcus (Finance), Atlas (Trading), Aria (Music) — Stub Agents
-- Frontend-only personas. Return template responses. Real backends planned.
-
----
-
-## Tech Stack
-
-| Layer | Technology |
-|---|---|
-| Framework | React 18, Vite 5 |
-| Language | TypeScript 5.8 |
-| Styling | Tailwind CSS 3.4, Framer Motion 12 |
-| UI Components | shadcn/ui + full Radix UI primitive suite |
-| Rich Text Editor | TipTap 3 (notes and journal entries) |
-| Charts | Recharts |
-| Database | PostgreSQL via Supabase |
-| Auth | Supabase Auth (email/password, localStorage session) |
-| AI | OpenAI GPT-4 (called from Supabase Edge Functions) |
-| Edge Functions | Deno runtime on Supabase |
-| Routing | React Router 6 |
-| Forms | React Hook Form + Zod |
-| State | TanStack Query 5 |
-
----
-
-## Architecture
-
-```
-┌────────────────────────────────────────────────────────────────┐
-│                     React Frontend (Vite)                       │
-│  Dashboard · Spiritual · Trading · Finance · Tech · Notes       │
-└──────────────────────────┬─────────────────────────────────────┘
-                           │ Supabase JS Client
-┌──────────────────────────▼─────────────────────────────────────┐
-│                        Supabase                                 │
-│                                                                 │
-│  PostgreSQL DB          Auth            Edge Functions          │
-│  ├─ bible_reading_plans ├─ Email/Pass   ├─ nova-chat            │
-│  ├─ daily_focus         ├─ JWT tokens   │    └─▶ OpenAI API     │
-│  ├─ office_notes        └─ RLS policies └─ spiritual-guide      │
-│  ├─ daily_checklist_entries                  └─▶ OpenAI API     │
-│  ├─ scripture_memory                                            │
-│  ├─ spiritual_goals                                             │
-│  ├─ spiritual_journal_entries                                   │
-│  └─ ... (14 tables total)                                       │
-└────────────────────────────────────────────────────────────────┘
-```
-
-**Agent call flow:**
-```
-User message → React component → useSpiritualGuide / Nova chat hook
-→ fetch() → Supabase Edge Function URL (with user JWT)
-→ Deno function → OpenAI streaming API
-→ SSE stream back to frontend → rendered token by token
-```
-
----
+- `src/`: React frontend
+- `server/`: Hono API server, Better Auth config, Drizzle schema and routes
+- `supabase/`: legacy migrations and edge-function snapshots kept for reference
 
 ## Local Setup
 
-### Prerequisites
-- Node.js 18+ (or Bun)
-- A Supabase project (free tier works)
-- OpenAI API key with GPT-4 access
-
-### Steps
+### 1. Install dependencies
 
 ```bash
-# 1. Clone the repository
-git clone https://github.com/Rahwulkumar/ignite-life-command.git
-cd ignite-life-command
-
-# 2. Install dependencies
 npm install
-# or if you have Bun:
-bun install
+cd server
+npm install
+cd ..
+```
 
-# 3. Set up environment variables
+### 2. Configure frontend env
+
+```bash
 cp .env.example .env
 ```
 
-Edit `.env` and fill in:
+Set:
 
 ```env
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_key
-VITE_SUPABASE_PROJECT_ID=your_project_ref_id
+VITE_API_URL=http://localhost:3001
 ```
 
+### 3. Configure server env
+
 ```bash
-# 4. Link Supabase project and push database migrations
-npx supabase link --project-ref your_project_ref_id
-npx supabase db push
+cd server
+cp .env.example .env
+```
 
-# 5. Set OpenAI API key as a Supabase secret (used by Edge Functions)
-npx supabase secrets set OPENAI_API_KEY=sk-your-key-here
+Set these values in `server/.env`:
 
-# 6. Deploy Edge Functions
-npx supabase functions deploy nova-chat
-npx supabase functions deploy spiritual-guide
+```env
+DATABASE_URL=postgresql://...
+BETTER_AUTH_SECRET=...
+BETTER_AUTH_URL=http://localhost:3001
+FRONTEND_URL=http://localhost:5173
+OPENAI_API_KEY=sk-...
+PORT=3001
+```
 
-# 7. Start development server
+### 4. Push the schema
+
+```bash
+cd server
+npm run db:push
+```
+
+### 5. Run the app
+
+In one terminal:
+
+```bash
+cd server
 npm run dev
 ```
 
-App runs at `http://localhost:8080`
+In another terminal:
 
----
+```bash
+npm run dev
+```
 
-## Database Schema (Core Tables)
+Frontend: `http://localhost:5173`
 
-| Table | Purpose |
-|---|---|
-| `bible_reading_plans` | Tracks current book, chapter, verse and overall completion % |
-| `daily_focus` | One scripture per day per user, with completion toggle |
-| `office_notes` | Universal notes table — stores all domain notes, journals, character studies as typed TipTap JSON with parent/child tree structure |
-| `daily_checklist_entries` | Daily task completions with JSONB metrics data per entry |
-| `custom_task_metrics` | User-defined metric fields for each task type |
-| `scripture_memory` | Verse flashcard system with mastery levels 0–5 |
-| `spiritual_goals` | Goal tracking with progress and target dates |
-| `spiritual_journal_entries` | Structured reflection entries |
-| `sermon_notes` | Sermon records with key takeaways and scripture references |
-| `spiritual_chat_messages` | Sage chat history |
+API: `http://localhost:3001`
 
----
+## Feature Snapshot
 
-## Current Progress
+| Area | Status | Notes |
+|---|---|---|
+| Auth | Live | Better Auth email/password with cookie sessions |
+| Notes | Live | Cross-domain notes, folders, journals, hubs |
+| Spiritual | Live | Bible reading, daily focus, scripture memory, goals, journal, character library |
+| Dashboard | Partial | Checklist analytics are live; surrounding domain content is mixed |
+| Trading AI | Live | Nova streams from the Hono backend |
+| Spiritual AI | Live | Sage streams from the Hono backend |
+| Finance | Placeholder | UI exists, persistence not wired |
+| Technology | Placeholder | UI exists, persistence not wired |
+| Music | Placeholder | UI exists, persistence not wired |
+| Content | Placeholder | UI exists, persistence not wired |
+| Projects | Placeholder | UI exists, persistence not wired |
 
-- [x] Authentication — Supabase Auth with route protection and auto session refresh
-- [x] Notes system — full Notion-style CRUD with domain filtering, pinning, tree structure, TipTap editor
-- [x] Daily checklist — custom tasks, completion tracking, JSONB metrics
-- [x] Weekly activity and completion charts
-- [x] Sage AI (Spiritual) — streaming GPT-4, JWT-authenticated Edge Function
-- [x] Nova AI (Trading) — streaming GPT-4 with live investment context
-- [x] Bible reading tracker
-- [x] Daily focus scripture
-- [x] Scripture memory flashcard system
-- [x] Spiritual character library
-- [x] Spiritual journal
-- [ ] Finance domain — Supabase integration
-- [ ] Tech domain — Supabase integration
-- [ ] Music domain — Supabase integration
-- [ ] Content domain — Supabase integration
-- [ ] Projects kanban — persistence
-- [ ] Dashboard streaks — calculated from real data (currently placeholder)
-- [ ] Marcus, Atlas, Aria agents — real backends
-- [ ] Spaced repetition scheduler for scripture memory
+## Useful Commands
 
----
+```bash
+# frontend
+npm run dev
+npm run build
+npm run lint
 
-## License
-
-MIT
+# server
+cd server
+npm run dev
+npm run build
+npm run db:push
+```

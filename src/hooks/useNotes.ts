@@ -2,28 +2,23 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import type { Json } from "@/lib/types";
 import { DOMAINS, type DomainId } from "@/lib/domains";
+import {
+  normalizeNote,
+  type ApiNoteRecord,
+  type NoteRecord,
+  type NoteType,
+} from "@/lib/api-normalizers";
 
-export interface Note {
-  id: string;
-  user_id: string;
-  title: string;
-  content: Json | null;
-  parent_id: string | null;
-  icon: string | null;
-  cover_image: string | null;
-  is_pinned: boolean | null;
-  is_template: boolean | null;
-  domain: DomainId | null;
-  note_type: "hub" | "page" | "journal" | "folder" | null;
-  created_at: string | null;
-  updated_at: string | null;
-}
+export type Note = NoteRecord;
 
 // Fetch all notes
 export function useNotes() {
   return useQuery({
     queryKey: ["notes"],
-    queryFn: () => api.get<Note[]>("/api/notes"),
+    queryFn: () =>
+      api
+        .get<ApiNoteRecord[]>("/api/notes")
+        .then((notes) => notes.map(normalizeNote)),
   });
 }
 
@@ -32,7 +27,9 @@ export function useNotesByDomain(domain: DomainId | null) {
   return useQuery({
     queryKey: ["notes", "domain", domain],
     queryFn: () =>
-      api.get<Note[]>(`/api/notes?domain=${domain}`),
+      api
+        .get<ApiNoteRecord[]>(`/api/notes?domain=${domain}`)
+        .then((notes) => notes.map(normalizeNote)),
     enabled: !!domain,
   });
 }
@@ -44,7 +41,9 @@ export function useJournalEntries(domain?: DomainId) {
     queryFn: () => {
       const params = new URLSearchParams({ noteType: "journal" });
       if (domain) params.append("domain", domain);
-      return api.get<Note[]>(`/api/notes?${params.toString()}`);
+      return api
+        .get<ApiNoteRecord[]>(`/api/notes?${params.toString()}`)
+        .then((notes) => notes.map(normalizeNote));
     },
   });
 }
@@ -53,7 +52,8 @@ export function useJournalEntries(domain?: DomainId) {
 export function useNote(noteId: string | null) {
   return useQuery({
     queryKey: ["note", noteId],
-    queryFn: () => api.get<Note>(`/api/notes/${noteId}`),
+    queryFn: () =>
+      api.get<ApiNoteRecord>(`/api/notes/${noteId}`).then(normalizeNote),
     enabled: !!noteId,
   });
 }
@@ -65,7 +65,9 @@ export function useSearchNotes(searchQuery: string, domain?: DomainId | null) {
     queryFn: () => {
       const params = new URLSearchParams({ search: searchQuery });
       if (domain) params.append("domain", domain);
-      return api.get<Note[]>(`/api/notes?${params.toString()}`);
+      return api
+        .get<ApiNoteRecord[]>(`/api/notes?${params.toString()}`)
+        .then((notes) => notes.map(normalizeNote));
     },
     enabled: searchQuery.length > 0,
   });
@@ -91,17 +93,19 @@ export function useCreateNote() {
       is_template?: boolean;
       content?: Json | null;
       domain?: DomainId | null;
-      note_type?: "hub" | "page" | "journal" | "folder";
+      note_type?: NoteType;
     }) =>
-      api.post<Note>("/api/notes", {
-        title,
-        parentId: parent_id,
-        icon,
-        isTemplate: is_template,
-        content,
-        domain,
-        noteType: note_type,
-      }),
+      api
+        .post<ApiNoteRecord>("/api/notes", {
+          title,
+          parentId: parent_id,
+          icon,
+          isTemplate: is_template,
+          content,
+          domain,
+          noteType: note_type,
+        })
+        .then(normalizeNote),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
     },
@@ -125,18 +129,20 @@ export function useUpdateNote() {
       is_pinned?: boolean;
       parent_id?: string | null;
       domain?: DomainId | null;
-      note_type?: "hub" | "page" | "journal" | "folder";
+      note_type?: NoteType;
     }) =>
-      api.patch<Note>(`/api/notes/${id}`, {
-        title: updates.title,
-        content: updates.content,
-        icon: updates.icon,
-        coverImage: updates.cover_image,
-        isPinned: updates.is_pinned,
-        parentId: updates.parent_id,
-        domain: updates.domain,
-        noteType: updates.note_type,
-      }),
+      api
+        .patch<ApiNoteRecord>(`/api/notes/${id}`, {
+          title: updates.title,
+          content: updates.content,
+          icon: updates.icon,
+          coverImage: updates.cover_image,
+          isPinned: updates.is_pinned,
+          parentId: updates.parent_id,
+          domain: updates.domain,
+          noteType: updates.note_type,
+        })
+        .then(normalizeNote),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
       queryClient.invalidateQueries({ queryKey: ["note", data.id] });
@@ -171,12 +177,14 @@ export function useInitializeHubs() {
 
       return Promise.all(
         hubsToCreate.map((domain) =>
-          api.post<Note>("/api/notes", {
-            title: `${domain.label} Hub`,
-            icon: null,
-            domain: domain.id,
-            noteType: "hub",
-          })
+          api
+            .post<ApiNoteRecord>("/api/notes", {
+              title: `${domain.label} Hub`,
+              icon: null,
+              domain: domain.id,
+              noteType: "hub",
+            })
+            .then(normalizeNote)
         )
       );
     },
@@ -233,7 +241,7 @@ export function groupNotesByDomain(notes: Note[]) {
       grouped[domain].hub = note;
     } else if (note.note_type === "journal") {
       grouped[domain].journal.push(note);
-    } else {
+    } else if (note.note_type !== "character") {
       grouped[domain].pages.push(note);
     }
   });

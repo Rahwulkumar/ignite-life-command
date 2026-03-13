@@ -11,6 +11,7 @@ import spiritual from "./routes/spiritual";
 import scripture from "./routes/scripture";
 import ai from "./routes/ai";
 import goals from "./routes/goals";
+import projects from "./routes/projects";
 
 const app = new Hono();
 
@@ -53,6 +54,7 @@ app.route("/api", spiritual);
 app.route("/api", scripture);
 app.route("/api", ai);
 app.route("/api", goals);
+app.route("/api", projects);
 
 // ── Start Server ──────────────────────────────────────────────
 

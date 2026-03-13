@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { PageTransition } from "@/components/layout/PageTransition";
@@ -6,13 +6,9 @@ import { HeroHeader } from "@/components/dashboard/widgets/HeroHeader";
 import { DomainNavigation } from "@/components/dashboard/DomainNavigation";
 import { ZenLayout } from "@/components/dashboard/layouts/ZenLayout";
 
-// Import new mock data structure
-// In future this will be a Supabase hook
-import { mockData } from "@/lib/mockData";
 import { Activity, AgentInsight, Streak } from "@/types/domain";
 
-// Transform mock data to match new interfaces if needed
-// This is a temporary bridge until we standardized mockData.ts structure
+// Temporary dashboard placeholder data while remaining domains are wired up.
 const dashboardActivities: Activity[] = [
   { type: "tech", title: "DSA Study Session", description: "Completed binary search problems", time: "2h ago" },
   { type: "finance", title: "Expense Logged", description: "Groceries - ₦15,000", time: "4h ago" },

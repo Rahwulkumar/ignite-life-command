@@ -1,64 +1,193 @@
-import { Briefcase, CheckCircle2, Clock, Target, Plus } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Briefcase, CheckCircle2, Clock, Plus, Target } from "lucide-react";
+import { AddProjectDialog } from "@/components/projects/AddProjectDialog";
+import { AddProjectTaskDialog } from "@/components/projects/AddProjectTaskDialog";
+import { ProjectTasks } from "@/components/projects/ProjectTasks";
 import { DomainPageTemplate } from "@/components/shared/DomainPageTemplate";
-import { ProjectTasks, Project } from "@/components/projects/ProjectTasks";
+import {
+  calculateProjectStats,
+  useCreateProject,
+  useCreateProjectTask,
+  useProjects,
+  useUpdateProjectTask,
+  type ProjectTaskRecord,
+  type ProjectTaskStatus,
+} from "@/hooks/useProjects";
 import { toast } from "@/hooks/use-toast";
 
-// Mock data for Projects domain
-const mockProjects: Project[] = [
-  {
-    id: 1,
-    name: "Personal Dashboard",
-    progress: 65,
-    tasks: [
-      { id: 1, title: "Implement auth flow", status: "done", dueDate: "Dec 28", priority: "high" },
-      { id: 2, title: "Add data persistence", status: "in-progress", dueDate: "Dec 30", priority: "high" },
-      { id: 3, title: "Polish UI animations", status: "todo", dueDate: "Jan 2", priority: "medium" },
-    ]
-  },
-  {
-    id: 2,
-    name: "E-commerce API",
-    progress: 40,
-    tasks: [
-      { id: 4, title: "Setup Stripe integration", status: "in-progress", dueDate: "Dec 31", priority: "high" },
-      { id: 5, title: "Order management endpoints", status: "todo", dueDate: "Jan 3", priority: "medium" },
-    ]
-  },
-];
-
-const stats = [
-  { icon: Briefcase, label: "Active", value: "3", suffix: "projects", color: "text-work" },
-  { icon: CheckCircle2, label: "Completed", value: "12", suffix: "total", color: "text-finance" },
-  { icon: Target, label: "Tasks", value: "32", suffix: "open", color: "text-muted-foreground" },
-  { icon: Clock, label: "Due Soon", value: "5", suffix: "this week", color: "text-destructive" },
-];
-
 const ProjectsPage = () => {
-  const handleNewProject = () => {
-    toast({
-      title: "Coming Soon",
-      description: "Project creation feature is under development.",
+  const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+
+  const { data: projects = [], isLoading } = useProjects();
+  const createProject = useCreateProject();
+  const createProjectTask = useCreateProjectTask();
+  const updateProjectTask = useUpdateProjectTask();
+
+  const projectStats = useMemo(
+    () => calculateProjectStats(projects),
+    [projects]
+  );
+
+  const selectedProject =
+    projects.find((project) => project.id === selectedProjectId) ?? null;
+
+  const stats = [
+    {
+      icon: Briefcase,
+      label: "Active",
+      value: isLoading ? "..." : projectStats.activeProjects,
+      suffix: "projects",
+      color: "text-work",
+    },
+    {
+      icon: CheckCircle2,
+      label: "Completed",
+      value: isLoading ? "..." : projectStats.completedProjects,
+      suffix: "projects",
+      color: "text-finance",
+    },
+    {
+      icon: Target,
+      label: "Tasks",
+      value: isLoading ? "..." : projectStats.openTasks,
+      suffix: "open",
+      color: "text-muted-foreground",
+    },
+    {
+      icon: Clock,
+      label: "Due Soon",
+      value: isLoading ? "..." : projectStats.dueSoonTasks,
+      suffix: "7 days",
+      color: "text-destructive",
+    },
+  ];
+
+  const handleCreateProject = (project: {
+    name: string;
+    description?: string;
+    targetDate?: string;
+  }) => {
+    createProject.mutate(project, {
+      onSuccess: () => {
+        setIsCreateProjectOpen(false);
+        toast({
+          title: "Project created",
+          description: `"${project.name}" is now being tracked.`,
+        });
+      },
+      onError: (error) => {
+        toast({
+          title: "Unable to create project",
+          description:
+            error instanceof Error ? error.message : "Please try again.",
+          variant: "destructive",
+        });
+      },
     });
   };
 
+  const handleCreateTask = (task: {
+    title: string;
+    dueDate?: string;
+    priority: "high" | "medium" | "low";
+  }) => {
+    if (!selectedProjectId) return;
+
+    createProjectTask.mutate(
+      { projectId: selectedProjectId, ...task },
+      {
+        onSuccess: () => {
+          toast({
+            title: "Task added",
+            description: `"${task.title}" was added to ${selectedProject?.name ?? "the project"}.`,
+          });
+          setSelectedProjectId(null);
+        },
+        onError: (error) => {
+          toast({
+            title: "Unable to add task",
+            description:
+              error instanceof Error ? error.message : "Please try again.",
+            variant: "destructive",
+          });
+        },
+      }
+    );
+  };
+
+  const handleToggleTaskStatus = (
+    task: ProjectTaskRecord,
+    nextStatus: ProjectTaskStatus
+  ) => {
+    updateProjectTask.mutate(
+      {
+        id: task.id,
+        updates: { status: nextStatus },
+      },
+      {
+        onError: (error) => {
+          toast({
+            title: "Unable to update task",
+            description:
+              error instanceof Error ? error.message : "Please try again.",
+            variant: "destructive",
+          });
+        },
+      }
+    );
+  };
+
   return (
-    <DomainPageTemplate
-      domain={{
-        icon: Briefcase,
-        title: "Projects",
-        subtitle: "Tasks, milestones, and progress tracking",
-        color: "work",
-      }}
-      stats={stats}
-      tabs={[
-        { value: "active", label: "Active Projects", component: <ProjectTasks projects={mockProjects} /> },
-      ]}
-      headerAction={{
-        icon: Plus,
-        label: "New Project",
-        onClick: handleNewProject,
-      }}
-    />
+    <>
+      <DomainPageTemplate
+        domain={{
+          icon: Briefcase,
+          title: "Projects",
+          subtitle: "Tasks, milestones, and progress tracking",
+          color: "work",
+        }}
+        stats={stats}
+        tabs={[
+          {
+            value: "projects",
+            label: "Projects",
+            component: (
+              <ProjectTasks
+                projects={projects}
+                updatingTaskId={
+                  updateProjectTask.isPending
+                    ? updateProjectTask.variables?.id
+                    : undefined
+                }
+                onAddTask={(projectId) => setSelectedProjectId(projectId)}
+                onToggleTaskStatus={handleToggleTaskStatus}
+              />
+            ),
+          },
+        ]}
+        headerAction={{
+          icon: Plus,
+          label: "New Project",
+          onClick: () => setIsCreateProjectOpen(true),
+        }}
+      />
+
+      <AddProjectDialog
+        open={isCreateProjectOpen}
+        onOpenChange={setIsCreateProjectOpen}
+        onSave={handleCreateProject}
+      />
+
+      <AddProjectTaskDialog
+        open={!!selectedProjectId}
+        onOpenChange={(open) => {
+          if (!open) setSelectedProjectId(null);
+        }}
+        projectName={selectedProject?.name ?? "Project"}
+        onSave={handleCreateTask}
+      />
+    </>
   );
 };
 

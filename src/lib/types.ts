@@ -1,9 +1,6 @@
-/**
- * Shared utility types — replaces the ones that used to come from
- * @/integrations/supabase/types (which has been removed).
- */
+/** Shared utility types used across the frontend. */
 
-/** JSON-serialisable value (mirrors the old Supabase Json type) */
+/** JSON-serializable value used for note content and API payloads. */
 export type Json =
   | string
   | number

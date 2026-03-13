@@ -2,19 +2,13 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { format, startOfMonth, subMonths } from "date-fns";
 import { MetricsData } from "@/types/domain";
+import {
+  normalizeChecklistEntry,
+  type ApiChecklistEntry,
+  type ChecklistEntryRecord,
+} from "@/lib/api-normalizers";
 
-export interface ChecklistEntry {
-  id: string;
-  user_id: string;
-  task_id: string;
-  entry_date: string;
-  is_completed: boolean;
-  duration_seconds: number | null;
-  notes: string | null;
-  metrics_data: MetricsData;
-  created_at: string;
-  updated_at: string;
-}
+export type ChecklistEntry = ChecklistEntryRecord;
 
 // Fetch entries for a date range
 export function useChecklistEntries(startDate: Date, endDate: Date) {
@@ -25,9 +19,11 @@ export function useChecklistEntries(startDate: Date, endDate: Date) {
       format(endDate, "yyyy-MM-dd"),
     ],
     queryFn: () =>
-      api.get<ChecklistEntry[]>(
-        `/api/checklist-entries?start=${format(startDate, "yyyy-MM-dd")}&end=${format(endDate, "yyyy-MM-dd")}`
-      ),
+      api
+        .get<ApiChecklistEntry[]>(
+          `/api/checklist-entries?start=${format(startDate, "yyyy-MM-dd")}&end=${format(endDate, "yyyy-MM-dd")}`,
+        )
+        .then((entries) => entries.map(normalizeChecklistEntry)),
     staleTime: 0,
   });
 }
@@ -40,9 +36,11 @@ export function useChecklistAnalytics(monthsBack = 3) {
   return useQuery({
     queryKey: ["checklist-analytics", monthsBack],
     queryFn: () =>
-      api.get<ChecklistEntry[]>(
-        `/api/checklist-entries?start=${format(startDate, "yyyy-MM-dd")}&end=${format(endDate, "yyyy-MM-dd")}`
-      ),
+      api
+        .get<ApiChecklistEntry[]>(
+          `/api/checklist-entries?start=${format(startDate, "yyyy-MM-dd")}&end=${format(endDate, "yyyy-MM-dd")}`,
+        )
+        .then((entries) => entries.map(normalizeChecklistEntry)),
     staleTime: 0,
   });
 }
@@ -63,12 +61,14 @@ export function useToggleChecklistEntry() {
       isCompleted: boolean;
       metricsData?: MetricsData;
     }) =>
-      api.post<ChecklistEntry>("/api/checklist-entries", {
-        taskId,
-        entryDate,
-        isCompleted,
-        metricsData: metricsData ?? {},
-      }),
+      api
+        .post<ApiChecklistEntry>("/api/checklist-entries", {
+          taskId,
+          entryDate,
+          isCompleted,
+          metricsData: metricsData ?? {},
+        })
+        .then(normalizeChecklistEntry),
     // Optimistic update for instant UI feedback
     onMutate: async ({ taskId, entryDate, isCompleted, metricsData }) => {
       await queryClient.cancelQueries({ queryKey: ["checklist-entries"] });
@@ -146,12 +146,14 @@ export function useSaveChecklistMetrics() {
       metricsData: MetricsData;
       isCompleted: boolean;
     }) =>
-      api.post<ChecklistEntry>("/api/checklist-entries", {
-        taskId,
-        entryDate,
-        isCompleted,
-        metricsData,
-      }),
+      api
+        .post<ApiChecklistEntry>("/api/checklist-entries", {
+          taskId,
+          entryDate,
+          isCompleted,
+          metricsData,
+        })
+        .then(normalizeChecklistEntry),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["checklist-entries"] });
     },
@@ -173,12 +175,14 @@ export function useAddPendingTask() {
       taskId: string;
       entryDate: string;
     }) =>
-      api.post<ChecklistEntry>("/api/checklist-entries", {
-        taskId,
-        entryDate,
-        isCompleted: false,
-        metricsData: {},
-      }),
+      api
+        .post<ApiChecklistEntry>("/api/checklist-entries", {
+          taskId,
+          entryDate,
+          isCompleted: false,
+          metricsData: {},
+        })
+        .then(normalizeChecklistEntry),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["checklist-entries"] });
       queryClient.invalidateQueries({ queryKey: ["checklist-analytics"] });

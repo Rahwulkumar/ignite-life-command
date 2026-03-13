@@ -1,20 +1,20 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import {
+  normalizeScriptureVerse,
+  type ApiScriptureVerse,
+  type ScriptureVerseRecord,
+} from "@/lib/api-normalizers";
 
-export interface ScriptureVerse {
-  id: string;
-  user_id: string;
-  reference: string;
-  verse_text: string;
-  mastery_level: number;
-  created_at: string;
-  updated_at: string;
-}
+export type ScriptureVerse = ScriptureVerseRecord;
 
 export function useScriptureVerses() {
   return useQuery({
     queryKey: ["scripture-memory"],
-    queryFn: () => api.get<ScriptureVerse[]>("/api/scripture-verses"),
+    queryFn: () =>
+      api
+        .get<ApiScriptureVerse[]>("/api/scripture-verses")
+        .then((verses) => verses.map(normalizeScriptureVerse)),
   });
 }
 
@@ -23,11 +23,13 @@ export function useAddVerse() {
 
   return useMutation({
     mutationFn: ({ reference, text }: { reference: string; text: string }) =>
-      api.post<ScriptureVerse>("/api/scripture-verses", {
-        reference,
-        verseText: text,
-        masteryLevel: 0,
-      }),
+      api
+        .post<ApiScriptureVerse>("/api/scripture-verses", {
+          reference,
+          verseText: text,
+          masteryLevel: 0,
+        })
+        .then(normalizeScriptureVerse),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["scripture-memory"] });
     },
@@ -46,7 +48,11 @@ export function useUpdateVerseProgress() {
       masteryLevel: number;
       correct: boolean;
     }) =>
-      api.patch<ScriptureVerse>(`/api/scripture-verses/${id}`, { masteryLevel }),
+      api
+        .patch<ApiScriptureVerse>(`/api/scripture-verses/${id}`, {
+          masteryLevel,
+        })
+        .then(normalizeScriptureVerse),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["scripture-memory"] });
     },

@@ -31,7 +31,7 @@ export default defineConfig({
             "framer-motion",
           ],
           // Data fetching
-          "vendor-data": ["@tanstack/react-query", "@supabase/supabase-js"],
+          "vendor-data": ["@tanstack/react-query"],
           // Charts (often large)
           "vendor-charts": ["recharts"],
         },

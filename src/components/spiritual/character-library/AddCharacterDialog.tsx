@@ -65,8 +65,7 @@ export function AddCharacterDialog({
         description: "",
       });
     } catch (err: unknown) {
-      // Supabase errors often have a 'code' property, but basic Error doesn't.
-      // Using 'any' here is sometimes necessary for mixed error types, but let's try to be safer.
+      // API errors are not guaranteed to share one shape, so narrow carefully.
       const error = err as { code?: string; message: string };
       console.error("Error creating character:", error);
       toast({

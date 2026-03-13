@@ -14,7 +14,7 @@ const stats = [
   { icon: Percent, label: "ROI", value: "+22.3%", color: "text-finance" },
 ];
 
-// Mock data - will be replaced with Supabase queries
+// Mock data until portfolio persistence is wired to the API.
 const mockWatchlist: WatchlistItem[] = [
   { id: 1, symbol: "AMZN", name: "Amazon", price: 153.42, change: 2.1, notes: "Watching for breakout" },
   { id: 2, symbol: "AMD", name: "AMD Inc.", price: 147.80, change: -1.5, notes: "Support at $145" },

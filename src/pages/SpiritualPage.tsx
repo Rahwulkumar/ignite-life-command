@@ -10,6 +10,7 @@ import { SageChat } from "@/components/spiritual/SageChat";
 import { ScriptureMemoryCard } from "@/components/spiritual/ScriptureMemoryCard";
 import { SpiritualGoalsCard } from "@/components/spiritual/SpiritualGoalsCard";
 import { AddGoalDialog } from "@/components/spiritual/AddGoalDialog";
+import { AddVerseDialog } from "@/components/spiritual/AddVerseDialog";
 import { toast } from "@/hooks/use-toast";
 
 import {
@@ -36,6 +37,7 @@ const SpiritualPage = () => {
   const [activeTab, setActiveTab] = useState("reading");
   const [isJournalModalOpen, setIsJournalModalOpen] = useState(false);
   const [isGoalDialogOpen, setIsGoalDialogOpen] = useState(false);
+  const [isAddVerseDialogOpen, setIsAddVerseDialogOpen] = useState(false);
 
   const hour = new Date().getHours();
 
@@ -233,10 +235,21 @@ const SpiritualPage = () => {
           value: "memory",
           label: "Scripture Memory",
           component: (
-            <ScriptureMemoryCard
-              verses={mappedVerses}
-              onReviewComplete={handleReviewComplete}
-            />
+            <div className="space-y-6">
+              <div className="flex justify-end">
+                <button
+                  onClick={() => setIsAddVerseDialogOpen(true)}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-spiritual/10 text-spiritual hover:bg-spiritual/20 transition-colors text-sm font-medium"
+                >
+                  <BookOpen className="w-4 h-4" />
+                  Add Verse
+                </button>
+              </div>
+              <ScriptureMemoryCard
+                verses={mappedVerses}
+                onReviewComplete={handleReviewComplete}
+              />
+            </div>
           ),
         },
         {
@@ -299,6 +312,12 @@ const SpiritualPage = () => {
             description: `"${title}" added to your spiritual goals.`,
           });
         }}
+      />
+
+      {/* Add Verse Dialog */}
+      <AddVerseDialog
+        open={isAddVerseDialogOpen}
+        onOpenChange={setIsAddVerseDialogOpen}
       />
     </DomainPageTemplate>
   );

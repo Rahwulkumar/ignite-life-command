@@ -13,7 +13,6 @@ const SUGGESTIONS = [
 ];
 
 export function SageChat() {
-  // FIX BUG 1: Wire the real useSpiritualGuide hook's streaming API instead of mock responses
   const onSendMessage = useCallback(async (content: string) => {
     let assistantContent = "";
 

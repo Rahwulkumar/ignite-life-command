@@ -1,6 +1,6 @@
 // Centralized mock data for all domains
 // This file contains all mock/placeholder data used throughout the application
-// TODO: Replace with real data from Supabase as features are implemented
+// TODO: Replace with API-backed domain data as features are implemented
 
 // ============================================================================
 // TECH DOMAIN

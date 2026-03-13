@@ -15,11 +15,6 @@ checklist.get("/checklist-entries", async (c) => {
   const start = c.req.query("start");
   const end = c.req.query("end");
 
-  let query = db
-    .select()
-    .from(dailyChecklistEntries)
-    .where(eq(dailyChecklistEntries.userId, user.id));
-
   const entries = await db
     .select()
     .from(dailyChecklistEntries)

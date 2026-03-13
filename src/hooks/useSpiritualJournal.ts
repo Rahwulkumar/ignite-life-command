@@ -1,25 +1,21 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import {
+  normalizeNote,
+  type ApiNoteRecord,
+  type NoteRecord,
+} from "@/lib/api-normalizers";
 
 // Journal entries are stored in office_notes with domain='spiritual', noteType='journal'
-export interface JournalEntry {
-  id: string;
-  user_id: string;
-  title: string;
-  content: unknown;
-  icon: string | null;
-  domain: string | null;
-  note_type: string | null;
-  is_pinned: boolean | null;
-  created_at: string;
-  updated_at: string;
-}
+export type JournalEntry = NoteRecord;
 
 export function useSpiritualJournal() {
   return useQuery({
     queryKey: ["spiritual-journal"],
     queryFn: () =>
-      api.get<JournalEntry[]>("/api/notes?domain=spiritual&noteType=journal"),
+      api
+        .get<ApiNoteRecord[]>("/api/notes?domain=spiritual&noteType=journal")
+        .then((entries) => entries.map(normalizeNote)),
   });
 }
 
@@ -28,12 +24,14 @@ export function useAddJournalEntry() {
 
   return useMutation({
     mutationFn: ({ title, content }: { title: string; content: string }) =>
-      api.post<JournalEntry>("/api/notes", {
-        title,
-        content: { body: content },
-        domain: "spiritual",
-        noteType: "journal",
-      }),
+      api
+        .post<ApiNoteRecord>("/api/notes", {
+          title,
+          content: { body: content },
+          domain: "spiritual",
+          noteType: "journal",
+        })
+        .then(normalizeNote),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["spiritual-journal"] });
       queryClient.invalidateQueries({ queryKey: ["notes"] });

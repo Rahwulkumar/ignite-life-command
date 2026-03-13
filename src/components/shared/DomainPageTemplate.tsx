@@ -64,6 +64,7 @@ export function DomainPageTemplate({
     children,
 }: DomainPageTemplateProps) {
     const [showAI, setShowAI] = useState(false);
+    const notesDomain = domain.color === "work" ? "projects" : domain.color;
 
     // Determine which tab prop to use
     const tabValue = activeTab !== undefined ? activeTab : undefined;
@@ -114,7 +115,7 @@ export function DomainPageTemplate({
                                         <TabsTrigger value="notes" asChild>
                                             <Link
                                                 to="/notes"
-                                                state={{ domain: domain.color }}
+                                                state={{ domain: notesDomain }}
                                                 className="flex items-center gap-1.5"
                                             >
                                                 <StickyNote className="w-3.5 h-3.5" />

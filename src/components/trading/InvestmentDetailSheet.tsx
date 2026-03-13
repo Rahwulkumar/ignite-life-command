@@ -1,17 +1,17 @@
-import { useState, useRef, useEffect } from "react";
-import { Send, LineChart, TrendingUp, TrendingDown } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { LineChart, Send, TrendingDown, TrendingUp } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { Textarea } from "@/components/ui/textarea";
+import { streamRequest } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { InvestmentChart } from "./InvestmentChart";
-import { toast } from "sonner";
-import { streamRequest } from "@/lib/api";
 
 interface Holding {
   id: string;
@@ -37,7 +37,7 @@ interface InvestmentDetailSheetProps {
   onClose: () => void;
 }
 
-// AI chat routes through the Hono backend — no Supabase edge function needed
+// AI chat routes through the Hono backend.
 
 export function InvestmentDetailSheet({
   holding,
@@ -55,7 +55,7 @@ export function InvestmentDetailSheet({
         {
           id: "intro",
           role: "assistant",
-          content: `I see you're looking at your ${holding.name} (${holding.symbol}) position. You're ${holding.returnsPercent >= 0 ? "up" : "down"} ${Math.abs(holding.returnsPercent)}%. What would you like to discuss—your thesis, exit strategy, or position sizing?`,
+          content: `I see you're looking at your ${holding.name} (${holding.symbol}) position. You're ${holding.returnsPercent >= 0 ? "up" : "down"} ${Math.abs(holding.returnsPercent)}%. What would you like to discuss - your thesis, exit strategy, or position sizing?`,
         },
       ]);
     }
@@ -66,7 +66,7 @@ export function InvestmentDetailSheet({
   }, [messages]);
 
   const streamChat = async (userMessages: Message[]) => {
-    // Uses Better Auth session cookie automatically via credentials:include
+    // Uses Better Auth session cookie automatically via credentials: include
     const resp = await streamRequest("/api/ai/nova", {
       messages: userMessages.map((m) => ({ role: m.role, content: m.content })),
       investmentContext: holding,
@@ -206,7 +206,6 @@ export function InvestmentDetailSheet({
           </div>
         </SheetHeader>
 
-        {/* Chart */}
         <div className="p-4 border-b border-border">
           <p className="text-xs text-muted-foreground mb-2">
             30 Day Performance
@@ -214,7 +213,6 @@ export function InvestmentDetailSheet({
           <InvestmentChart symbol={holding.symbol} isPositive={isPositive} />
         </div>
 
-        {/* Stats */}
         <div className="grid grid-cols-3 gap-4 p-4 border-b border-border text-center">
           <div>
             <p className="text-xs text-muted-foreground">Units</p>
@@ -234,7 +232,6 @@ export function InvestmentDetailSheet({
           </div>
         </div>
 
-        {/* Chat */}
         <div className="flex-1 flex flex-col min-h-0">
           <div className="flex items-center gap-2 px-4 py-2 border-b border-border bg-muted/30">
             <LineChart className="w-4 h-4 text-muted-foreground" />
