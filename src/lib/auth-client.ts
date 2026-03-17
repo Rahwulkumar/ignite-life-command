@@ -1,9 +1,8 @@
 import { createAuthClient } from "better-auth/react";
-
-const apiUrl = import.meta.env.VITE_API_URL as string;
+import { env } from "@/lib/env";
 
 export const authClient = createAuthClient({
-  baseURL: apiUrl,
+  baseURL: env.API_URL,
 });
 
 // Re-export the hooks and methods for easy import throughout the app

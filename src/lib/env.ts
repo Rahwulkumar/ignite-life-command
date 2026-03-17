@@ -18,9 +18,45 @@ function getOptionalEnvVar(key: string, defaultValue = ""): string {
   return import.meta.env[key] || defaultValue;
 }
 
+function stripTrailingSlash(value: string): string {
+  return value.endsWith("/") ? value.slice(0, -1) : value;
+}
+
+function isLoopbackHost(hostname: string): boolean {
+  return hostname === "localhost" || hostname === "127.0.0.1";
+}
+
+function resolveApiUrl(configuredUrl: string): string {
+  const normalizedUrl = stripTrailingSlash(configuredUrl);
+
+  if (typeof window === "undefined") {
+    return normalizedUrl;
+  }
+
+  try {
+    const configured = new URL(normalizedUrl);
+    const currentHost = window.location.hostname;
+
+    if (!isLoopbackHost(configured.hostname) || !isLoopbackHost(currentHost)) {
+      return normalizedUrl;
+    }
+
+    if (configured.hostname === currentHost) {
+      return normalizedUrl;
+    }
+
+    configured.hostname = currentHost;
+    configured.protocol = window.location.protocol;
+
+    return stripTrailingSlash(configured.toString());
+  } catch {
+    return normalizedUrl;
+  }
+}
+
 export const env = {
   // API Configuration (Required)
-  API_URL: getEnvVar("VITE_API_URL"),
+  API_URL: resolveApiUrl(getEnvVar("VITE_API_URL")),
 
   // Optional
   NODE_ENV: getOptionalEnvVar("NODE_ENV", "development"),

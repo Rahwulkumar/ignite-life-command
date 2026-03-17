@@ -1,7 +1,7 @@
 import { Hono } from "hono";
-import { requireAuth } from "../middleware/auth";
-import { db } from "../db";
-import { dailyFocus } from "../db/schema";
+import { requireAuth } from "../middleware/auth.js";
+import { db } from "../db/index.js";
+import { dailyFocus } from "../db/schema.js";
 import { eq, and } from "drizzle-orm";
 
 const spiritual = new Hono();

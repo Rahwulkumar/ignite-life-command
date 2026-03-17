@@ -1,5 +1,5 @@
 import { createMiddleware } from "hono/factory";
-import { auth } from "../auth";
+import { auth } from "../auth.js";
 
 // Augment Hono's context type to include user
 declare module "hono" {

@@ -1,7 +1,7 @@
 import { Hono } from "hono";
-import { requireAuth } from "../middleware/auth";
-import { db } from "../db";
-import { dailyChecklistEntries, customTaskMetrics } from "../db/schema";
+import { requireAuth } from "../middleware/auth.js";
+import { db } from "../db/index.js";
+import { dailyChecklistEntries, customTaskMetrics } from "../db/schema.js";
 import { eq, and, gte, lte } from "drizzle-orm";
 
 const checklist = new Hono();

@@ -1,8 +1,6 @@
-const BASE_URL = import.meta.env.VITE_API_URL as string;
+import { env } from "@/lib/env";
 
-if (!BASE_URL) {
-  console.error("VITE_API_URL is not set. Check your .env file.");
-}
+const BASE_URL = env.API_URL;
 
 type HttpMethod = "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
 

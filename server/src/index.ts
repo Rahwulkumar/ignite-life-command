@@ -3,15 +3,15 @@ import { Hono } from "hono";
 import { serve } from "@hono/node-server";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
-import { auth } from "./auth";
-import bible from "./routes/bible";
-import checklist from "./routes/checklist";
-import notes from "./routes/notes";
-import spiritual from "./routes/spiritual";
-import scripture from "./routes/scripture";
-import ai from "./routes/ai";
-import goals from "./routes/goals";
-import projects from "./routes/projects";
+import { auth } from "./auth.js";
+import bible from "./routes/bible.js";
+import checklist from "./routes/checklist.js";
+import notes from "./routes/notes.js";
+import spiritual from "./routes/spiritual.js";
+import scripture from "./routes/scripture.js";
+import ai from "./routes/ai.js";
+import goals from "./routes/goals.js";
+import projects from "./routes/projects.js";
 
 const app = new Hono();
 

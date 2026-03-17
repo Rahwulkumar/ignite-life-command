@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import { and, desc, eq } from "drizzle-orm";
-import { db } from "../db";
-import { officeNotes, spiritualGoals } from "../db/schema";
-import { requireAuth } from "../middleware/auth";
+import { db } from "../db/index.js";
+import { officeNotes, spiritualGoals } from "../db/schema.js";
+import { requireAuth } from "../middleware/auth.js";
 
 const goals = new Hono();
 goals.use("*", requireAuth);

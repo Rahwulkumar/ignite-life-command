@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import { and, asc, desc, eq } from "drizzle-orm";
-import { db } from "../db";
-import { projects, projectTasks } from "../db/schema";
-import { requireAuth } from "../middleware/auth";
+import { db } from "../db/index.js";
+import { projects, projectTasks } from "../db/schema.js";
+import { requireAuth } from "../middleware/auth.js";
 
 const projectsRoute = new Hono();
 projectsRoute.use("*", requireAuth);
