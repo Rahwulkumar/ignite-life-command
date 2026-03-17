@@ -116,6 +116,7 @@ const TechPage = () => {
         title: "Tech Mastery Hub",
         subtitle: "Skills, certifications & research",
         color: "tech",
+        notesDomain: "tech",
       }}
       stats={stats}
       tabs={[

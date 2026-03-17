@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { CharacterSidebar } from "@/components/spiritual/workspace/CharacterSidebar";
@@ -9,7 +9,7 @@ import {
   useEnsureCharacterFolder,
 } from "@/hooks/useSpiritualCharacters";
 import { useNote, useUpdateNote } from "@/hooks/useNotes";
-import { debounce } from "@/lib/utils";
+import { useDebouncedNoteSave } from "@/hooks/useDebouncedNoteSave";
 import type { Json } from "@/lib/types";
 import { Loader2, User } from "lucide-react";
 
@@ -21,9 +21,16 @@ export default function CharacterWorkspacePage() {
 
   const [rootFolderId, setRootFolderId] = useState<string | null>(null);
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
 
   const { data: selectedNote } = useNote(selectedNoteId);
+  const saveNote = useCallback(
+    (noteId: string, content: Json) =>
+      updateNote.mutateAsync({ id: noteId, content }),
+    [updateNote],
+  );
+  const { savingNoteId, scheduleSave, flushPendingSave } =
+    useDebouncedNoteSave(saveNote);
+  const isSaving = selectedNoteId !== null && savingNoteId === selectedNoteId;
 
   // Ensure folder exists and set root ID
   useEffect(() => {
@@ -38,19 +45,15 @@ export default function CharacterWorkspacePage() {
     }
   }, [character, rootFolderId, ensureFolder]);
 
-  // Debounced save
-  const debouncedSave = useCallback(
-    debounce(async (id: string, content: Json) => {
-      setIsSaving(true);
-      await updateNote.mutateAsync({ id, content });
-      setIsSaving(false);
-    }, 500),
-    [updateNote],
-  );
+  useEffect(() => {
+    return () => {
+      flushPendingSave();
+    };
+  }, [flushPendingSave, selectedNoteId]);
 
   const handleContentChange = (content: Json) => {
     if (selectedNoteId) {
-      debouncedSave(selectedNoteId, content);
+      scheduleSave(selectedNoteId, content);
     }
   };
 
@@ -96,6 +99,7 @@ export default function CharacterWorkspacePage() {
           <div className="flex-1 bg-background overflow-hidden relative">
             {selectedNote ? (
               <NoteEditor
+                key={selectedNote.id}
                 note={selectedNote}
                 onContentChange={handleContentChange}
                 onTitleChange={handleTitleChange}

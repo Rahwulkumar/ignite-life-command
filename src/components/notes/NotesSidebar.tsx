@@ -4,7 +4,8 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { useSearchNotes, groupNotesByDomain, buildNoteTree, type Note } from "@/hooks/useNotes";
-import { DOMAINS, type DomainId, DomainIcon, getDomainById } from "@/lib/domains";
+import { DOMAINS, type DomainId, getDomainById } from "@/lib/domains";
+import { DomainIcon } from "@/components/shared/DomainIcon";
 import { DomainSection } from "./DomainSection";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 

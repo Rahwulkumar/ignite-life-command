@@ -40,7 +40,7 @@ export function SkillRadarChart({ data, size = 280 }: SkillRadarChartProps) {
     return Array.from({ length: levels }, (_, level) => {
       const radius = ((level + 1) / levels) * maxRadius;
       const angleStep = (2 * Math.PI) / data.length;
-      const path = data.map((_, i) => {
+      const path = Array.from({ length: data.length }, (_, i) => {
         const angle = angleStep * i - Math.PI / 2;
         const x = center + radius * Math.cos(angle);
         const y = center + radius * Math.sin(angle);
@@ -52,7 +52,7 @@ export function SkillRadarChart({ data, size = 280 }: SkillRadarChartProps) {
 
   const axisLines = useMemo(() => {
     const angleStep = (2 * Math.PI) / data.length;
-    return data.map((_, i) => {
+    return Array.from({ length: data.length }, (_, i) => {
       const angle = angleStep * i - Math.PI / 2;
       return {
         x2: center + maxRadius * Math.cos(angle),

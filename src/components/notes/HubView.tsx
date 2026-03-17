@@ -6,7 +6,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { JournalList } from "./JournalList";
 import { JournalEntryForm } from "./JournalEntryForm";
 import { cn } from "@/lib/utils";
-import { DOMAINS, DomainIcon, type DomainId } from "@/lib/domains";
+import { DOMAINS, type DomainId } from "@/lib/domains";
+import { DomainIcon } from "@/components/shared/DomainIcon";
 import type { Note } from "@/hooks/useNotes";
 
 type NoteWithChildren = Note & { children: NoteWithChildren[] };

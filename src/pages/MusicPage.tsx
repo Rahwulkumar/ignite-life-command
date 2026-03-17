@@ -36,6 +36,7 @@ const MusicPage = () => {
         title: "Music",
         subtitle: "Practice sessions, repertoire, and technique",
         color: "music",
+        notesDomain: "music",
       }}
       stats={stats}
       tabs={[

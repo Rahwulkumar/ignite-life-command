@@ -2,7 +2,8 @@ import { Link } from "react-router-dom";
 import { Layers, ChevronRight } from "lucide-react";
 import { useNotes, groupNotesByDomain } from "@/hooks/useNotes";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { DOMAINS, DomainIcon } from "@/lib/domains";
+import { DOMAINS } from "@/lib/domains";
+import { DomainIcon } from "@/components/shared/DomainIcon";
 
 export function NotesWidget() {
   const { data: notes = [], isLoading } = useNotes();

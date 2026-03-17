@@ -25,6 +25,7 @@ export default function CharacterLibraryPage() {
                 title: "Character Library",
                 subtitle: "Deepen your understanding by studying the lives of key figures in Scripture.",
                 color: "spiritual",
+                notesDomain: "spiritual",
             }}
             stats={[]} // No stats for library yet, or could add character count
             headerAction={{

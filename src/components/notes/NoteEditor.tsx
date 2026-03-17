@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import type { Content } from "@tiptap/core";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
@@ -31,6 +32,9 @@ export function NoteEditor({
   onTitleChange,
   isSaving,
 }: NoteEditorProps) {
+  const hydratedNoteIdRef = useRef(note.id);
+  const hydratedContentRef = useRef<string | null>(null);
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -54,7 +58,7 @@ export function NoteEditor({
         lowlight,
       }),
     ],
-    content: (note.content as object) || "",
+    content: (note.content as Content) ?? null,
     onUpdate: ({ editor }) => {
       const json = editor.getJSON();
       onContentChange(json as Json);
@@ -69,14 +73,66 @@ export function NoteEditor({
 
   // Update editor content when note changes
   useEffect(() => {
-    if (editor && note.content) {
-      const currentContent = JSON.stringify(editor.getJSON());
-      const newContent = JSON.stringify(note.content);
-      if (currentContent !== newContent) {
-        editor.commands.setContent(note.content as object);
-      }
+    if (!editor) {
+      return;
     }
-  }, [note.id]);
+
+    if (hydratedContentRef.current === null) {
+      hydratedNoteIdRef.current = note.id;
+      hydratedContentRef.current = JSON.stringify(editor.getJSON());
+    }
+
+    const currentContent = JSON.stringify(editor.getJSON());
+    const incomingContent = (note.content as Content) ?? null;
+    const isNewNote = hydratedNoteIdRef.current !== note.id;
+
+    const applyIncomingContent = () => {
+      if (incomingContent === null) {
+        if (!editor.isEmpty) {
+          editor.commands.clearContent(false);
+        }
+      } else {
+        editor.commands.setContent(incomingContent, { emitUpdate: false });
+      }
+
+      hydratedNoteIdRef.current = note.id;
+      hydratedContentRef.current = JSON.stringify(editor.getJSON());
+    };
+
+    if (isNewNote) {
+      applyIncomingContent();
+      return;
+    }
+
+    if (incomingContent === null) {
+      if (editor.isEmpty) {
+        hydratedContentRef.current = currentContent;
+        return;
+      }
+
+      if (currentContent === hydratedContentRef.current) {
+        applyIncomingContent();
+      }
+
+      return;
+    }
+
+    const incomingSnapshot = JSON.stringify(note.content);
+
+    if (incomingSnapshot === currentContent) {
+      hydratedContentRef.current = incomingSnapshot;
+      return;
+    }
+
+    // Ignore refetches that lag behind local unsaved edits.
+    if (currentContent !== hydratedContentRef.current) {
+      return;
+    }
+
+    if (incomingSnapshot !== hydratedContentRef.current) {
+      applyIncomingContent();
+    }
+  }, [editor, note.content, note.id]);
 
   return (
     <div className="h-full flex flex-col">

@@ -38,6 +38,7 @@ const ContentPage = () => {
         title: "Content",
         subtitle: "Saved reels, videos, articles, and notes",
         color: "content",
+        notesDomain: "content",
       }}
       stats={stats}
       tabs={[

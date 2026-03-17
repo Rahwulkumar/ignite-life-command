@@ -46,6 +46,7 @@ const FinancePage = () => {
         title: "Finance",
         subtitle: "Track expenses, budgets, and investments",
         color: "finance",
+        notesDomain: "finance",
       }}
       stats={stats}
       tabs={[

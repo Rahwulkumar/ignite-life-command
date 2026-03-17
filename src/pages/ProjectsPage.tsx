@@ -146,6 +146,7 @@ const ProjectsPage = () => {
           title: "Projects",
           subtitle: "Tasks, milestones, and progress tracking",
           color: "work",
+          notesDomain: "projects",
         }}
         stats={stats}
         tabs={[

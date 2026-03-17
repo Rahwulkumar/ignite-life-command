@@ -10,7 +10,7 @@ This document serves as the **Single Source of Truth** for development practices
 Before writing a single line of code:
 1.  **Check for existing components**: Do NOT reinvent the wheel. Search `src/components/shared` and `src/components/ui` first.
 2.  **Check for existing hooks**: Business logic often already exists in `src/hooks`. Reuse it.
-3.  **Check for existing types**: Use `src/integrations/supabase/types.ts` or domain-specific type files.
+3.  **Check for existing types**: Use `src/lib/types.ts` or domain-specific type files.
 
 ---
 

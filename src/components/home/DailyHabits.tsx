@@ -93,7 +93,7 @@ export function DailyHabits({ date, habits, onToggle, compact = false }: DailyHa
   );
 }
 
-export const defaultHabits: Habit[] = [
+const defaultHabits: Habit[] = [
   { id: "water", icon: Droplets, label: "Drink 8 glasses of water", completed: false },
   { id: "gym", icon: Dumbbell, label: "Workout or movement", completed: false },
   { id: "devotion", icon: BookOpen, label: "Morning devotion", completed: false },

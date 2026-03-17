@@ -17,7 +17,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { DOMAINS, DomainIcon, type DomainId } from "@/lib/domains";
+import { DOMAINS, type DomainId } from "@/lib/domains";
+import { DomainIcon } from "@/components/shared/DomainIcon";
 import { useCreateNote } from "@/hooks/useNotes";
 import { toast } from "sonner";
 

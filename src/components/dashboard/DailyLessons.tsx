@@ -92,7 +92,7 @@ export function DailyLessons({ lessons, completedCount, onViewAll }: DailyLesson
 }
 
 // Default lessons for backward compatibility
-export const DEFAULT_LESSONS: Lesson[] = [
+const DEFAULT_LESSONS: Lesson[] = [
   {
     title: "Understanding Time Complexity",
     description: "Learn how to analyze algorithm efficiency using Big O notation",

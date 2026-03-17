@@ -215,6 +215,7 @@ const SpiritualPage = () => {
         title: "Spiritual",
         subtitle: "Deepen your faith journey",
         color: "spiritual",
+        notesDomain: "spiritual",
       }}
       stats={stats}
       tabs={[

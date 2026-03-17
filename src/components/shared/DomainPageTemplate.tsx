@@ -8,6 +8,7 @@ import { DomainStatsBar } from "@/components/shared/DomainStatsBar";
 import { AIChatSidebar } from "@/components/shared/AIChatSidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import type { DomainId } from "@/lib/domains";
 
 export interface StatItem {
     icon: LucideIcon;
@@ -34,6 +35,7 @@ export interface DomainConfig {
     title: string;
     subtitle: string;
     color: "finance" | "trading" | "tech" | "spiritual" | "music" | "content" | "work";
+    notesDomain: DomainId;
 }
 
 export interface DomainPageTemplateProps {
@@ -64,7 +66,6 @@ export function DomainPageTemplate({
     children,
 }: DomainPageTemplateProps) {
     const [showAI, setShowAI] = useState(false);
-    const notesDomain = domain.color === "work" ? "projects" : domain.color;
 
     // Determine which tab prop to use
     const tabValue = activeTab !== undefined ? activeTab : undefined;
@@ -115,7 +116,7 @@ export function DomainPageTemplate({
                                         <TabsTrigger value="notes" asChild>
                                             <Link
                                                 to="/notes"
-                                                state={{ domain: notesDomain }}
+                                                state={{ domain: domain.notesDomain }}
                                                 className="flex items-center gap-1.5"
                                             >
                                                 <StickyNote className="w-3.5 h-3.5" />

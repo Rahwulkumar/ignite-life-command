@@ -7,7 +7,8 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
-import { DomainIcon, type Domain, type DomainId } from "@/lib/domains";
+import type { Domain, DomainId } from "@/lib/domains";
+import { DomainIcon } from "@/components/shared/DomainIcon";
 import type { Note } from "@/hooks/useNotes";
 
 import { SidebarFileTree } from "@/components/notes/SidebarFileTree";

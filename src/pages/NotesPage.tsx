@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { PageTransition } from "@/components/layout/PageTransition";
@@ -20,7 +20,7 @@ import {
   groupNotesByDomain,
   type Note,
 } from "@/hooks/useNotes";
-import { debounce } from "@/lib/utils";
+import { useDebouncedNoteSave } from "@/hooks/useDebouncedNoteSave";
 import { DOMAINS, type DomainId } from "@/lib/domains";
 import type { Json } from "@/lib/types";
 
@@ -38,7 +38,6 @@ export default function NotesPage() {
 
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
   const [activeDomain, setActiveDomain] = useState<DomainId | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
   const [viewMode, setViewMode] = useState<"hub" | "editor">("hub");
 
   const { data: notes = [], isLoading: notesLoading } = useNotes();
@@ -50,16 +49,32 @@ export default function NotesPage() {
 
   const groupedNotes = groupNotesByDomain(notes);
   const pinnedNotes = notes.filter((n) => n.is_pinned && !n.is_template);
+  const hubCount = notes.filter((n) => n.note_type === "hub").length;
+
+  const saveNote = useCallback(
+    (id: string, content: Json) => updateNote.mutateAsync({ id, content }),
+    [updateNote],
+  );
+  const { savingNoteId, scheduleSave, flushPendingSave } =
+    useDebouncedNoteSave(saveNote);
+  const isSaving = selectedNoteId !== null && savingNoteId === selectedNoteId;
 
   // Initialize hubs on first load
   useEffect(() => {
-    if (!notesLoading && notes.length >= 0) {
-      const hubs = notes.filter((n) => n.note_type === "hub");
-      if (hubs.length < DOMAINS.length) {
-        initializeHubs.mutate(notes);
-      }
+    if (
+      !notesLoading &&
+      !initializeHubs.isPending &&
+      hubCount < DOMAINS.length
+    ) {
+      initializeHubs.mutate(notes);
     }
-  }, [notesLoading, notes.length]);
+  }, [hubCount, initializeHubs, notes, notesLoading]);
+
+  useEffect(() => {
+    return () => {
+      flushPendingSave();
+    };
+  }, [flushPendingSave, selectedNoteId]);
 
   // Handle incoming domain from navigation state
   useEffect(() => {
@@ -98,19 +113,9 @@ export default function NotesPage() {
     }
   }, [notes, selectedNoteId, activeDomain, notesLoading, locationState]);
 
-  // Debounced save function
-  const debouncedSave = useCallback(
-    debounce(async (id: string, content: Json) => {
-      setIsSaving(true);
-      await updateNote.mutateAsync({ id, content });
-      setIsSaving(false);
-    }, 500),
-    [updateNote],
-  );
-
   const handleContentChange = (content: Json) => {
     if (selectedNoteId) {
-      debouncedSave(selectedNoteId, content);
+      scheduleSave(selectedNoteId, content);
     }
   };
 
@@ -247,6 +252,7 @@ export default function NotesPage() {
               />
             ) : selectedNote && viewMode === "editor" ? (
               <NoteEditor
+                key={selectedNote.id}
                 note={selectedNote}
                 onContentChange={handleContentChange}
                 onTitleChange={handleTitleChange}

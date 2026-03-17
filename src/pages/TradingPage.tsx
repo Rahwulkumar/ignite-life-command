@@ -63,6 +63,7 @@ const TradingPage = () => {
         title: "Investments",
         subtitle: "Portfolio, mutual funds, and investment journal",
         color: "trading",
+        notesDomain: "trading",
       }}
       stats={stats}
       tabs={[

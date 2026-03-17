@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { DOMAIN_COLORS, DomainId } from "@/lib/domain-colors";
 import { useChecklistAnalytics } from "@/hooks/useChecklistEntries";
 import {
+  addWeeks,
   format,
   startOfWeek,
   endOfWeek,
@@ -36,14 +37,22 @@ interface DayActivity {
 
 export function WeeklyActivityChart() {
   const [weekOffset, setWeekOffset] = useState(0);
-  const { data: analyticsData = [], isLoading } = useChecklistAnalytics(1);
+  const { data: analyticsData = [], isLoading } = useChecklistAnalytics(3);
+  const weekRange = useMemo(() => {
+    const referenceDate = addWeeks(new Date(), weekOffset);
+
+    return {
+      weekStart: startOfWeek(referenceDate),
+      weekEnd: endOfWeek(referenceDate),
+    };
+  }, [weekOffset]);
 
   // Calculate week data from analytics
   const weekData = useMemo(() => {
-    const today = new Date();
-    const weekStart = startOfWeek(today);
-    const weekEnd = endOfWeek(today);
-    const daysOfWeek = eachDayOfInterval({ start: weekStart, end: weekEnd });
+    const daysOfWeek = eachDayOfInterval({
+      start: weekRange.weekStart,
+      end: weekRange.weekEnd,
+    });
 
     return daysOfWeek.map((date) => {
       const dateKey = format(date, "yyyy-MM-dd");
@@ -94,7 +103,7 @@ export function WeeklyActivityChart() {
         domainBreakdown,
       };
     });
-  }, [analyticsData, weekOffset]);
+  }, [analyticsData, weekRange]);
 
   // Get bar color based on completion rate
   const getBarColor = (rate: number, isToday: boolean) => {
@@ -159,7 +168,9 @@ export function WeeklyActivityChart() {
   };
 
   const isCurrentWeek = weekOffset === 0;
-  const weekLabel = "This Week";
+  const weekLabel = isCurrentWeek
+    ? "This Week"
+    : `${format(weekRange.weekStart, "MMM d")} - ${format(weekRange.weekEnd, "MMM d")}`;
 
   if (isLoading) {
     return (
