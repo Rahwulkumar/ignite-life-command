@@ -4,6 +4,7 @@ import { serve } from "@hono/node-server";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { auth } from "./auth.js";
+import { checkDatabaseConnection } from "./db/index.js";
 import bible from "./routes/bible.js";
 import checklist from "./routes/checklist.js";
 import notes from "./routes/notes.js";
@@ -40,6 +41,17 @@ app.use(
 // ── Health Check ──────────────────────────────────────────────
 
 app.get("/health", (c) => c.json({ status: "ok", timestamp: new Date().toISOString() }));
+
+app.get("/health/db", async (c) => {
+  try {
+    await checkDatabaseConnection();
+    return c.json({ status: "ok", database: "reachable", timestamp: new Date().toISOString() });
+  } catch (error) {
+    console.error("Database health check failed:", error);
+    const message = error instanceof Error ? error.message : "Database unavailable";
+    return c.json({ status: "error", database: "unreachable", error: message }, 500);
+  }
+});
 
 // ── Auth Routes (Better Auth handles /api/auth/**) ────────────
 
