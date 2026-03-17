@@ -8,6 +8,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   Cell,
+  type TooltipProps,
 } from "recharts";
 import { cn } from "@/lib/utils";
 import { DOMAIN_COLORS, DomainId } from "@/lib/domain-colors";
@@ -32,6 +33,7 @@ interface DayActivity {
   completed: boolean;
   completionRate: number;
   isToday: boolean;
+  isFuture: boolean;
   domainBreakdown: Record<string, number>;
 }
 
@@ -57,11 +59,13 @@ export function WeeklyActivityChart() {
     return daysOfWeek.map((date) => {
       const dateKey = format(date, "yyyy-MM-dd");
       const dayOfWeek = getDay(date);
+      const isFuture = weekOffset === 0 && date > new Date();
 
-      // Get tasks for this day
-      const dayTasks = analyticsData.filter(
+      // Get checklist entries for this day and only count completed work.
+      const dayEntries = analyticsData.filter(
         (entry) => entry.entry_date === dateKey,
       );
+      const completedTasks = dayEntries.filter((entry) => entry.is_completed);
 
       // Calculate expected tasks for this day
       const expectedTasks = STANDARD_TASKS.filter((task) => {
@@ -73,21 +77,21 @@ export function WeeklyActivityChart() {
       }).length;
 
       // Calculate totals
-      const completedCount = dayTasks.length;
-      const totalHours = dayTasks.reduce((sum, task) => {
+      const completedCount = completedTasks.length;
+      const totalHours = completedTasks.reduce((sum, task) => {
         return sum + (task.duration_seconds || 0) / 3600;
       }, 0);
 
       // Domain breakdown
       const domainBreakdown: Record<string, number> = {};
-      dayTasks.forEach((task) => {
+      completedTasks.forEach((task) => {
         const taskId = task.task_id;
         const domain = taskId.split("_")[0]; // Extract domain from task_id (e.g., "tech_dsa" -> "tech")
         domainBreakdown[domain] = (domainBreakdown[domain] || 0) + 1;
       });
 
       const completionRate =
-        expectedTasks > 0
+        !isFuture && expectedTasks > 0
           ? Math.round((completedCount / expectedTasks) * 100)
           : 0;
 
@@ -97,16 +101,18 @@ export function WeeklyActivityChart() {
         total: expectedTasks,
         hours: Math.round(totalHours * 10) / 10,
         points: 0, // Points will be added later when the column exists
-        completed: completedCount >= expectedTasks,
+        completed: !isFuture && completedCount >= expectedTasks,
         completionRate,
         isToday: isTodayFn(date),
+        isFuture,
         domainBreakdown,
       };
     });
   }, [analyticsData, weekRange]);
 
   // Get bar color based on completion rate
-  const getBarColor = (rate: number, isToday: boolean) => {
+  const getBarColor = (rate: number, isToday: boolean, isFuture: boolean) => {
+    if (isFuture) return "hsl(var(--muted))";
     if (isToday) return "hsl(var(--foreground))";
     if (rate >= 71) return "hsl(var(--finance))";
     if (rate >= 41) return "hsl(var(--trading))";
@@ -129,6 +135,11 @@ export function WeeklyActivityChart() {
               {data.tasks}/{data.total}
             </span>
           </div>
+          {data.isFuture && (
+            <p className="text-[10px] text-muted-foreground">
+              Future day: no completion target yet.
+            </p>
+          )}
           <div className="flex items-center gap-2">
             <span className="text-muted-foreground">Hours:</span>
             <span className="font-medium">{data.hours}h</span>
@@ -232,7 +243,7 @@ export function WeeklyActivityChart() {
               {weekData.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}
-                  fill={getBarColor(entry.completionRate, entry.isToday)}
+                  fill={getBarColor(entry.completionRate, entry.isToday, entry.isFuture)}
                   className={entry.isToday ? "animate-pulse" : ""}
                 />
               ))}
