@@ -82,6 +82,8 @@ export default function AuthPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="pl-10"
+                  autoComplete="email"
+                  autoCapitalize="none"
                   required
                 />
               </div>
@@ -98,6 +100,7 @@ export default function AuthPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="pl-10 pr-10"
+                  autoComplete={isSignUp ? "new-password" : "current-password"}
                   required
                   minLength={6}
                 />

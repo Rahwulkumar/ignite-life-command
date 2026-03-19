@@ -6,12 +6,28 @@ type AuthActionResult = {
   error: { message: string } | null;
 };
 
-function normalizeAuthError(error: unknown): { message: string } {
+async function normalizeAuthError(error: unknown): Promise<{ message: string }> {
   if (error instanceof Error) {
+    if (error.message) {
+      return { message: error.message };
+    }
+
+    try {
+      const response = await fetch(`${env.API_URL}/health/db`, {
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        return {
+          message: "Authentication is unavailable because the database connection is down.",
+        };
+      }
+    } catch {
+      // Fall through to the default API unavailable message below.
+    }
+
     return {
-      message:
-        error.message ||
-        `Authentication failed. Make sure the API server is running at ${env.API_URL}.`,
+      message: `Authentication failed. Make sure the API server is running at ${env.API_URL}.`,
     };
   }
 
@@ -34,7 +50,7 @@ export function useAuth() {
       const result = await authSignIn.email({ email, password });
       return { error: result.error ?? null };
     } catch (error) {
-      return { error: normalizeAuthError(error) };
+      return { error: await normalizeAuthError(error) };
     }
   }, []);
 
@@ -47,7 +63,7 @@ export function useAuth() {
       });
       return { error: result.error ?? null };
     } catch (error) {
-      return { error: normalizeAuthError(error) };
+      return { error: await normalizeAuthError(error) };
     }
   }, []);
 
@@ -56,7 +72,7 @@ export function useAuth() {
       await authSignOut();
       return { error: null };
     } catch (error) {
-      return { error: normalizeAuthError(error) };
+      return { error: await normalizeAuthError(error) };
     }
   }, []);
 

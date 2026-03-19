@@ -16,6 +16,30 @@ import projects from "./routes/projects.js";
 
 const app = new Hono();
 
+function formatRuntimeError(error: unknown): string {
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  if (typeof error === "string" && error.trim()) {
+    return error;
+  }
+
+  if (error && typeof error === "object") {
+    const candidate = error as { type?: unknown; constructor?: { name?: string } };
+
+    if (typeof candidate.type === "string" && candidate.type.trim()) {
+      return `${candidate.constructor?.name ?? "Error"}: ${candidate.type}`;
+    }
+
+    if (candidate.constructor?.name && candidate.constructor.name !== "Object") {
+      return candidate.constructor.name;
+    }
+  }
+
+  return "Database unavailable";
+}
+
 // ── Global Middleware ─────────────────────────────────────────
 
 app.use("*", logger());
@@ -48,7 +72,7 @@ app.get("/health/db", async (c) => {
     return c.json({ status: "ok", database: "reachable", timestamp: new Date().toISOString() });
   } catch (error) {
     console.error("Database health check failed:", error);
-    const message = error instanceof Error ? error.message : "Database unavailable";
+    const message = formatRuntimeError(error);
     return c.json({ status: "error", database: "unreachable", error: message }, 500);
   }
 });
@@ -76,5 +100,13 @@ serve({ fetch: app.fetch, port: PORT }, () => {
   console.log(`\n🚀 API server running at http://localhost:${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/health\n`);
 });
+
+void checkDatabaseConnection()
+  .then(() => {
+    console.log("Database connection: reachable");
+  })
+  .catch((error) => {
+    console.error(`Database connection check failed on startup: ${formatRuntimeError(error)}`);
+  });
 
 export default app;
