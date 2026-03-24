@@ -1,8 +1,6 @@
 import { Hono } from "hono";
-import { requireAuth } from "../middleware/auth.js";
 
 const ai = new Hono();
-ai.use("*", requireAuth);
 
 const SAGE_PROMPT = `You are Sage, a deeply wise and reflective Spiritual Guide. Your role is to help users deepen their understanding of Scripture, faith, and spiritual practice.
 

@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Home,
@@ -10,12 +10,8 @@ import {
   Bookmark,
   Briefcase,
   StickyNote,
-  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/hooks/useAuth";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 
 const navItems = [
   { icon: Home, label: "Home", path: "/" },
@@ -31,17 +27,6 @@ const navItems = [
 
 export function TopNavigation() {
   const location = useLocation();
-  const navigate = useNavigate();
-  const { signOut } = useAuth();
-
-  const handleSignOut = async () => {
-    const { error } = await signOut();
-    if (error) {
-      toast.error("Failed to sign out");
-    } else {
-      navigate("/auth");
-    }
-  };
 
   return (
     <motion.nav
@@ -81,16 +66,6 @@ export function TopNavigation() {
                 </motion.div>
               );
             })}
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleSignOut}
-              className="ml-1 sm:ml-2 text-muted-foreground hover:text-foreground px-2 sm:px-3"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span className="hidden md:inline ml-1.5">Sign Out</span>
-            </Button>
           </div>
         </div>
       </div>

@@ -4,11 +4,9 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
-// Eagerly load auth page (needed immediately for login)
-import AuthPage from "./pages/AuthPage";
+// Eagerly load not found page
 import NotFound from "./pages/NotFound";
 
 // Lazy load all domain pages for code splitting
@@ -51,22 +49,18 @@ const App = () => (
         >
           <Suspense fallback={<PageLoader />}>
             <Routes>
-              {/* Public routes */}
-              <Route path="/auth" element={<AuthPage />} />
-
-              {/* Protected routes */}
-              <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-              <Route path="/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
-              <Route path="/finance" element={<ProtectedRoute><FinancePage /></ProtectedRoute>} />
-              <Route path="/investments" element={<ProtectedRoute><TradingPage /></ProtectedRoute>} />
-              <Route path="/tech" element={<ProtectedRoute><TechPage /></ProtectedRoute>} />
-              <Route path="/spiritual" element={<ProtectedRoute><SpiritualPage /></ProtectedRoute>} />
-              <Route path="/music" element={<ProtectedRoute><MusicPage /></ProtectedRoute>} />
-              <Route path="/content" element={<ProtectedRoute><ContentPage /></ProtectedRoute>} />
-              <Route path="/projects" element={<ProtectedRoute><ProjectsPage /></ProtectedRoute>} />
-              <Route path="/notes" element={<ProtectedRoute><NotesPage /></ProtectedRoute>} />
-              <Route path="/spiritual/library" element={<ProtectedRoute><CharacterLibraryPage /></ProtectedRoute>} />
-              <Route path="/spiritual/character/:id" element={<ProtectedRoute><CharacterWorkspacePage /></ProtectedRoute>} />
+              <Route path="/" element={<Index />} />
+              <Route path="/chat" element={<ChatPage />} />
+              <Route path="/finance" element={<FinancePage />} />
+              <Route path="/investments" element={<TradingPage />} />
+              <Route path="/tech" element={<TechPage />} />
+              <Route path="/spiritual" element={<SpiritualPage />} />
+              <Route path="/music" element={<MusicPage />} />
+              <Route path="/content" element={<ContentPage />} />
+              <Route path="/projects" element={<ProjectsPage />} />
+              <Route path="/notes" element={<NotesPage />} />
+              <Route path="/spiritual/library" element={<CharacterLibraryPage />} />
+              <Route path="/spiritual/character/:id" element={<CharacterWorkspacePage />} />
 
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

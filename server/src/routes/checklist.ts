@@ -1,17 +1,16 @@
 import { Hono } from "hono";
-import { requireAuth } from "../middleware/auth.js";
 import { db } from "../db/index.js";
 import { dailyChecklistEntries, customTaskMetrics } from "../db/schema.js";
 import { eq, and, gte, lte } from "drizzle-orm";
 
+const STATIC_USER_ID = "local-user";
+
 const checklist = new Hono();
-checklist.use("*", requireAuth);
 
 // ── Checklist Entries ──────────────────────────────────────
 
 // GET /api/checklist-entries?start=YYYY-MM-DD&end=YYYY-MM-DD
 checklist.get("/checklist-entries", async (c) => {
-  const user = c.get("user");
   const start = c.req.query("start");
   const end = c.req.query("end");
 
@@ -20,7 +19,7 @@ checklist.get("/checklist-entries", async (c) => {
     .from(dailyChecklistEntries)
     .where(
       and(
-        eq(dailyChecklistEntries.userId, user.id),
+        eq(dailyChecklistEntries.userId, STATIC_USER_ID),
         start ? gte(dailyChecklistEntries.entryDate, start) : undefined,
         end ? lte(dailyChecklistEntries.entryDate, end) : undefined
       )
@@ -32,7 +31,6 @@ checklist.get("/checklist-entries", async (c) => {
 
 // POST /api/checklist-entries — upsert (toggle)
 checklist.post("/checklist-entries", async (c) => {
-  const user = c.get("user");
   const body = await c.req.json<{
     taskId: string;
     entryDate: string;
@@ -45,7 +43,7 @@ checklist.post("/checklist-entries", async (c) => {
   const [entry] = await db
     .insert(dailyChecklistEntries)
     .values({
-      userId: user.id,
+      userId: STATIC_USER_ID,
       taskId: body.taskId,
       entryDate: body.entryDate,
       isCompleted: body.isCompleted,
@@ -74,14 +72,13 @@ checklist.post("/checklist-entries", async (c) => {
 
 // DELETE /api/checklist-entries/:id
 checklist.delete("/checklist-entries/:id", async (c) => {
-  const user = c.get("user");
   const id = c.req.param("id");
   await db
     .delete(dailyChecklistEntries)
     .where(
       and(
         eq(dailyChecklistEntries.id, id),
-        eq(dailyChecklistEntries.userId, user.id)
+        eq(dailyChecklistEntries.userId, STATIC_USER_ID)
       )
     );
   return c.json({ success: true });
@@ -91,14 +88,13 @@ checklist.delete("/checklist-entries/:id", async (c) => {
 
 // GET /api/task-metrics?taskId=xxx
 checklist.get("/task-metrics", async (c) => {
-  const user = c.get("user");
   const taskId = c.req.query("taskId") ?? "";
   const metrics = await db
     .select()
     .from(customTaskMetrics)
     .where(
       and(
-        eq(customTaskMetrics.userId, user.id),
+        eq(customTaskMetrics.userId, STATIC_USER_ID),
         taskId ? eq(customTaskMetrics.taskId, taskId) : undefined
       )
     )
@@ -108,7 +104,6 @@ checklist.get("/task-metrics", async (c) => {
 
 // POST /api/task-metrics
 checklist.post("/task-metrics", async (c) => {
-  const user = c.get("user");
   const body = await c.req.json<{
     taskId: string;
     label: string;
@@ -118,21 +113,20 @@ checklist.post("/task-metrics", async (c) => {
   }>();
   const [metric] = await db
     .insert(customTaskMetrics)
-    .values({ ...body, userId: user.id })
+    .values({ ...body, userId: STATIC_USER_ID })
     .returning();
   return c.json(metric, 201);
 });
 
 // PATCH /api/task-metrics/:id
 checklist.patch("/task-metrics/:id", async (c) => {
-  const user = c.get("user");
   const id = c.req.param("id");
   const body = await c.req.json();
   const [updated] = await db
     .update(customTaskMetrics)
     .set({ ...body, updatedAt: new Date() })
     .where(
-      and(eq(customTaskMetrics.id, id), eq(customTaskMetrics.userId, user.id))
+      and(eq(customTaskMetrics.id, id), eq(customTaskMetrics.userId, STATIC_USER_ID))
     )
     .returning();
   if (!updated) return c.json({ error: "Not found" }, 404);
@@ -141,12 +135,11 @@ checklist.patch("/task-metrics/:id", async (c) => {
 
 // DELETE /api/task-metrics/:id
 checklist.delete("/task-metrics/:id", async (c) => {
-  const user = c.get("user");
   const id = c.req.param("id");
   await db
     .delete(customTaskMetrics)
     .where(
-      and(eq(customTaskMetrics.id, id), eq(customTaskMetrics.userId, user.id))
+      and(eq(customTaskMetrics.id, id), eq(customTaskMetrics.userId, STATIC_USER_ID))
     );
   return c.json({ success: true });
 });
