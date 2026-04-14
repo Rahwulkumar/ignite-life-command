@@ -13,6 +13,13 @@ import scripture from "./routes/scripture.js";
 import ai from "./routes/ai.js";
 import goals from "./routes/goals.js";
 import projects from "./routes/projects.js";
+import views from "./routes/views.js";
+import finance from "./routes/finance.js";
+import music from "./routes/music.js";
+import content from "./routes/content.js";
+import trading from "./routes/trading.js";
+import tech from "./routes/tech.js";
+import customDomains from "./routes/custom-domains.js";
 
 const app = new Hono();
 
@@ -91,6 +98,13 @@ app.route("/api", scripture);
 app.route("/api", ai);
 app.route("/api", goals);
 app.route("/api", projects);
+app.route("/api", views);
+app.route("/api", finance);
+app.route("/api", music);
+app.route("/api", content);
+app.route("/api", trading);
+app.route("/api", tech);
+app.route("/api", customDomains);
 
 // ── Start Server ──────────────────────────────────────────────
 

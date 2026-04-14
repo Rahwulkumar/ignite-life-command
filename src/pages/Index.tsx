@@ -1,37 +1,18 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { MainLayout } from "@/components/layout/MainLayout";
-import { PageTransition } from "@/components/layout/PageTransition";
-import { HeroHeader } from "@/components/dashboard/widgets/HeroHeader";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { DomainNavigation } from "@/components/dashboard/DomainNavigation";
 import { ZenLayout } from "@/components/dashboard/layouts/ZenLayout";
-
-import { Activity, AgentInsight, Streak } from "@/types/domain";
-
-// Temporary dashboard placeholder data while remaining domains are wired up.
-const dashboardActivities: Activity[] = [
-  { type: "tech", title: "DSA Study Session", description: "Completed binary search problems", time: "2h ago" },
-  { type: "finance", title: "Expense Logged", description: "Groceries - ₦15,000", time: "4h ago" },
-  { type: "spiritual", title: "Bible Study", description: "Read Proverbs 3:5-6", time: "6h ago" },
-  { type: "trading", title: "Position Opened", description: "Bought 10 shares of AAPL", time: "1d ago" },
-  { type: "music", title: "Practice Session", description: "45 min guitar - chord transitions", time: "1d ago" },
-];
-
-const dashboardInsights: AgentInsight[] = [
-  { agentName: "Nova", domain: "tech", insight: "You've been studying arrays for 3 days but haven't touched trees. Are you avoiding them because they're harder?", action: "challenge" },
-  { agentName: "Marcus", domain: "finance", insight: "Dining out spending increased 40% this week. That's ₦24,000 diverted from your emergency fund.", action: "observation" },
-  { agentName: "Atlas", domain: "trading", insight: "Pattern detected: You sell on red days. Is this strategy or emotion?", action: "challenge" },
-];
-
-const dashboardStreaks: Streak[] = [
-  { id: "1", title: "DSA Study", count: 12, domain: "tech" },
-  { id: "2", title: "Bible Time", count: 45, domain: "spiritual" },
-  { id: "3", title: "Guitar Practice", count: 3, domain: "music" },
-  { id: "4", title: "Trading Journal", count: 8, domain: "trading" },
-];
+import { HeroHeader } from "@/components/dashboard/widgets/HeroHeader";
+import { CreateDomainDialog } from "@/components/custom-domains/CreateDomainDialog";
+import { MainLayout } from "@/components/layout/MainLayout";
+import { PageTransition } from "@/components/layout/PageTransition";
 
 const Index = () => {
+  const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [isCreateDomainOpen, setIsCreateDomainOpen] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => setCurrentTime(new Date()), 60000);
@@ -44,7 +25,7 @@ const Index = () => {
   return (
     <MainLayout>
       <PageTransition>
-        <div className="h-full w-full px-4 sm:px-6 lg:px-8 xl:px-12 pt-2 sm:pt-4 pb-4">
+        <div className="h-full w-full px-4 pb-4 pt-2 sm:px-6 sm:pt-4 lg:px-8 xl:px-12">
           <HeroHeader currentTime={currentTime} />
 
           <motion.div
@@ -53,20 +34,24 @@ const Index = () => {
             transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
             className="relative z-10 -mt-16 sm:-mt-20 lg:-mt-24"
           >
-            {/* Domain navigation */}
-            <div className="flex justify-end mb-3 sm:mb-4">
-              <DomainNavigation />
+            <div className="mb-3 flex justify-end sm:mb-4">
+              <DomainNavigation
+                onCreateDomain={() => setIsCreateDomainOpen(true)}
+              />
             </div>
 
-            {/* Dashboard content - passing data down */}
-            <ZenLayout
-              timeOfDay={timeOfDay}
-              activities={dashboardActivities}
-              insights={dashboardInsights}
-              streaks={dashboardStreaks}
-            />
+            <ZenLayout timeOfDay={timeOfDay} />
           </motion.div>
         </div>
+
+        <CreateDomainDialog
+          open={isCreateDomainOpen}
+          onOpenChange={setIsCreateDomainOpen}
+          onCreated={(slug) => {
+            toast.success("Domain created");
+            navigate(`/domains/${slug}`);
+          }}
+        />
       </PageTransition>
     </MainLayout>
   );

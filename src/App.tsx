@@ -20,6 +20,7 @@ const MusicPage = lazy(() => import("./pages/MusicPage"));
 const ContentPage = lazy(() => import("./pages/ContentPage"));
 const ProjectsPage = lazy(() => import("./pages/ProjectsPage"));
 const NotesPage = lazy(() => import("./pages/NotesPage"));
+const CustomDomainPage = lazy(() => import("./pages/CustomDomainPage"));
 const CharacterLibraryPage = lazy(() => import("./pages/spiritual/CharacterLibraryPage"));
 const CharacterWorkspacePage = lazy(() => import("./pages/spiritual/CharacterWorkspacePage"));
 
@@ -59,6 +60,7 @@ const App = () => (
               <Route path="/content" element={<ContentPage />} />
               <Route path="/projects" element={<ProjectsPage />} />
               <Route path="/notes" element={<NotesPage />} />
+              <Route path="/domains/:slug" element={<CustomDomainPage />} />
               <Route path="/spiritual/library" element={<CharacterLibraryPage />} />
               <Route path="/spiritual/character/:id" element={<CharacterWorkspacePage />} />
 

@@ -7,6 +7,7 @@ import {
   timestamp,
   date,
   jsonb,
+  numeric,
   unique,
 } from "drizzle-orm/pg-core";
 
@@ -126,6 +127,349 @@ export const projects = pgTable("projects", {
   name: text("name").notNull(),
   description: text("description"),
   targetDate: date("target_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const viewConfigs = pgTable(
+  "view_configs",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    viewKey: text("view_key").notNull(),
+    schemaVersion: integer("schema_version").notNull().default(1),
+    layout: jsonb("layout").notNull().default({}),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (t) => [unique().on(t.userId, t.viewKey)],
+);
+
+export const financeTransactions = pgTable("finance_transactions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  description: text("description").notNull(),
+  amount: integer("amount").notNull(),
+  category: text("category").notNull(),
+  dateLabel: text("date_label").notNull().default("Today"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const financeBudgets = pgTable("finance_budgets", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  category: text("category").notNull(),
+  allocated: integer("allocated").notNull(),
+  spent: integer("spent").notNull().default(0),
+  color: text("color").notNull().default("bg-finance"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const financeInvestments = pgTable("finance_investments", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  type: text("type").notNull(),
+  invested: integer("invested").notNull(),
+  current: integer("current").notNull(),
+  change: numeric("change", { precision: 6, scale: 2 }).notNull().default("0"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const musicPracticeSessions = pgTable("music_practice_sessions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  focus: text("focus").notNull(),
+  instrument: text("instrument").notNull(),
+  duration: integer("duration").notNull(),
+  dateLabel: text("date_label").notNull().default("Today"),
+  notes: text("notes").notNull().default("Focused session"),
+  rating: integer("rating").notNull().default(4),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const musicRepertoire = pgTable("music_repertoire", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  artist: text("artist").notNull(),
+  difficulty: text("difficulty").notNull(),
+  status: text("status").notNull().default("queued"),
+  progress: integer("progress").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const contentFolders = pgTable("content_folders", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  itemCount: integer("item_count").notNull().default(0),
+  color: text("color").notNull().default("bg-tech"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const contentItems = pgTable("content_items", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  source: text("source").notNull(),
+  type: text("type").notNull(),
+  dateLabel: text("date_label").notNull().default("Today"),
+  url: text("url").notNull().default("#"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const tradingWatchlist = pgTable("trading_watchlist", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  symbol: text("symbol").notNull(),
+  name: text("name").notNull(),
+  price: numeric("price", { precision: 12, scale: 2 }).notNull(),
+  change: numeric("change", { precision: 8, scale: 2 }).notNull().default("0"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const tradingTrades = pgTable("trading_trades", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  symbol: text("symbol").notNull(),
+  type: text("type").notNull(),
+  quantity: numeric("quantity", { precision: 14, scale: 4 }).notNull(),
+  price: numeric("price", { precision: 12, scale: 2 }).notNull(),
+  dateLabel: text("date_label").notNull().default("Today"),
+  notes: text("notes").notNull().default("Logged trade"),
+  pnl: numeric("pnl", { precision: 12, scale: 2 }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const tradingHoldings = pgTable("trading_holdings", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  symbol: text("symbol").notNull(),
+  type: text("type").notNull(),
+  units: numeric("units", { precision: 14, scale: 4 }).notNull(),
+  avgCost: numeric("avg_cost", { precision: 14, scale: 2 }).notNull(),
+  currentPrice: numeric("current_price", { precision: 14, scale: 2 }).notNull(),
+  returns: numeric("returns", { precision: 14, scale: 2 }).notNull(),
+  returnsPercent: numeric("returns_percent", { precision: 8, scale: 2 })
+    .notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const tradingPortfolioData = pgTable("trading_portfolio_data", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  dateLabel: text("date_label").notNull(),
+  value: integer("value").notNull(),
+  orderIndex: integer("order_index").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const techSkillDomains = pgTable(
+  "tech_skill_domains",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    clientId: text("client_id").notNull(),
+    name: text("name").notNull(),
+    iconKey: text("icon_key").notNull(),
+    color: text("color").notNull().default("tech"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (t) => [unique().on(t.userId, t.clientId)],
+);
+
+export const techSkills = pgTable(
+  "tech_skills",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    clientId: text("client_id").notNull(),
+    domainClientId: text("domain_client_id").notNull(),
+    name: text("name").notNull(),
+    proficiency: text("proficiency").notNull(),
+    notes: text("notes"),
+    lastUpdated: text("last_updated").notNull(),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (t) => [unique().on(t.userId, t.clientId)],
+);
+
+export const techCertifications = pgTable(
+  "tech_certifications",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    clientId: text("client_id").notNull(),
+    name: text("name").notNull(),
+    provider: text("provider").notNull(),
+    status: text("status").notNull(),
+    targetDate: text("target_date"),
+    earnedDate: text("earned_date"),
+    expiryDate: text("expiry_date"),
+    credentialId: text("credential_id"),
+    credentialUrl: text("credential_url"),
+    progress: integer("progress"),
+    studyNotes: text("study_notes"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (t) => [unique().on(t.userId, t.clientId)],
+);
+
+export const techResearchEntries = pgTable(
+  "tech_research_entries",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    clientId: text("client_id").notNull(),
+    title: text("title").notNull(),
+    domain: text("domain").notNull(),
+    entryDate: text("entry_date").notNull(),
+    insights: text("insights").notNull(),
+    tags: text("tags").array(),
+    links: jsonb("links").notNull().default([]),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (t) => [unique().on(t.userId, t.clientId)],
+);
+
+export const techResources = pgTable(
+  "tech_resources",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    clientId: text("client_id").notNull(),
+    title: text("title").notNull(),
+    type: text("type").notNull(),
+    source: text("source").notNull(),
+    url: text("url").notNull(),
+    category: text("category").notNull(),
+    pinned: boolean("pinned").notNull().default(false),
+    rating: integer("rating"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (t) => [unique().on(t.userId, t.clientId)],
+);
+
+export const customDomains = pgTable(
+  "custom_domains",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    slug: text("slug").notNull(),
+    subtitle: text("subtitle")
+      .notNull()
+      .default("A custom workspace built inside LifeOS"),
+    iconKey: text("icon_key").notNull().default("Layers3"),
+    color: text("color").notNull().default("content"),
+    template: text("template").notNull().default("tracker"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (t) => [unique().on(t.userId, t.slug)],
+);
+
+export const customDomainFields = pgTable(
+  "custom_domain_fields",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    domainId: uuid("domain_id")
+      .notNull()
+      .references(() => customDomains.id, { onDelete: "cascade" }),
+    key: text("key").notNull(),
+    label: text("label").notNull(),
+    fieldType: text("field_type").notNull(),
+    isRequired: boolean("is_required").notNull().default(false),
+    config: jsonb("config").notNull().default({}),
+    orderIndex: integer("order_index").notNull().default(0),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (t) => [unique().on(t.domainId, t.key)],
+);
+
+export const customDomainViews = pgTable(
+  "custom_domain_views",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    domainId: uuid("domain_id")
+      .notNull()
+      .references(() => customDomains.id, { onDelete: "cascade" }),
+    viewKey: text("view_key").notNull(),
+    name: text("name").notNull(),
+    layout: jsonb("layout").notNull().default({}),
+    orderIndex: integer("order_index").notNull().default(0),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (t) => [unique().on(t.domainId, t.viewKey)],
+);
+
+export const customDomainRecords = pgTable("custom_domain_records", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  domainId: uuid("domain_id")
+    .notNull()
+    .references(() => customDomains.id, { onDelete: "cascade" }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  values: jsonb("values").notNull().default({}),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

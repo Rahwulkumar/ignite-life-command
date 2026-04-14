@@ -1,0 +1,451 @@
+{
+  "nodes": [
+    {
+      "id": "AIChatSidebar_component",
+      "label": "AI Chat Sidebar shell that wraps a domain-specific AI chat UI with a branded header showing agent name, role, and domain color gradient",
+      "file_type": "code",
+      "source_file": "src/components/shared/AIChatSidebar.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "BaseDomainCard_component",
+      "label": "Reusable animated card primitive for domain pages, providing themed header with icon, title, subtitle, optional footer, header action slot, and framer-motion entrance animation",
+      "file_type": "code",
+      "source_file": "src/components/shared/BaseDomainCard.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "custom_domain_icons_registry",
+      "label": "Registry of selectable Lucide icons for custom domains, exporting a type-safe map, an options array for UI pickers, and a safe lookup helper that falls back to Layers3",
+      "file_type": "code",
+      "source_file": "src/components/shared/custom-domain-icons.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "domain_page_config_layout",
+      "label": "Pure utility module for domain page tab layout management: creates default layouts, normalises persisted layouts against current tabs, applies ordering/filtering, moves tabs up/down, toggles visibility with guard against hiding the last tab",
+      "file_type": "code",
+      "source_file": "src/components/shared/domain-page-config.ts",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "DomainIcon_component",
+      "label": "Thin wrapper that resolves a domain ID string to the matching Lucide icon component from the DOMAIN_ICONS map and renders it, returning null for unknown/null IDs",
+      "file_type": "code",
+      "source_file": "src/components/shared/DomainIcon.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "DomainPageCustomizeSheet_component",
+      "label": "Slide-in sheet UI for reordering and toggling visibility of domain page tabs, using arrow buttons and switches, with save and reset actions; consumes domain-page-config utilities",
+      "file_type": "code",
+      "source_file": "src/components/shared/DomainPageCustomizeSheet.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "DomainPageHeader_component",
+      "label": "Full-bleed animated page header with domain-specific background video, gradient overlays, decorative orb, domain icon, title/subtitle, and optional action button; supports 7 domain color themes",
+      "file_type": "code",
+      "source_file": "src/components/shared/DomainPageHeader.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "DomainPageTemplate_component",
+      "label": "Full domain page scaffold composing MainLayout, PageTransition, DomainPageHeader, DomainStatsBar, tabbed content area with automatic Notes link, and optional AI coach Sheet sidebar",
+      "file_type": "code",
+      "source_file": "src/components/shared/DomainPageTemplate.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "DomainStatsBar_component",
+      "label": "Animated grid of domain metric stat tiles, each showing an icon, label, numeric value with optional suffix; used below the domain page header",
+      "file_type": "code",
+      "source_file": "src/components/shared/DomainStatsBar.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "TopNavigation_component",
+      "label": "Fixed top navigation bar linking to all domain pages and home, with active-route highlight and staggered framer-motion entrance; uses react-router-dom location for active state",
+      "file_type": "code",
+      "source_file": "src/components/shared/TopNavigation.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "AddGoalDialog_spiritual",
+      "label": "Modal dialog for creating a new spiritual goal with title, category (growth/service/community/study), and optional target date fields; calls onSave callback on submit",
+      "file_type": "code",
+      "source_file": "src/components/spiritual/AddGoalDialog.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "AddVerseDialog_spiritual",
+      "label": "Modal dialog for adding a Bible memory verse with real-time reference validation via bibleValidation, book autocomplete suggestions, verse text input, live preview, and mutation via useAddVerse hook",
+      "file_type": "code",
+      "source_file": "src/components/spiritual/AddVerseDialog.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "BibleReadingCard_spiritual",
+      "label": "Domain card for tracking current Bible reading position (book/chapter/verse) with searchable book picker, chapter validation, progress percentage, and edit/save flow; extends BaseDomainCard",
+      "file_type": "code",
+      "source_file": "src/components/spiritual/BibleReadingCard.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "CharacterStudyCard_spiritual",
+      "label": "Domain card summarising active biblical character studies count and linking to the spiritual library page; fetches data from useSpiritualCharacters hook",
+      "file_type": "code",
+      "source_file": "src/components/spiritual/CharacterStudyCard.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "DailyFocusCard_spiritual",
+      "label": "Scripture memorisation card with two states: input form to lock a daily focus verse, and review display with morning/evening context, mastery toggle, and edit capability; uses useDailyFocus hooks",
+      "file_type": "code",
+      "source_file": "src/components/spiritual/DailyFocusCard.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "DevotionReminderCard_spiritual",
+      "label": "Dismissible animated banner prompting morning or evening devotion with today's scripture and Bible story, with begin and dismiss actions",
+      "file_type": "code",
+      "source_file": "src/components/spiritual/DevotionReminderCard.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "JournalEntryModal_spiritual",
+      "label": "Tabbed journal entry dialog for character study sessions capturing character insights, attributes of God (toggle chips), and personal reflection/prayer; emits structured JournalEntryData on save",
+      "file_type": "code",
+      "source_file": "src/components/spiritual/JournalEntryModal.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "SageChat_spiritual",
+      "label": "AI spiritual guide chat component that streams responses from /api/ai/sage SSE endpoint and renders them in AgentChat; presents Scripture, theology, and spiritual growth suggestions",
+      "file_type": "code",
+      "source_file": "src/components/spiritual/SageChat.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "ScriptureMemoryCard_spiritual",
+      "label": "Flashcard-style scripture memory review UI with flip animation, mastery level indicator dots, got-it/needs-work responses, and cycling through due verses",
+      "file_type": "code",
+      "source_file": "src/components/spiritual/ScriptureMemoryCard.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "SermonNotesCard_spiritual",
+      "label": "Card displaying up to 3 recent sermon notes (title, speaker, date) with an add button, using date-fns for formatting",
+      "file_type": "code",
+      "source_file": "src/components/spiritual/SermonNotesCard.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "SpiritualDebug_stub",
+      "label": "Stub/tombstone component replacing a removed debug panel that relied on legacy backend RPC calls; renders null and redirects debuggers to /health endpoint",
+      "file_type": "code",
+      "source_file": "src/components/spiritual/SpiritualDebug.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "SpiritualGoalsCard_spiritual",
+      "label": "Card listing up to 4 active spiritual goals with circular SVG progress indicators, completed count, and an add goal button triggering onAddGoal callback",
+      "file_type": "code",
+      "source_file": "src/components/spiritual/SpiritualGoalsCard.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "DomainPageTemplate_component",
+      "target": "DomainPageHeader_component",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/shared/DomainPageTemplate.tsx",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "DomainPageTemplate_component",
+      "target": "DomainStatsBar_component",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/shared/DomainPageTemplate.tsx",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "DomainPageTemplate_component",
+      "target": "AIChatSidebar_component",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/shared/DomainPageTemplate.tsx",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "DomainPageCustomizeSheet_component",
+      "target": "domain_page_config_layout",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/shared/DomainPageCustomizeSheet.tsx",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "BibleReadingCard_spiritual",
+      "target": "BaseDomainCard_component",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/spiritual/BibleReadingCard.tsx",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "CharacterStudyCard_spiritual",
+      "target": "BaseDomainCard_component",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/spiritual/CharacterStudyCard.tsx",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "AddVerseDialog_spiritual",
+      "target": "AddVerseDialog_spiritual",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/spiritual/AddVerseDialog.tsx",
+      "source_location": null,
+      "weight": 0.5
+    },
+    {
+      "source": "SageChat_spiritual",
+      "target": "AIChatSidebar_component",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/components/spiritual/SageChat.tsx",
+      "source_location": null,
+      "weight": 0.8
+    },
+    {
+      "source": "DomainPageTemplate_component",
+      "target": "SageChat_spiritual",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "src/components/shared/DomainPageTemplate.tsx",
+      "source_location": null,
+      "weight": 0.85
+    },
+    {
+      "source": "AddVerseDialog_spiritual",
+      "target": "ScriptureMemoryCard_spiritual",
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "src/components/spiritual/AddVerseDialog.tsx",
+      "source_location": null,
+      "weight": 0.85
+    },
+    {
+      "source": "DailyFocusCard_spiritual",
+      "target": "ScriptureMemoryCard_spiritual",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "src/components/spiritual/DailyFocusCard.tsx",
+      "source_location": null,
+      "weight": 0.75
+    },
+    {
+      "source": "SpiritualGoalsCard_spiritual",
+      "target": "AddGoalDialog_spiritual",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/components/spiritual/SpiritualGoalsCard.tsx",
+      "source_location": null,
+      "weight": 0.8
+    },
+    {
+      "source": "CharacterStudyCard_spiritual",
+      "target": "JournalEntryModal_spiritual",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.7,
+      "source_file": "src/components/spiritual/CharacterStudyCard.tsx",
+      "source_location": null,
+      "weight": 0.7
+    },
+    {
+      "source": "AIChatSidebar_component",
+      "target": "DomainPageTemplate_component",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.9,
+      "source_file": "src/components/shared/AIChatSidebar.tsx",
+      "source_location": null,
+      "weight": 0.9
+    },
+    {
+      "source": "DomainIcon_component",
+      "target": "custom_domain_icons_registry",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.7,
+      "source_file": "src/components/shared/DomainIcon.tsx",
+      "source_location": null,
+      "weight": 0.7
+    },
+    {
+      "source": "BaseDomainCard_component",
+      "target": "DomainStatsBar_component",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.65,
+      "source_file": "src/components/shared/BaseDomainCard.tsx",
+      "source_location": null,
+      "weight": 0.65
+    },
+    {
+      "source": "TopNavigation_component",
+      "target": "DomainPageHeader_component",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.6,
+      "source_file": "src/components/shared/TopNavigation.tsx",
+      "source_location": null,
+      "weight": 0.6
+    },
+    {
+      "source": "SermonNotesCard_spiritual",
+      "target": "SpiritualGoalsCard_spiritual",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.65,
+      "source_file": "src/components/spiritual/SermonNotesCard.tsx",
+      "source_location": null,
+      "weight": 0.65
+    },
+    {
+      "source": "DevotionReminderCard_spiritual",
+      "target": "DailyFocusCard_spiritual",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "src/components/spiritual/DevotionReminderCard.tsx",
+      "source_location": null,
+      "weight": 0.75
+    },
+    {
+      "source": "DomainPageCustomizeSheet_component",
+      "target": "DomainPageTemplate_component",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "src/components/shared/DomainPageCustomizeSheet.tsx",
+      "source_location": null,
+      "weight": 0.85
+    }
+  ],
+  "hyperedges": [],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

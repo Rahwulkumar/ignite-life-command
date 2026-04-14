@@ -1,0 +1,553 @@
+{
+  "nodes": [
+    {
+      "id": "DashboardCustomizeSheet_DashboardCustomizeSheet",
+      "label": "Side-panel sheet UI for adding, removing, reordering, resizing, and editing per-widget props in the dashboard layout; emits an updated DashboardLayoutSchema on every change and exposes Save/Reset actions",
+      "file_type": "code",
+      "source_file": "src/components/dashboard/DashboardCustomizeSheet.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "DomainCard_DomainCard",
+      "label": "Animated glass card displaying a single life-domain with colored icon, optional circular SVG progress ring, stats grid, and trend indicator; supports default/large/tall size variants",
+      "file_type": "code",
+      "source_file": "src/components/dashboard/DomainCard.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "DomainNavigation_DomainNavigation",
+      "label": "Horizontal scrollable tab bar listing all built-in life-domain routes plus dynamically fetched custom domains; renders an optional Create Domain button at the end",
+      "file_type": "code",
+      "source_file": "src/components/dashboard/DomainNavigation.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "DomainProgressRing_DomainProgressRing",
+      "label": "Animated SVG ring chart widget showing value/total progress for a single domain with a centered icon; supports compact and full-size modes",
+      "file_type": "code",
+      "source_file": "src/components/dashboard/DomainProgressRing.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "FocusCard_FocusCard",
+      "label": "Navigable card linking to a specific area of focus; renders full or compact variant with domain-colored icon, title, subtitle, and animated hover arrow",
+      "file_type": "code",
+      "source_file": "src/components/dashboard/FocusCard.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "QuickActions_QuickActions",
+      "label": "4-column action button grid for common cross-domain quick-log actions (expense, trade, study, bible, practice, content, timer, more) using domain-color styles",
+      "file_type": "code",
+      "source_file": "src/components/dashboard/QuickActions.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "StreakTracker_StreakTracker",
+      "label": "Displays active per-domain streak counts with flame icons, trophy badges for personal bests, and a daily goals completed summary; consumes Streak[] and goal counts as props",
+      "file_type": "code",
+      "source_file": "src/components/dashboard/StreakTracker.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "WeeklyOverview_WeeklyOverview",
+      "label": "7-day animated bar chart component showing daily activity values; highlights today's bar; supports compact and full-size rendering modes",
+      "file_type": "code",
+      "source_file": "src/components/dashboard/WeeklyOverview.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "WelcomeHeader_WelcomeHeader",
+      "label": "Dashboard top header showing live clock, date, time-of-day greeting, notification bell with badge count, and Quick Log CTA; updates every second via setInterval",
+      "file_type": "code",
+      "source_file": "src/components/dashboard/WelcomeHeader.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "DashboardRenderer_DashboardRenderer",
+      "label": "Generic layout engine that iterates DashboardLayoutSchema rows and columns, maps each widget type to its registered definition renderer, wraps output in a caller-supplied renderCard function, and applies responsive 12-column CSS grid span classes",
+      "file_type": "code",
+      "source_file": "src/components/dashboard/layouts/DashboardRenderer.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "ZenLayout_ZenLayout",
+      "label": "Top-level dashboard page layout with ink-brush entrance animation; manages persisted/working layout state, checklist data, task toggle handler, and wires DashboardRenderer with ZenCard wrapper and DashboardCustomizeSheet",
+      "file_type": "code",
+      "source_file": "src/components/dashboard/layouts/ZenLayout.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "DashboardWidgetRegistry_DASHBOARD_WIDGET_REGISTRY",
+      "label": "Central registry mapping every DashboardWidgetType to its label, description, configurable field definitions, and render function; acts as the single source of truth for what widgets exist and how to render them",
+      "file_type": "code",
+      "source_file": "src/components/dashboard/registry/dashboard-widget-registry.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "DashboardWidgetRegistry_DashboardWidgetContext",
+      "label": "Shared context interface passed to every widget render function; carries timeOfDay, selectedDate, task completion maps, analytics entries, and the onToggleTask callback",
+      "file_type": "code",
+      "source_file": "src/components/dashboard/registry/dashboard-widget-registry.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "DashboardWidgetRegistry_DashboardWidgetDefinition",
+      "label": "Type contract for a dashboard widget entry: label, description, optional field schema array, allowMultiple flag, initialProps, and a render(context, props) function returning ReactNode",
+      "file_type": "code",
+      "source_file": "src/components/dashboard/registry/dashboard-widget-registry.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "ActivityChart_ActivityChart",
+      "label": "Animated bar chart widget displaying daily activity values with today highlighted in tech-color; shows total in header; accepts DayData array and maxValue",
+      "file_type": "code",
+      "source_file": "src/components/dashboard/widgets/ActivityChart.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "CompletionChart_CompletionChart",
+      "label": "Recharts BarChart widget showing daily checklist completion rate (%) for week/month/all time windows; color-codes bars by completion threshold; can use real or mock data",
+      "file_type": "code",
+      "source_file": "src/components/dashboard/widgets/CompletionChart.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "CustomBlockWidget_CustomBlockWidget",
+      "label": "User-editable callout card with eyebrow label, title, body, optional CTA button, tone variants (neutral/focus/growth/warm), and optional emphasize styling; navigates internally or externally via CTA URL",
+      "file_type": "code",
+      "source_file": "src/components/dashboard/widgets/CustomBlockWidget.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "DailyChecklistPopover_DailyChecklistPopover",
+      "label": "Popover widget for a calendar day that lists standard and custom tasks, supports check/uncheck with optional journal dialog, quick-journal navigation, and adding new tasks or custom task IDs",
+      "file_type": "code",
+      "source_file": "src/components/dashboard/widgets/DailyChecklistPopover.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "DevotionBanner_DevotionBanner",
+      "label": "Spiritual devotion card with video background, character name, day number, scripture reference, and morning/evening label; links to /spiritual page",
+      "file_type": "code",
+      "source_file": "src/components/dashboard/widgets/DevotionBanner.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "DomainFocusRadar_DomainFocusRadar",
+      "label": "Recharts RadarChart widget showing relative checklist task completion across top-6 domains this week; derives domain from task_id prefix; fetches live data via useChecklistAnalytics",
+      "file_type": "code",
+      "source_file": "src/components/dashboard/widgets/DomainFocusRadar.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "DomainLinkCard_DomainLinkCard",
+      "label": "Animated domain navigation card with domain-colored accent line and ambient glow, optional stats row, and React Router link to the domain route",
+      "file_type": "code",
+      "source_file": "src/components/dashboard/widgets/DomainLinkCard.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "GlowWidget_GlowWidget",
+      "label": "Animated wrapper card with hover glow border for generic widget content; also exports StatWidget (icon + value + trend badge) and ProgressWidget (icon + progress bar) as standalone cards",
+      "file_type": "code",
+      "source_file": "src/components/dashboard/widgets/GlowWidget.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "GoalProgress_GoalProgress",
+      "label": "Goal tracker card showing current vs target value with animated progress bar; optionally renders as a React Router Link; supports staggered entrance animation via index prop",
+      "file_type": "code",
+      "source_file": "src/components/dashboard/widgets/GoalProgress.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "HabitDetailModal_HabitDetailModal",
+      "label": "Dialog modal for a single habit entry with built-in stopwatch timer (start/pause/resume/reset), freeform notes textarea, and mark complete/incomplete toggle; saves notes and elapsed seconds to parent via onSave callback",
+      "file_type": "code",
+      "source_file": "src/components/dashboard/widgets/HabitDetailModal.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "ZenLayout_ZenLayout",
+      "target": "DashboardRenderer_DashboardRenderer",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/dashboard/layouts/ZenLayout.tsx",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "ZenLayout_ZenLayout",
+      "target": "DashboardCustomizeSheet_DashboardCustomizeSheet",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/dashboard/layouts/ZenLayout.tsx",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "DashboardRenderer_DashboardRenderer",
+      "target": "DashboardWidgetRegistry_DASHBOARD_WIDGET_REGISTRY",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/dashboard/layouts/DashboardRenderer.tsx",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "DashboardRenderer_DashboardRenderer",
+      "target": "DashboardWidgetRegistry_DashboardWidgetContext",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/dashboard/layouts/DashboardRenderer.tsx",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "DashboardCustomizeSheet_DashboardCustomizeSheet",
+      "target": "DashboardWidgetRegistry_DASHBOARD_WIDGET_REGISTRY",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/dashboard/DashboardCustomizeSheet.tsx",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "DashboardCustomizeSheet_DashboardCustomizeSheet",
+      "target": "DashboardWidgetRegistry_DashboardWidgetDefinition",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/dashboard/DashboardCustomizeSheet.tsx",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "DashboardWidgetRegistry_DASHBOARD_WIDGET_REGISTRY",
+      "target": "DevotionBanner_DevotionBanner",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/dashboard/registry/dashboard-widget-registry.tsx",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "DashboardWidgetRegistry_DASHBOARD_WIDGET_REGISTRY",
+      "target": "DomainFocusRadar_DomainFocusRadar",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/dashboard/registry/dashboard-widget-registry.tsx",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "DashboardWidgetRegistry_DASHBOARD_WIDGET_REGISTRY",
+      "target": "CustomBlockWidget_CustomBlockWidget",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/dashboard/registry/dashboard-widget-registry.tsx",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "DomainNavigation_DomainNavigation",
+      "target": "DomainNavigation_DomainNavigation",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/dashboard/DomainNavigation.tsx",
+      "source_location": null,
+      "weight": 0.0
+    },
+    {
+      "source": "DomainFocusRadar_DomainFocusRadar",
+      "target": "DashboardWidgetRegistry_DashboardWidgetContext",
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/components/dashboard/widgets/DomainFocusRadar.tsx",
+      "source_location": null,
+      "weight": 0.8
+    },
+    {
+      "source": "DevotionBanner_DevotionBanner",
+      "target": "DashboardWidgetRegistry_DashboardWidgetContext",
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/components/dashboard/widgets/DevotionBanner.tsx",
+      "source_location": null,
+      "weight": 0.8
+    },
+    {
+      "source": "DailyChecklistPopover_DailyChecklistPopover",
+      "target": "DashboardWidgetRegistry_DashboardWidgetContext",
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "src/components/dashboard/widgets/DailyChecklistPopover.tsx",
+      "source_location": null,
+      "weight": 0.85
+    },
+    {
+      "source": "ZenLayout_ZenLayout",
+      "target": "DashboardWidgetRegistry_DashboardWidgetContext",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/dashboard/layouts/ZenLayout.tsx",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "StreakTracker_StreakTracker",
+      "target": "DomainCard_DomainCard",
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.7,
+      "source_file": "src/components/dashboard/StreakTracker.tsx",
+      "source_location": null,
+      "weight": 0.7
+    },
+    {
+      "source": "DomainNavigation_DomainNavigation",
+      "target": "DomainCard_DomainCard",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.65,
+      "source_file": "src/components/dashboard/DomainNavigation.tsx",
+      "source_location": null,
+      "weight": 0.65
+    },
+    {
+      "source": "DomainCard_DomainCard",
+      "target": "DomainProgressRing_DomainProgressRing",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "src/components/dashboard/DomainCard.tsx",
+      "source_location": null,
+      "weight": 0.75
+    },
+    {
+      "source": "DomainLinkCard_DomainLinkCard",
+      "target": "DomainCard_DomainCard",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/components/dashboard/widgets/DomainLinkCard.tsx",
+      "source_location": null,
+      "weight": 0.8
+    },
+    {
+      "source": "ActivityChart_ActivityChart",
+      "target": "WeeklyOverview_WeeklyOverview",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "src/components/dashboard/widgets/ActivityChart.tsx",
+      "source_location": null,
+      "weight": 0.85
+    },
+    {
+      "source": "CompletionChart_CompletionChart",
+      "target": "ActivityChart_ActivityChart",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "src/components/dashboard/widgets/CompletionChart.tsx",
+      "source_location": null,
+      "weight": 0.75
+    },
+    {
+      "source": "GoalProgress_GoalProgress",
+      "target": "DomainProgressRing_DomainProgressRing",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.7,
+      "source_file": "src/components/dashboard/widgets/GoalProgress.tsx",
+      "source_location": null,
+      "weight": 0.7
+    },
+    {
+      "source": "GlowWidget_GlowWidget",
+      "target": "GoalProgress_GoalProgress",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.65,
+      "source_file": "src/components/dashboard/widgets/GlowWidget.tsx",
+      "source_location": null,
+      "weight": 0.65
+    },
+    {
+      "source": "HabitDetailModal_HabitDetailModal",
+      "target": "DailyChecklistPopover_DailyChecklistPopover",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "src/components/dashboard/widgets/HabitDetailModal.tsx",
+      "source_location": null,
+      "weight": 0.75
+    },
+    {
+      "source": "DashboardWidgetRegistry_DASHBOARD_WIDGET_REGISTRY",
+      "target": "DashboardWidgetRegistry_DashboardWidgetDefinition",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/dashboard/registry/dashboard-widget-registry.tsx",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "DashboardWidgetRegistry_DASHBOARD_WIDGET_REGISTRY",
+      "target": "DashboardWidgetRegistry_DashboardWidgetContext",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/dashboard/registry/dashboard-widget-registry.tsx",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "FocusCard_FocusCard",
+      "target": "DomainLinkCard_DomainLinkCard",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/components/dashboard/FocusCard.tsx",
+      "source_location": null,
+      "weight": 0.8
+    },
+    {
+      "source": "ZenLayout_ZenLayout",
+      "target": "DomainNavigation_DomainNavigation",
+      "relation": "semantically_similar_to",
+      "confidence": "AMBIGUOUS",
+      "confidence_score": 0.2,
+      "source_file": "src/components/dashboard/layouts/ZenLayout.tsx",
+      "source_location": null,
+      "weight": 0.2
+    },
+    {
+      "source": "DailyChecklistPopover_DailyChecklistPopover",
+      "target": "HabitDetailModal_HabitDetailModal",
+      "relation": "rationale_for",
+      "confidence": "INFERRED",
+      "confidence_score": 0.7,
+      "source_file": "src/components/dashboard/widgets/DailyChecklistPopover.tsx",
+      "source_location": null,
+      "weight": 0.7
+    }
+  ],
+  "hyperedges": [],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

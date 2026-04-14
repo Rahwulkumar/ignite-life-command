@@ -1,16 +1,19 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  Wallet,
-  TrendingUp,
-  Code2,
   BookOpen,
-  Music,
   Bookmark,
   Briefcase,
+  Code2,
+  Music,
+  Plus,
+  TrendingUp,
+  Wallet,
 } from "lucide-react";
+import { useCustomDomains } from "@/hooks/useCustomDomains";
+import { getCustomDomainIconComponent } from "@/components/shared/custom-domain-icons";
 
-const domains = [
+const builtInDomains = [
   { icon: Wallet, label: "Finance", path: "/finance" },
   { icon: TrendingUp, label: "Investments", path: "/investments" },
   { icon: Code2, label: "Tech", path: "/tech" },
@@ -20,9 +23,24 @@ const domains = [
   { icon: Briefcase, label: "Projects", path: "/projects" },
 ];
 
-export function DomainNavigation() {
+interface DomainNavigationProps {
+  onCreateDomain?: () => void;
+}
+
+export function DomainNavigation({ onCreateDomain }: DomainNavigationProps) {
+  const { data: customDomains = [] } = useCustomDomains();
+
+  const domains = [
+    ...builtInDomains,
+    ...customDomains.map((domain) => ({
+      icon: getCustomDomainIconComponent(domain.iconKey),
+      label: domain.name,
+      path: `/domains/${domain.slug}`,
+    })),
+  ];
+
   return (
-    <div className="flex items-center gap-1 sm:gap-1.5 p-1 rounded-lg bg-muted/50 border border-border overflow-x-auto scrollbar-hide">
+    <div className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto rounded-lg border border-border bg-muted/50 p-1 scrollbar-hide">
       {domains.map((domain, i) => (
         <motion.div
           key={domain.path}
@@ -32,13 +50,27 @@ export function DomainNavigation() {
         >
           <Link
             to={domain.path}
-            className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-md text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors whitespace-nowrap"
+            className="flex items-center gap-1.5 whitespace-nowrap rounded-md px-2 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground sm:gap-2 sm:px-3"
           >
-            <domain.icon className="w-3.5 h-3.5 flex-shrink-0" />
+            <domain.icon className="h-3.5 w-3.5 flex-shrink-0" />
             <span className="hidden sm:inline">{domain.label}</span>
           </Link>
         </motion.div>
       ))}
+
+      {onCreateDomain && (
+        <motion.button
+          type="button"
+          initial={{ opacity: 0, y: 5 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: domains.length * 0.03 }}
+          onClick={onCreateDomain}
+          className="flex items-center gap-1.5 whitespace-nowrap rounded-md px-2 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground sm:gap-2 sm:px-3"
+        >
+          <Plus className="h-3.5 w-3.5 flex-shrink-0" />
+          <span className="hidden sm:inline">New Domain</span>
+        </motion.button>
+      )}
     </div>
   );
 }

@@ -1,0 +1,514 @@
+{
+  "nodes": [
+    {
+      "id": "spiritual_route",
+      "label": "Hono route handler for spiritual domain: GET/POST/PATCH daily-focus records with upsert on conflict, using static local-user ID (no auth middleware)",
+      "file_type": "code",
+      "source_file": "server/src/routes/spiritual.ts",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "tech_route",
+      "label": "Hono route handler for tech domain: GET/PUT skill-domains, certifications, research-entries, and resources with seed-on-first-load behavior, protected by requireAuth",
+      "file_type": "code",
+      "source_file": "server/src/routes/tech.ts",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "tech_ensureSeedData",
+      "label": "Idempotent seed function that inserts default skill domains, skills, certifications, research entries, and learning resources for a new user on first load",
+      "file_type": "code",
+      "source_file": "server/src/routes/tech.ts",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "trading_route",
+      "label": "Hono route handler for trading/investments domain: GET aggregated portfolio data and POST watchlist/trade entries with seed-on-first-load behavior, protected by requireAuth",
+      "file_type": "code",
+      "source_file": "server/src/routes/trading.ts",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "trading_ensureSeedData",
+      "label": "Idempotent seed function that inserts default watchlist symbols, trade history, portfolio holdings, and portfolio timeline data for a new trading user",
+      "file_type": "code",
+      "source_file": "server/src/routes/trading.ts",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "views_route",
+      "label": "Hono route handler for persisting per-user view configuration layouts by viewKey: GET, PUT (upsert), and DELETE viewConfigs records, protected by requireAuth",
+      "file_type": "code",
+      "source_file": "server/src/routes/views.ts",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "usercontext_getUserId",
+      "label": "Hono context helper that extracts the authenticated user ID from the Hono context variable set by the auth middleware",
+      "file_type": "code",
+      "source_file": "server/src/utils/user-context.ts",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "app_App",
+      "label": "Root React application component: sets up QueryClient, TooltipProvider, ErrorBoundary, BrowserRouter, and lazily loads all domain pages with Suspense fallback",
+      "file_type": "code",
+      "source_file": "src/App.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "main_entry",
+      "label": "Application entry point: mounts the React App component into the root DOM element via createRoot",
+      "file_type": "code",
+      "source_file": "src/main.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "vitenv_d",
+      "label": "Vite client type reference declaration for TypeScript environment variable and import.meta.env type support",
+      "file_type": "code",
+      "source_file": "src/vite-env.d.ts",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "errorboundary_ErrorBoundary",
+      "label": "React class component error boundary: catches render-phase errors, displays a fallback UI with reset/reload options, and logs error info for debugging",
+      "file_type": "code",
+      "source_file": "src/components/ErrorBoundary.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "navlink_NavLink",
+      "label": "Wrapper around React Router NavLink that adds support for activeClassName and pendingClassName string props using the cn utility",
+      "file_type": "code",
+      "source_file": "src/components/NavLink.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "protectedroute_ProtectedRoute",
+      "label": "Auth guard component: redirects unauthenticated users to /auth with the original location saved in state, shows a spinner while auth is loading",
+      "file_type": "code",
+      "source_file": "src/components/auth/ProtectedRoute.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "chatinterface_ChatInterface",
+      "label": "Reusable chat UI component: renders agent-branded message bubbles, a text input with send/mic buttons, and exposes an onSendMessage callback; does not perform any network calls itself",
+      "file_type": "code",
+      "source_file": "src/components/chat/ChatInterface.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "chatinterface_ChatMessage",
+      "label": "TypeScript interface describing a chat message: id, role (user|assistant), content, optional agent name/color, and timestamp",
+      "file_type": "code",
+      "source_file": "src/components/chat/ChatInterface.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "contentfolders_ContentFolders",
+      "label": "Animated grid of content folder cards showing name and item count, with selection state and a New Folder trigger; data shape is ContentFolder[]",
+      "file_type": "code",
+      "source_file": "src/components/content/ContentFolders.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "saveditems_SavedItems",
+      "label": "Animated list of recently saved content items (video, article, reel) with external link navigation and a Save button trigger; data shape is SavedItem[]",
+      "file_type": "code",
+      "source_file": "src/components/content/SavedItems.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "createcustomfielddialog_CreateCustomFieldDialog",
+      "label": "Modal dialog for defining a new custom domain field: collects label, optional key, field type (text/textarea/select/status/date/url/number), required flag, and options list",
+      "file_type": "code",
+      "source_file": "src/components/custom-domains/CreateCustomFieldDialog.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "createcustomrecorddialog_CreateCustomRecordDialog",
+      "label": "Modal dialog for creating a new record in a custom domain: renders dynamic form fields based on the domain's field schema, validates required fields before save",
+      "file_type": "code",
+      "source_file": "src/components/custom-domains/CreateCustomRecordDialog.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "createdomaindialog_CreateDomainDialog",
+      "label": "Modal dialog for creating a new custom domain workspace: collects name, subtitle, color theme token, icon, and starter template (tracker/library/journal/pipeline), then calls useCreateCustomDomain mutation",
+      "file_type": "code",
+      "source_file": "src/components/custom-domains/CreateDomainDialog.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "activityfeed_ActivityFeed",
+      "label": "Dashboard widget displaying a chronological list of domain activities (finance/tech/spiritual/music/trading) with domain-colored icons; expects Activity[] from domain types",
+      "file_type": "code",
+      "source_file": "src/components/dashboard/ActivityFeed.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "agentinsights_AgentInsights",
+      "label": "Dashboard widget rendering AI agent insight cards categorized as challenge/observation/lesson with domain-colored left borders and agent avatar initials; expects AgentInsight[] from domain types",
+      "file_type": "code",
+      "source_file": "src/components/dashboard/AgentInsights.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "dailylessons_DailyLessons",
+      "label": "Dashboard widget listing daily lessons per domain with completion state, domain colors from DOMAIN_COLORS map, duration display, and a View All button; includes static default lesson data",
+      "file_type": "code",
+      "source_file": "src/components/dashboard/DailyLessons.tsx",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "dashboardlayoututils_utils",
+      "label": "Pure utility functions for manipulating DashboardLayoutSchema: add, remove, move, swap, duplicate widgets; update column span and widget props; normalize and find widgets by ID",
+      "file_type": "code",
+      "source_file": "src/components/dashboard/dashboard-layout-utils.ts",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "dashboardschema_types",
+      "label": "TypeScript type definitions and default layout constant for the dashboard: DashboardWidgetType union, DashboardGridSpan, DashboardWidgetInstance, DashboardColumn, DashboardRow, DashboardLayoutSchema, and DEFAULT_DASHBOARD_LAYOUT",
+      "file_type": "code",
+      "source_file": "src/components/dashboard/dashboard-schema.ts",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "main_entry",
+      "target": "app_App",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/main.tsx",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "app_App",
+      "target": "errorboundary_ErrorBoundary",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/App.tsx",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "tech_route",
+      "target": "usercontext_getUserId",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/src/routes/tech.ts",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "trading_route",
+      "target": "usercontext_getUserId",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/src/routes/trading.ts",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "views_route",
+      "target": "usercontext_getUserId",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/src/routes/views.ts",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "tech_route",
+      "target": "tech_ensureSeedData",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/src/routes/tech.ts",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "trading_route",
+      "target": "trading_ensureSeedData",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/src/routes/trading.ts",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "tech_ensureSeedData",
+      "target": "trading_ensureSeedData",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "server/src/routes/tech.ts",
+      "source_location": null,
+      "weight": 0.85
+    },
+    {
+      "source": "protectedroute_ProtectedRoute",
+      "target": "app_App",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "src/components/auth/ProtectedRoute.tsx",
+      "source_location": null,
+      "weight": 0.75
+    },
+    {
+      "source": "createdomaindialog_CreateDomainDialog",
+      "target": "createcustomfielddialog_CreateCustomFieldDialog",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/components/custom-domains/CreateDomainDialog.tsx",
+      "source_location": null,
+      "weight": 0.8
+    },
+    {
+      "source": "createcustomrecorddialog_CreateCustomRecordDialog",
+      "target": "createcustomfielddialog_CreateCustomFieldDialog",
+      "relation": "shares_data_with",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/custom-domains/CreateCustomRecordDialog.tsx",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "dashboardlayoututils_utils",
+      "target": "dashboardschema_types",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/dashboard/dashboard-layout-utils.ts",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "activityfeed_ActivityFeed",
+      "target": "dashboardschema_types",
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/components/dashboard/ActivityFeed.tsx",
+      "source_location": null,
+      "weight": 0.8
+    },
+    {
+      "source": "agentinsights_AgentInsights",
+      "target": "dashboardschema_types",
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/components/dashboard/AgentInsights.tsx",
+      "source_location": null,
+      "weight": 0.8
+    },
+    {
+      "source": "dailylessons_DailyLessons",
+      "target": "dashboardschema_types",
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "src/components/dashboard/DailyLessons.tsx",
+      "source_location": null,
+      "weight": 0.75
+    },
+    {
+      "source": "spiritual_route",
+      "target": "tech_route",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.7,
+      "source_file": "server/src/routes/spiritual.ts",
+      "source_location": null,
+      "weight": 0.7
+    },
+    {
+      "source": "spiritual_route",
+      "target": "trading_route",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.65,
+      "source_file": "server/src/routes/spiritual.ts",
+      "source_location": null,
+      "weight": 0.65
+    },
+    {
+      "source": "views_route",
+      "target": "dashboardschema_types",
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "server/src/routes/views.ts",
+      "source_location": null,
+      "weight": 0.8
+    },
+    {
+      "source": "views_route",
+      "target": "dashboardlayoututils_utils",
+      "relation": "rationale_for",
+      "confidence": "INFERRED",
+      "confidence_score": 0.7,
+      "source_file": "server/src/routes/views.ts",
+      "source_location": null,
+      "weight": 0.7
+    },
+    {
+      "source": "chatinterface_ChatInterface",
+      "target": "chatinterface_ChatMessage",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/chat/ChatInterface.tsx",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "app_App",
+      "target": "navlink_NavLink",
+      "relation": "references",
+      "confidence": "AMBIGUOUS",
+      "confidence_score": 0.2,
+      "source_file": "src/App.tsx",
+      "source_location": null,
+      "weight": 0.2
+    },
+    {
+      "source": "navlink_NavLink",
+      "target": "app_App",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.7,
+      "source_file": "src/components/NavLink.tsx",
+      "source_location": null,
+      "weight": 0.7
+    },
+    {
+      "source": "contentfolders_ContentFolders",
+      "target": "saveditems_SavedItems",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "src/components/content/ContentFolders.tsx",
+      "source_location": null,
+      "weight": 0.75
+    }
+  ],
+  "hyperedges": [],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

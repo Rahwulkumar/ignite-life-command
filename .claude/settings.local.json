@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs cat:*)",
+      "Bash(python -c \"import graphify; print\\('graphify already installed'\\)\")",
+      "Bash(python -c \"import graphify; print\\(graphify.__version__\\)\")",
+      "Bash(python -c \"import sys; open\\('.graphify_python', 'w'\\).write\\(sys.executable\\); print\\('Interpreter:', sys.executable\\)\")",
+      "Bash(python -c ':*)",
+      "Bash(grep -r \"header-\\\\|placeholder\\\\.svg\\\\|nature-header\\\\|video-content\\\\|video-finance\\\\|video-music\\\\|video-projects\\\\|video-spiritual\\\\|video-tech\\\\|video-trading\" src/ --include=\"*.ts\" --include=\"*.tsx\" -l)",
+      "Bash(grep -r \"mockData\" src/ --include=\"*.ts\" --include=\"*.tsx\" -l)",
+      "Bash(grep -r \"SpiritualDebug\" src/ --include=\"*.ts\" --include=\"*.tsx\" -l)",
+      "Bash(grep -r \"domain-seeds\" src/ --include=\"*.ts\" --include=\"*.tsx\" -l)",
+      "Bash(grep -r \"nova-chat\\\\|spiritual-guide\" src/ server/ --include=\"*.ts\" --include=\"*.tsx\" -l)",
+      "Bash(ls dist/)",
+      "Bash(ls server/dist/)",
+      "Bash(grep \"dist\" .gitignore)",
+      "Bash(grep -r \"tiptapUtils\" src/ --include=\"*.ts\" --include=\"*.tsx\" -l)",
+      "Bash(grep -r \"client-id\" src/ --include=\"*.ts\" --include=\"*.tsx\" -l)",
+      "Bash(grep -r \"client-id\\\\|clientId\" src/ server/src/ --include=\"*.ts\" --include=\"*.tsx\" -l)",
+      "Bash(grep -r \"bibleBooks\\\\|bibleValidation\" src/ --include=\"*.ts\" --include=\"*.tsx\" -l)",
+      "Bash(grep -r \"domain-seeds\" src/ server/src/ --include=\"*.ts\" --include=\"*.tsx\" -l)",
+      "Bash(grep -r \"from.*mockData\\\\|import.*mockData\" src/ --include=\"*.ts\" --include=\"*.tsx\")",
+      "Bash(grep -r \"SpiritualDebug\" src/ --include=\"*.ts\" --include=\"*.tsx\")",
+      "Bash(mkdir -p graphify-out)",
+      "Bash(rm -f .graphify_detect.json .graphify_extract.json .graphify_ast.json .graphify_semantic.json .graphify_analysis.json .graphify_labels.json .graphify_python)",
+      "Bash(python -c \" from graphify.cache import clear_cache from pathlib import Path clear_cache\\(Path\\('.'\\)\\) print\\('Cache cleared'\\) \")",
+      "Bash(claude:*)",
+      "Bash(python -c \"import sys,json; lines=sys.stdin.read\\(\\).strip\\(\\).split\\('\\\\n'\\); [print\\(json.dumps\\(json.loads\\(l\\), indent=2\\)\\) for l in lines[:2] if l]\")",
+      "Bash(python:*)"
+    ]
+  }
+}

@@ -43,7 +43,11 @@ export function TopNavigation() {
 
           <div className="flex items-center gap-0.5 sm:gap-1 overflow-x-auto scrollbar-hide">
             {navItems.map((item, i) => {
-              const isActive = location.pathname === item.path;
+              const isActive =
+                item.path === "/"
+                  ? location.pathname === "/" ||
+                    location.pathname.startsWith("/domains/")
+                  : location.pathname === item.path;
               return (
                 <motion.div
                   key={item.path}
