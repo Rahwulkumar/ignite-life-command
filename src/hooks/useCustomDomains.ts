@@ -153,3 +153,18 @@ export function useDeleteCustomDomainField(slug: string) {
     },
   });
 }
+
+export function useDeleteCustomDomain() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (slug: string) =>
+      api.delete<{ success: true; slug: string }>(`/api/custom-domains/${slug}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["custom-domains"] });
+      queryClient.removeQueries({
+        predicate: (query) => Array.isArray(query.queryKey) && query.queryKey[0] === "custom-domain",
+      });
+    },
+  });
+}

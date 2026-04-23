@@ -66,7 +66,7 @@ export default function AuthPage() {
             <p className="text-muted-foreground text-sm">
               {isSignUp
                 ? "Sign up to start tracking your life domains"
-                : "Sign in to continue to LifeOS"}
+                : "Sign in to continue to LifeOs"}
             </p>
           </div>
 

@@ -380,6 +380,27 @@ customDomainsRoute.get("/custom-domains/:slug", async (c) => {
   return c.json({ domain, fields, records, views });
 });
 
+customDomainsRoute.delete("/custom-domains/:slug", async (c) => {
+  const userId = getUserId(c);
+  const slug = c.req.param("slug");
+  const domain = await getOwnedDomain(userId, slug);
+
+  if (!domain) {
+    return c.json({ error: "Custom domain not found" }, 404);
+  }
+
+  await db
+    .delete(customDomains)
+    .where(and(eq(customDomains.id, domain.id), eq(customDomains.userId, userId)));
+
+  return c.json({
+    success: true,
+    id: domain.id,
+    slug: domain.slug,
+    name: domain.name,
+  });
+});
+
 customDomainsRoute.post("/custom-domains/:slug/fields", async (c) => {
   const userId = getUserId(c);
   const slug = c.req.param("slug");

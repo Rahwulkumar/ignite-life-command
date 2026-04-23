@@ -7,6 +7,7 @@ import {
   Code2,
   Music,
   Plus,
+  Settings,
   TrendingUp,
   Wallet,
 } from "lucide-react";
@@ -21,6 +22,7 @@ const builtInDomains = [
   { icon: Music, label: "Music", path: "/music" },
   { icon: Bookmark, label: "Content", path: "/content" },
   { icon: Briefcase, label: "Projects", path: "/projects" },
+  { icon: Settings, label: "Settings", path: "/settings" },
 ];
 
 interface DomainNavigationProps {

@@ -414,7 +414,7 @@ export const customDomains = pgTable(
     slug: text("slug").notNull(),
     subtitle: text("subtitle")
       .notNull()
-      .default("A custom workspace built inside LifeOS"),
+      .default("A custom workspace built inside LifeOs"),
     iconKey: text("icon_key").notNull().default("Layers3"),
     color: text("color").notNull().default("content"),
     template: text("template").notNull().default("tracker"),

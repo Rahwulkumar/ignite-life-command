@@ -9,6 +9,7 @@ import {
   Music,
   Bookmark,
   Briefcase,
+  Settings,
   StickyNote,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -23,6 +24,7 @@ const navItems = [
   { icon: Bookmark, label: "Content", path: "/content" },
   { icon: Briefcase, label: "Projects", path: "/projects" },
   { icon: StickyNote, label: "Notes", path: "/notes" },
+  { icon: Settings, label: "Settings", path: "/settings" },
 ];
 
 export function TopNavigation() {
@@ -38,7 +40,7 @@ export function TopNavigation() {
       <div className="max-w-6xl mx-auto px-3 sm:px-6">
         <div className="flex items-center justify-between h-12 sm:h-14">
           <Link to="/" className="font-semibold text-foreground text-sm sm:text-base">
-            LifeOS
+            LifeOs
           </Link>
 
           <div className="flex items-center gap-0.5 sm:gap-1 overflow-x-auto scrollbar-hide">

@@ -121,7 +121,7 @@ export function CreateDomainDialog({
             Create Domain
           </DialogTitle>
           <DialogDescription>
-            Build a new workspace from the current LifeOS design system without
+            Build a new workspace from the current LifeOs design system without
             changing the visual theme.
           </DialogDescription>
         </DialogHeader>
