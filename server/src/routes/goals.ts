@@ -2,22 +2,26 @@ import { Hono } from "hono";
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "../db/index.js";
 import { officeNotes, spiritualGoals } from "../db/schema.js";
-
-const STATIC_USER_ID = "local-user";
+import { requireAuth } from "../middleware/auth.js";
+import { getUserId } from "../utils/user-context.js";
 
 const goals = new Hono();
 
+goals.use("*", requireAuth);
+
 // Spiritual goals
 goals.get("/spiritual-goals", async (c) => {
+  const userId = getUserId(c);
   const result = await db
     .select()
     .from(spiritualGoals)
-    .where(eq(spiritualGoals.userId, STATIC_USER_ID))
+    .where(eq(spiritualGoals.userId, userId))
     .orderBy(spiritualGoals.createdAt);
   return c.json(result);
 });
 
 goals.post("/spiritual-goals", async (c) => {
+  const userId = getUserId(c);
   const body = await c.req.json<{
     title: string;
     description?: string;
@@ -26,34 +30,37 @@ goals.post("/spiritual-goals", async (c) => {
   }>();
   const [goal] = await db
     .insert(spiritualGoals)
-    .values({ ...body, userId: STATIC_USER_ID })
+    .values({ ...body, userId })
     .returning();
   return c.json(goal, 201);
 });
 
 goals.patch("/spiritual-goals/:id", async (c) => {
+  const userId = getUserId(c);
   const id = c.req.param("id");
   const body = await c.req.json();
   const [updated] = await db
     .update(spiritualGoals)
     .set(body)
-    .where(and(eq(spiritualGoals.id, id), eq(spiritualGoals.userId, STATIC_USER_ID)))
+    .where(and(eq(spiritualGoals.id, id), eq(spiritualGoals.userId, userId)))
     .returning();
   if (!updated) return c.json({ error: "Not found" }, 404);
   return c.json(updated);
 });
 
 goals.delete("/spiritual-goals/:id", async (c) => {
+  const userId = getUserId(c);
   const id = c.req.param("id");
   await db
     .delete(spiritualGoals)
-    .where(and(eq(spiritualGoals.id, id), eq(spiritualGoals.userId, STATIC_USER_ID)));
+    .where(and(eq(spiritualGoals.id, id), eq(spiritualGoals.userId, userId)));
   return c.json({ success: true });
 });
 
 // Legacy compatibility routes. The live journal model now stores entries in
 // office_notes with domain='spiritual' and noteType='journal'.
 goals.get("/journal-entries", async (c) => {
+  const userId = getUserId(c);
   const entries = await db
     .select({
       id: officeNotes.id,
@@ -66,7 +73,7 @@ goals.get("/journal-entries", async (c) => {
     .from(officeNotes)
     .where(
       and(
-        eq(officeNotes.userId, STATIC_USER_ID),
+        eq(officeNotes.userId, userId),
         eq(officeNotes.domain, "spiritual"),
         eq(officeNotes.noteType, "journal")
       )
@@ -76,11 +83,12 @@ goals.get("/journal-entries", async (c) => {
 });
 
 goals.post("/journal-entries", async (c) => {
+  const userId = getUserId(c);
   const body = await c.req.json<{ title: string; content: unknown }>();
   const [entry] = await db
     .insert(officeNotes)
     .values({
-      userId: STATIC_USER_ID,
+      userId,
       title: body.title,
       content:
         typeof body.content === "string"
@@ -101,13 +109,14 @@ goals.post("/journal-entries", async (c) => {
 });
 
 goals.delete("/journal-entries/:id", async (c) => {
+  const userId = getUserId(c);
   const id = c.req.param("id");
   await db
     .delete(officeNotes)
     .where(
       and(
         eq(officeNotes.id, id),
-        eq(officeNotes.userId, STATIC_USER_ID),
+        eq(officeNotes.userId, userId),
         eq(officeNotes.domain, "spiritual"),
         eq(officeNotes.noteType, "journal")
       )

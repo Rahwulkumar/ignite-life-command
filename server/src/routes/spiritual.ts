@@ -2,25 +2,29 @@ import { Hono } from "hono";
 import { db } from "../db/index.js";
 import { dailyFocus } from "../db/schema.js";
 import { eq, and } from "drizzle-orm";
-
-const STATIC_USER_ID = "local-user";
+import { requireAuth } from "../middleware/auth.js";
+import { getUserId } from "../utils/user-context.js";
 
 const spiritual = new Hono();
+
+spiritual.use("*", requireAuth);
 
 // ── Daily Focus ──────────────────────────────────────────────
 
 // GET /api/daily-focus?date=YYYY-MM-DD
 spiritual.get("/daily-focus", async (c) => {
+  const userId = getUserId(c);
   const date = c.req.query("date") ?? new Date().toLocaleDateString("en-CA");
   const [focus] = await db
     .select()
     .from(dailyFocus)
-    .where(and(eq(dailyFocus.userId, STATIC_USER_ID), eq(dailyFocus.date, date)));
+    .where(and(eq(dailyFocus.userId, userId), eq(dailyFocus.date, date)));
   return c.json(focus ?? null);
 });
 
 // POST /api/daily-focus — upsert today's focus
 spiritual.post("/daily-focus", async (c) => {
+  const userId = getUserId(c);
   const body = await c.req.json<{
     reference: string;
     content: string;
@@ -29,7 +33,7 @@ spiritual.post("/daily-focus", async (c) => {
   const date = body.date ?? new Date().toLocaleDateString("en-CA");
   const [focus] = await db
     .insert(dailyFocus)
-    .values({ userId: STATIC_USER_ID, date, reference: body.reference, content: body.content })
+    .values({ userId, date, reference: body.reference, content: body.content })
     .onConflictDoUpdate({
       target: [dailyFocus.userId, dailyFocus.date],
       set: {
@@ -44,12 +48,13 @@ spiritual.post("/daily-focus", async (c) => {
 
 // PATCH /api/daily-focus/:id — mark completed
 spiritual.patch("/daily-focus/:id", async (c) => {
+  const userId = getUserId(c);
   const id = c.req.param("id");
   const body = await c.req.json<{ completed: boolean }>();
   const [updated] = await db
     .update(dailyFocus)
     .set({ completed: body.completed, updatedAt: new Date() })
-    .where(and(eq(dailyFocus.id, id), eq(dailyFocus.userId, STATIC_USER_ID)))
+    .where(and(eq(dailyFocus.id, id), eq(dailyFocus.userId, userId)))
     .returning();
   if (!updated) return c.json({ error: "Not found" }, 404);
   return c.json(updated);

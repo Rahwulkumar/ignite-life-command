@@ -20,6 +20,7 @@ import content from "./routes/content.js";
 import trading from "./routes/trading.js";
 import tech from "./routes/tech.js";
 import customDomains from "./routes/custom-domains.js";
+import telegram, { syncTelegramBotCommands } from "./routes/telegram.js";
 
 const app = new Hono();
 
@@ -105,6 +106,7 @@ app.route("/api", content);
 app.route("/api", trading);
 app.route("/api", tech);
 app.route("/api", customDomains);
+app.route("/api", telegram);
 
 // ── Start Server ──────────────────────────────────────────────
 
@@ -122,5 +124,7 @@ void checkDatabaseConnection()
   .catch((error) => {
     console.error(`Database connection check failed on startup: ${formatRuntimeError(error)}`);
   });
+
+void syncTelegramBotCommands();
 
 export default app;

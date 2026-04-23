@@ -24,7 +24,7 @@ const navItems = [
   { icon: Bookmark, label: "Content", path: "/content" },
   { icon: Briefcase, label: "Projects", path: "/projects" },
   { icon: StickyNote, label: "Notes", path: "/notes" },
-  { icon: Settings, label: "Settings", path: "/settings" },
+  { icon: Settings, label: "Settings", path: "/settings", showLabelOnMobile: true },
 ];
 
 export function TopNavigation() {
@@ -59,6 +59,8 @@ export function TopNavigation() {
                 >
                   <Link
                     to={item.path}
+                    title={item.label}
+                    aria-label={item.label}
                     className={cn(
                       "flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 sm:py-1.5 rounded-md text-xs font-medium transition-colors min-w-[2.5rem] justify-center sm:min-w-0 sm:justify-start",
                       isActive
@@ -67,7 +69,9 @@ export function TopNavigation() {
                     )}
                   >
                     <item.icon className="w-3.5 h-3.5 flex-shrink-0" />
-                    <span className="hidden md:inline">{item.label}</span>
+                    <span className={item.showLabelOnMobile ? "inline" : "hidden md:inline"}>
+                      {item.label}
+                    </span>
                   </Link>
                 </motion.div>
               );

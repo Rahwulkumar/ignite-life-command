@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { Settings } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { DomainNavigation } from "@/components/dashboard/DomainNavigation";
 import { ZenLayout } from "@/components/dashboard/layouts/ZenLayout";
@@ -34,10 +35,17 @@ const Index = () => {
             transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
             className="relative z-10 -mt-16 sm:-mt-20 lg:-mt-24"
           >
-            <div className="mb-3 flex justify-end sm:mb-4">
-              <DomainNavigation
-                onCreateDomain={() => setIsCreateDomainOpen(true)}
-              />
+            <div className="mb-3 flex flex-col gap-2 sm:mb-4 sm:items-end">
+              <div className="flex justify-end">
+                <Link
+                  to="/settings"
+                  className="inline-flex items-center gap-2 rounded-lg border border-border bg-card/80 px-3 py-2 text-xs font-medium text-foreground shadow-sm transition-colors hover:bg-muted/70"
+                >
+                  <Settings className="h-3.5 w-3.5" />
+                  <span>Open Settings</span>
+                </Link>
+              </div>
+              <DomainNavigation onCreateDomain={() => setIsCreateDomainOpen(true)} />
             </div>
 
             <ZenLayout timeOfDay={timeOfDay} />

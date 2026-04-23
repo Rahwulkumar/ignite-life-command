@@ -2,18 +2,21 @@ import { Hono } from "hono";
 import { db } from "../db/index.js";
 import { officeNotes } from "../db/schema.js";
 import { eq, and, desc, ilike } from "drizzle-orm";
-
-const STATIC_USER_ID = "local-user";
+import { requireAuth } from "../middleware/auth.js";
+import { getUserId } from "../utils/user-context.js";
 
 const notes = new Hono();
 
+notes.use("*", requireAuth);
+
 // GET /api/notes — all notes for user, pinned first
 notes.get("/notes", async (c) => {
+  const userId = getUserId(c);
   const domain = c.req.query("domain");
   const noteType = c.req.query("noteType");
   const search = c.req.query("search");
 
-  const conditions = [eq(officeNotes.userId, STATIC_USER_ID)];
+  const conditions = [eq(officeNotes.userId, userId)];
   if (domain) conditions.push(eq(officeNotes.domain, domain));
   if (noteType) conditions.push(eq(officeNotes.noteType, noteType));
   if (search) conditions.push(ilike(officeNotes.title, `%${search}%`));
@@ -29,17 +32,19 @@ notes.get("/notes", async (c) => {
 
 // GET /api/notes/:id — single note
 notes.get("/notes/:id", async (c) => {
+  const userId = getUserId(c);
   const id = c.req.param("id");
   const [note] = await db
     .select()
     .from(officeNotes)
-    .where(and(eq(officeNotes.id, id), eq(officeNotes.userId, STATIC_USER_ID)));
+    .where(and(eq(officeNotes.id, id), eq(officeNotes.userId, userId)));
   if (!note) return c.json({ error: "Not found" }, 404);
   return c.json(note);
 });
 
 // POST /api/notes — create note
 notes.post("/notes", async (c) => {
+  const userId = getUserId(c);
   const body = await c.req.json<{
     title?: string;
     content?: unknown;
@@ -52,7 +57,7 @@ notes.post("/notes", async (c) => {
   const [note] = await db
     .insert(officeNotes)
     .values({
-      userId: STATIC_USER_ID,
+      userId,
       title: body.title ?? "Untitled",
       content: body.content ?? {},
       parentId: body.parentId ?? null,
@@ -67,6 +72,7 @@ notes.post("/notes", async (c) => {
 
 // PATCH /api/notes/:id — update note (explicit field picking — never allow userId override)
 notes.patch("/notes/:id", async (c) => {
+  const userId = getUserId(c);
   const id = c.req.param("id");
   const body = await c.req.json<{
     title?: string;
@@ -93,7 +99,7 @@ notes.patch("/notes/:id", async (c) => {
   const [updated] = await db
     .update(officeNotes)
     .set(patch)
-    .where(and(eq(officeNotes.id, id), eq(officeNotes.userId, STATIC_USER_ID)))
+    .where(and(eq(officeNotes.id, id), eq(officeNotes.userId, userId)))
     .returning();
   if (!updated) return c.json({ error: "Not found" }, 404);
   return c.json(updated);
@@ -101,10 +107,11 @@ notes.patch("/notes/:id", async (c) => {
 
 // DELETE /api/notes/:id — delete note
 notes.delete("/notes/:id", async (c) => {
+  const userId = getUserId(c);
   const id = c.req.param("id");
   await db
     .delete(officeNotes)
-    .where(and(eq(officeNotes.id, id), eq(officeNotes.userId, STATIC_USER_ID)));
+    .where(and(eq(officeNotes.id, id), eq(officeNotes.userId, userId)));
   return c.json({ success: true });
 });
 

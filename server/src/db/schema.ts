@@ -424,6 +424,52 @@ export const customDomains = pgTable(
   (t) => [unique().on(t.userId, t.slug)],
 );
 
+export const telegramConnections = pgTable(
+  "telegram_connections",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    telegramChatId: text("telegram_chat_id"),
+    telegramUserId: text("telegram_user_id"),
+    telegramUsername: text("telegram_username"),
+    status: text("status").notNull().default("pending"),
+    linkCode: text("link_code"),
+    linkCodeExpiresAt: timestamp("link_code_expires_at"),
+    linkedAt: timestamp("linked_at"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (t) => [
+    unique().on(t.userId),
+    unique().on(t.telegramChatId),
+    unique().on(t.linkCode),
+  ],
+);
+
+export const telegramEvents = pgTable(
+  "telegram_events",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    connectionId: uuid("connection_id").references(() => telegramConnections.id, {
+      onDelete: "set null",
+    }),
+    telegramUpdateId: text("telegram_update_id").notNull(),
+    telegramChatId: text("telegram_chat_id"),
+    telegramUserId: text("telegram_user_id"),
+    updateType: text("update_type").notNull(),
+    payload: jsonb("payload").notNull().default({}),
+    parsedIntent: jsonb("parsed_intent"),
+    status: text("status").notNull().default("received"),
+    error: text("error"),
+    processedAt: timestamp("processed_at"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (t) => [unique().on(t.telegramUpdateId)],
+);
+
 export const customDomainFields = pgTable(
   "custom_domain_fields",
   {

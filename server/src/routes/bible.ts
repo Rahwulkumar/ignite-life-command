@@ -2,17 +2,20 @@ import { Hono } from "hono";
 import { db } from "../db/index.js";
 import { bibleReadingPlans } from "../db/schema.js";
 import { eq, and } from "drizzle-orm";
-
-const STATIC_USER_ID = "local-user";
+import { requireAuth } from "../middleware/auth.js";
+import { getUserId } from "../utils/user-context.js";
 
 const bible = new Hono();
 
+bible.use("*", requireAuth);
+
 // GET /api/bible-reading-plans — get user's latest plan
 bible.get("/bible-reading-plans", async (c) => {
+  const userId = getUserId(c);
   const plans = await db
     .select()
     .from(bibleReadingPlans)
-    .where(eq(bibleReadingPlans.userId, STATIC_USER_ID))
+    .where(eq(bibleReadingPlans.userId, userId))
     .orderBy(bibleReadingPlans.updatedAt)
     .limit(1);
   return c.json(plans[0] ?? null);
@@ -20,6 +23,7 @@ bible.get("/bible-reading-plans", async (c) => {
 
 // POST /api/bible-reading-plans — create a new plan
 bible.post("/bible-reading-plans", async (c) => {
+  const userId = getUserId(c);
   const body = await c.req.json<{
     name: string;
     currentBook?: string;
@@ -28,13 +32,14 @@ bible.post("/bible-reading-plans", async (c) => {
   }>();
   const [plan] = await db
     .insert(bibleReadingPlans)
-    .values({ ...body, userId: STATIC_USER_ID })
+    .values({ ...body, userId })
     .returning();
   return c.json(plan, 201);
 });
 
 // PATCH /api/bible-reading-plans/:id — update reading position
 bible.patch("/bible-reading-plans/:id", async (c) => {
+  const userId = getUserId(c);
   const id = c.req.param("id");
   const body = await c.req.json<{
     currentBook?: string;
@@ -47,7 +52,7 @@ bible.patch("/bible-reading-plans/:id", async (c) => {
     .where(
       and(
         eq(bibleReadingPlans.id, id),
-        eq(bibleReadingPlans.userId, STATIC_USER_ID)
+        eq(bibleReadingPlans.userId, userId)
       )
     )
     .returning();

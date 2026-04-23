@@ -2,10 +2,12 @@ import { Hono } from "hono";
 import { db } from "../db/index.js";
 import { scriptureVerses } from "../db/schema.js";
 import { eq, and } from "drizzle-orm";
-
-const STATIC_USER_ID = "local-user";
+import { requireAuth } from "../middleware/auth.js";
+import { getUserId } from "../utils/user-context.js";
 
 const scripture = new Hono();
+
+scripture.use("*", requireAuth);
 
 // ── Bible validation (mirrors src/lib/bibleValidation.ts) ─────────────────
 // Kept inline so the server bundle stays independent of src/ imports.
@@ -120,16 +122,18 @@ function validateBibleRef(ref: string): { valid: boolean; error?: string; normal
 
 // GET /api/scripture-verses
 scripture.get("/scripture-verses", async (c) => {
+  const userId = getUserId(c);
   const verses = await db
     .select()
     .from(scriptureVerses)
-    .where(eq(scriptureVerses.userId, STATIC_USER_ID))
+    .where(eq(scriptureVerses.userId, userId))
     .orderBy(scriptureVerses.createdAt);
   return c.json(verses);
 });
 
 // POST /api/scripture-verses
 scripture.post("/scripture-verses", async (c) => {
+  const userId = getUserId(c);
   const body = await c.req.json<{
     reference: string;
     verseText: string;
@@ -152,7 +156,7 @@ scripture.post("/scripture-verses", async (c) => {
   const [verse] = await db
     .insert(scriptureVerses)
     .values({
-      userId: STATIC_USER_ID,
+      userId,
       reference: validationResult.normalised,
       verseText: body.verseText.trim(),
       masteryLevel: body.masteryLevel ?? 0,
@@ -163,13 +167,14 @@ scripture.post("/scripture-verses", async (c) => {
 
 // PATCH /api/scripture-verses/:id — update mastery level
 scripture.patch("/scripture-verses/:id", async (c) => {
+  const userId = getUserId(c);
   const id = c.req.param("id");
   const body = await c.req.json<{ masteryLevel: number }>();
   const [updated] = await db
     .update(scriptureVerses)
     .set({ masteryLevel: body.masteryLevel, updatedAt: new Date() })
     .where(
-      and(eq(scriptureVerses.id, id), eq(scriptureVerses.userId, STATIC_USER_ID))
+      and(eq(scriptureVerses.id, id), eq(scriptureVerses.userId, userId))
     )
     .returning();
   if (!updated) return c.json({ error: "Not found" }, 404);
@@ -178,11 +183,12 @@ scripture.patch("/scripture-verses/:id", async (c) => {
 
 // DELETE /api/scripture-verses/:id
 scripture.delete("/scripture-verses/:id", async (c) => {
+  const userId = getUserId(c);
   const id = c.req.param("id");
   await db
     .delete(scriptureVerses)
     .where(
-      and(eq(scriptureVerses.id, id), eq(scriptureVerses.userId, STATIC_USER_ID))
+      and(eq(scriptureVerses.id, id), eq(scriptureVerses.userId, userId))
     );
   return c.json({ success: true });
 });

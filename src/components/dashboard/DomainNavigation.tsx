@@ -22,7 +22,7 @@ const builtInDomains = [
   { icon: Music, label: "Music", path: "/music" },
   { icon: Bookmark, label: "Content", path: "/content" },
   { icon: Briefcase, label: "Projects", path: "/projects" },
-  { icon: Settings, label: "Settings", path: "/settings" },
+  { icon: Settings, label: "Settings", path: "/settings", showLabelOnMobile: true },
 ];
 
 interface DomainNavigationProps {
@@ -38,6 +38,7 @@ export function DomainNavigation({ onCreateDomain }: DomainNavigationProps) {
       icon: getCustomDomainIconComponent(domain.iconKey),
       label: domain.name,
       path: `/domains/${domain.slug}`,
+      showLabelOnMobile: false,
     })),
   ];
 
@@ -52,10 +53,14 @@ export function DomainNavigation({ onCreateDomain }: DomainNavigationProps) {
         >
           <Link
             to={domain.path}
+            title={domain.label}
+            aria-label={domain.label}
             className="flex items-center gap-1.5 whitespace-nowrap rounded-md px-2 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground sm:gap-2 sm:px-3"
           >
             <domain.icon className="h-3.5 w-3.5 flex-shrink-0" />
-            <span className="hidden sm:inline">{domain.label}</span>
+            <span className={domain.showLabelOnMobile ? "inline" : "hidden sm:inline"}>
+              {domain.label}
+            </span>
           </Link>
         </motion.div>
       ))}

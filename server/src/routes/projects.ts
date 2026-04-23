@@ -2,10 +2,12 @@ import { Hono } from "hono";
 import { and, asc, desc, eq } from "drizzle-orm";
 import { db } from "../db/index.js";
 import { projects, projectTasks } from "../db/schema.js";
-
-const STATIC_USER_ID = "local-user";
+import { requireAuth } from "../middleware/auth.js";
+import { getUserId } from "../utils/user-context.js";
 
 const projectsRoute = new Hono();
+
+projectsRoute.use("*", requireAuth);
 
 function calculateProgress(
   tasks: Array<{ status: string }>
@@ -24,16 +26,17 @@ async function touchProject(projectId: string, userId: string) {
 
 // GET /api/projects
 projectsRoute.get("/projects", async (c) => {
+  const userId = getUserId(c);
   const [projectRows, taskRows] = await Promise.all([
     db
       .select()
       .from(projects)
-      .where(eq(projects.userId, STATIC_USER_ID))
+      .where(eq(projects.userId, userId))
       .orderBy(desc(projects.updatedAt), desc(projects.createdAt)),
     db
       .select()
       .from(projectTasks)
-      .where(eq(projectTasks.userId, STATIC_USER_ID))
+      .where(eq(projectTasks.userId, userId))
       .orderBy(asc(projectTasks.orderIndex), asc(projectTasks.createdAt)),
   ]);
 
@@ -59,6 +62,7 @@ projectsRoute.get("/projects", async (c) => {
 
 // POST /api/projects
 projectsRoute.post("/projects", async (c) => {
+  const userId = getUserId(c);
   const body = await c.req.json<{
     name: string;
     description?: string;
@@ -73,7 +77,7 @@ projectsRoute.post("/projects", async (c) => {
   const [project] = await db
     .insert(projects)
     .values({
-      userId: STATIC_USER_ID,
+      userId,
       name,
       description: body.description?.trim() || null,
       targetDate: body.targetDate ?? null,
@@ -85,6 +89,7 @@ projectsRoute.post("/projects", async (c) => {
 
 // PATCH /api/projects/:id
 projectsRoute.patch("/projects/:id", async (c) => {
+  const userId = getUserId(c);
   const id = c.req.param("id");
   const body = await c.req.json<{
     name?: string;
@@ -108,7 +113,7 @@ projectsRoute.patch("/projects/:id", async (c) => {
   const [updated] = await db
     .update(projects)
     .set(patch)
-    .where(and(eq(projects.id, id), eq(projects.userId, STATIC_USER_ID)))
+    .where(and(eq(projects.id, id), eq(projects.userId, userId)))
     .returning();
 
   if (!updated) return c.json({ error: "Not found" }, 404);
@@ -117,17 +122,19 @@ projectsRoute.patch("/projects/:id", async (c) => {
 
 // DELETE /api/projects/:id
 projectsRoute.delete("/projects/:id", async (c) => {
+  const userId = getUserId(c);
   const id = c.req.param("id");
 
   await db
     .delete(projects)
-    .where(and(eq(projects.id, id), eq(projects.userId, STATIC_USER_ID)));
+    .where(and(eq(projects.id, id), eq(projects.userId, userId)));
 
   return c.json({ success: true });
 });
 
 // POST /api/projects/:id/tasks
 projectsRoute.post("/projects/:id/tasks", async (c) => {
+  const userId = getUserId(c);
   const projectId = c.req.param("id");
   const body = await c.req.json<{
     title: string;
@@ -145,14 +152,14 @@ projectsRoute.post("/projects/:id/tasks", async (c) => {
   const [project] = await db
     .select({ id: projects.id })
     .from(projects)
-    .where(and(eq(projects.id, projectId), eq(projects.userId, STATIC_USER_ID)));
+    .where(and(eq(projects.id, projectId), eq(projects.userId, userId)));
 
   if (!project) return c.json({ error: "Project not found" }, 404);
 
   const [task] = await db
     .insert(projectTasks)
     .values({
-      userId: STATIC_USER_ID,
+      userId,
       projectId,
       title,
       dueDate: body.dueDate ?? null,
@@ -162,13 +169,14 @@ projectsRoute.post("/projects/:id/tasks", async (c) => {
     })
     .returning();
 
-  await touchProject(projectId, STATIC_USER_ID);
+  await touchProject(projectId, userId);
 
   return c.json(task, 201);
 });
 
 // PATCH /api/project-tasks/:id
 projectsRoute.patch("/project-tasks/:id", async (c) => {
+  const userId = getUserId(c);
   const id = c.req.param("id");
   const body = await c.req.json<{
     title?: string;
@@ -192,28 +200,29 @@ projectsRoute.patch("/project-tasks/:id", async (c) => {
   const [updated] = await db
     .update(projectTasks)
     .set(patch)
-    .where(and(eq(projectTasks.id, id), eq(projectTasks.userId, STATIC_USER_ID)))
+    .where(and(eq(projectTasks.id, id), eq(projectTasks.userId, userId)))
     .returning();
 
   if (!updated) return c.json({ error: "Not found" }, 404);
 
-  await touchProject(updated.projectId, STATIC_USER_ID);
+  await touchProject(updated.projectId, userId);
 
   return c.json(updated);
 });
 
 // DELETE /api/project-tasks/:id
 projectsRoute.delete("/project-tasks/:id", async (c) => {
+  const userId = getUserId(c);
   const id = c.req.param("id");
 
   const [deleted] = await db
     .delete(projectTasks)
-    .where(and(eq(projectTasks.id, id), eq(projectTasks.userId, STATIC_USER_ID)))
+    .where(and(eq(projectTasks.id, id), eq(projectTasks.userId, userId)))
     .returning({ projectId: projectTasks.projectId });
 
   if (!deleted) return c.json({ error: "Not found" }, 404);
 
-  await touchProject(deleted.projectId, STATIC_USER_ID);
+  await touchProject(deleted.projectId, userId);
 
   return c.json({ success: true });
 });
