@@ -69,16 +69,19 @@ function getColumnClassName(span: DashboardGridSpan, className?: string) {
     GRID_SPAN_CLASS_MAP[span.base],
     span.md ? MD_GRID_SPAN_CLASS_MAP[span.md] : undefined,
     span.lg ? LG_GRID_SPAN_CLASS_MAP[span.lg] : undefined,
+    "flex h-full min-w-0",
     className,
   );
 }
 
 function getStackClassName(column: DashboardColumn) {
   if (column.widgets.length <= 1) {
-    return undefined;
+    return "flex h-full min-h-0 w-full";
   }
 
-  return column.stackClassName ?? "flex flex-col gap-3 sm:gap-4";
+  return (
+    column.stackClassName ?? "flex h-full min-h-0 w-full flex-col gap-3 sm:gap-4"
+  );
 }
 
 export function DashboardRenderer({
@@ -94,7 +97,10 @@ export function DashboardRenderer({
         <motion.div
           key={row.id}
           variants={rowVariants}
-          className={cn("grid grid-cols-12 gap-3 sm:gap-4", row.className)}
+          className={cn(
+            "grid grid-cols-12 items-stretch gap-3 sm:gap-4",
+            row.className,
+          )}
         >
           {row.columns.map((column) => (
             <motion.div
@@ -108,14 +114,14 @@ export function DashboardRenderer({
                   const content = definition.render(context, widget.props);
 
                   return (
-                    <div key={widget.id}>
+                    <div key={widget.id} className="flex min-h-0 flex-1">
                       {renderCard(
                         widget.innerClassName ? (
                           <div className={widget.innerClassName}>{content}</div>
                         ) : (
                           content
                         ),
-                        widget.cardClassName,
+                        cn("h-full w-full", widget.cardClassName),
                       )}
                     </div>
                   );

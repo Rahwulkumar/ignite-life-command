@@ -1,11 +1,13 @@
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { PortfolioDataPoint } from "@/types/domain";
+import { formatSensitiveInvestmentCurrency } from "@/lib/investment-format";
 
 interface PortfolioChartProps {
   data: PortfolioDataPoint[];
+  hideValues?: boolean;
 }
 
-export function PortfolioChart({ data }: PortfolioChartProps) {
+export function PortfolioChart({ data, hideValues = false }: PortfolioChartProps) {
   if (data.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground text-sm">
@@ -16,8 +18,8 @@ export function PortfolioChart({ data }: PortfolioChartProps) {
 
   const startValue = data[0].value;
   const endValue = data[data.length - 1].value;
-  const change = ((endValue - startValue) / startValue * 100).toFixed(1);
-  const isPositive = endValue > startValue;
+  const change = startValue > 0 ? ((endValue - startValue) / startValue * 100).toFixed(1) : "0.0";
+  const isPositive = endValue >= startValue;
 
   return (
     <div className="space-y-4">
@@ -54,7 +56,10 @@ export function PortfolioChart({ data }: PortfolioChartProps) {
                 borderRadius: "8px",
                 fontSize: "12px"
               }}
-              formatter={(value: number) => [`$${value.toLocaleString()}`, "Value"]}
+              formatter={(value: number) => [
+                formatSensitiveInvestmentCurrency(value, hideValues),
+                "Value",
+              ]}
             />
             <Area
               type="monotone"

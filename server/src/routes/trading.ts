@@ -2,6 +2,10 @@ import { Hono } from "hono";
 import { asc, desc, eq } from "drizzle-orm";
 import { db } from "../db/index.js";
 import {
+  tradingBrokerConnections,
+  tradingBrokerHoldings,
+  tradingBrokerSnapshots,
+  tradingBrokerTrades,
   tradingHoldings,
   tradingPortfolioData,
   tradingTrades,
@@ -54,8 +58,42 @@ const seedPortfolio = [
   { dateLabel: "Dec 30", value: 12450, orderIndex: 6 },
 ];
 
+function aggregateBrokerSnapshots(
+  snapshots: Array<{
+    id: string;
+    snapshotDate: string;
+    value: number;
+  }>,
+) {
+  const totals = new Map<string, number>();
+
+  for (const snapshot of snapshots) {
+    totals.set(
+      snapshot.snapshotDate,
+      (totals.get(snapshot.snapshotDate) ?? 0) + snapshot.value,
+    );
+  }
+
+  return [...totals.entries()]
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([snapshotDate, value]) => ({
+      id: snapshotDate,
+      dateLabel: new Date(snapshotDate).toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "short",
+      }),
+      value,
+    }));
+}
+
 async function ensureTradingSeedData(userId: string) {
-  const [existingWatchlist, existingTrades, existingHoldings, existingPortfolio] =
+  const [
+    existingWatchlist,
+    existingTrades,
+    existingHoldings,
+    existingPortfolio,
+    existingBrokerConnection,
+  ] =
     await Promise.all([
       db
         .select({ id: tradingWatchlist.id })
@@ -77,7 +115,16 @@ async function ensureTradingSeedData(userId: string) {
         .from(tradingPortfolioData)
         .where(eq(tradingPortfolioData.userId, userId))
         .limit(1),
+      db
+        .select({ id: tradingBrokerConnections.id })
+        .from(tradingBrokerConnections)
+        .where(eq(tradingBrokerConnections.userId, userId))
+        .limit(1),
     ]);
+
+  if (existingBrokerConnection.length > 0) {
+    return;
+  }
 
   const writes: Promise<unknown>[] = [];
 
@@ -134,7 +181,21 @@ tradingRoute.get("/trading", async (c) => {
   const userId = getUserId(c);
   await ensureTradingSeedData(userId);
 
-  const [watchlist, trades, holdings, portfolioData] = await Promise.all([
+  const [
+    brokerConnections,
+    watchlist,
+    manualTrades,
+    manualHoldings,
+    manualPortfolioData,
+    brokerTrades,
+    brokerHoldings,
+    brokerSnapshots,
+  ] = await Promise.all([
+    db
+      .select({ id: tradingBrokerConnections.id })
+      .from(tradingBrokerConnections)
+      .where(eq(tradingBrokerConnections.userId, userId))
+      .limit(1),
     db
       .select()
       .from(tradingWatchlist)
@@ -155,7 +216,71 @@ tradingRoute.get("/trading", async (c) => {
       .from(tradingPortfolioData)
       .where(eq(tradingPortfolioData.userId, userId))
       .orderBy(asc(tradingPortfolioData.orderIndex)),
+    db
+      .select()
+      .from(tradingBrokerTrades)
+      .where(eq(tradingBrokerTrades.userId, userId))
+      .orderBy(desc(tradingBrokerTrades.createdAt)),
+    db
+      .select()
+      .from(tradingBrokerHoldings)
+      .where(eq(tradingBrokerHoldings.userId, userId))
+      .orderBy(asc(tradingBrokerHoldings.createdAt)),
+    db
+      .select()
+      .from(tradingBrokerSnapshots)
+      .where(eq(tradingBrokerSnapshots.userId, userId))
+      .orderBy(asc(tradingBrokerSnapshots.snapshotDate)),
   ]);
+
+  const useBrokerData = brokerConnections.length > 0;
+
+  const trades = [
+    ...brokerTrades.map((trade) => ({
+      id: trade.id,
+      symbol: trade.symbol,
+      type: trade.type as "buy" | "sell",
+      quantity: trade.quantity,
+      price: trade.price,
+      dateLabel: trade.dateLabel,
+      notes: trade.notes,
+      pnl: trade.pnl,
+    })),
+    ...(useBrokerData ? [] : manualTrades),
+  ];
+
+  const holdings = [
+    ...brokerHoldings.map((holding) => ({
+      id: holding.id,
+      name: holding.name,
+      symbol: holding.symbol,
+      type: holding.type as
+        | "stock"
+        | "mutual_fund"
+        | "etf"
+        | "bond"
+        | "crypto",
+      units: holding.units,
+      avgCost: holding.avgCost,
+      currentPrice: holding.currentPrice,
+      returns: holding.returns,
+      returnsPercent: holding.returnsPercent,
+    })),
+    ...(useBrokerData ? [] : manualHoldings),
+  ];
+
+  const portfolioData =
+    brokerSnapshots.length > 0
+      ? aggregateBrokerSnapshots(
+          brokerSnapshots.map((snapshot) => ({
+            id: snapshot.id,
+            snapshotDate: snapshot.snapshotDate,
+            value: snapshot.value,
+          })),
+        )
+      : useBrokerData
+        ? []
+        : manualPortfolioData;
 
   return c.json({ watchlist, trades, holdings, portfolioData });
 });

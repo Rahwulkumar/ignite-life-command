@@ -19,9 +19,6 @@ import { getUserId } from "../utils/user-context.js";
 
 const telegramRoute = new Hono();
 
-telegramRoute.use("/integrations/telegram/connection", requireAuth);
-telegramRoute.use("/integrations/telegram/link-code", requireAuth);
-
 const LINK_CODE_TTL_MS = 30 * 60 * 1000;
 
 let openAIClient: OpenAI | null | undefined;
@@ -77,12 +74,16 @@ function getTelegramConfig() {
   const botToken = process.env.TELEGRAM_BOT_TOKEN?.trim() ?? "";
   const botUsername = process.env.TELEGRAM_BOT_USERNAME?.trim() ?? "";
   const webhookSecret = process.env.TELEGRAM_WEBHOOK_SECRET?.trim() ?? "";
+  const skipWebhookSecretCheck =
+    process.env.TELEGRAM_SKIP_WEBHOOK_SECRET_CHECK?.trim() === "true" ||
+    webhookSecret === "put_a_random_long_secret_here";
 
   return {
     botToken,
     botUsername: botUsername || null,
     botUrl: botUsername ? `https://t.me/${botUsername}` : null,
     webhookSecret: webhookSecret || null,
+    skipWebhookSecretCheck,
     configured: Boolean(botToken),
     voiceTranscriptionEnabled: Boolean(process.env.OPENAI_API_KEY?.trim()),
     geminiIntentEnabled: supportsGeminiIntentParsing(),
@@ -428,13 +429,13 @@ export async function syncTelegramBotCommands(): Promise<void> {
   }
 }
 
-telegramRoute.get("/integrations/telegram/connection", async (c) => {
+telegramRoute.get("/integrations/telegram/connection", requireAuth, async (c) => {
   const userId = getUserId(c);
   const connection = await getConnectionForUser(userId);
   return c.json(serializeConnectionState(connection));
 });
 
-telegramRoute.post("/integrations/telegram/link-code", async (c) => {
+telegramRoute.post("/integrations/telegram/link-code", requireAuth, async (c) => {
   const config = getTelegramConfig();
   if (!config.configured) {
     return c.json({ error: "Telegram bot is not configured on the server." }, 503);
@@ -453,7 +454,7 @@ telegramRoute.post("/integrations/telegram/link-code", async (c) => {
   }
 });
 
-telegramRoute.delete("/integrations/telegram/connection", async (c) => {
+telegramRoute.delete("/integrations/telegram/connection", requireAuth, async (c) => {
   const userId = getUserId(c);
 
   await db.delete(telegramConnections).where(eq(telegramConnections.userId, userId));
@@ -469,13 +470,6 @@ telegramRoute.post("/integrations/telegram/webhook", async (c) => {
 
   if (!config.configured) {
     return c.json({ error: "Telegram bot is not configured on the server." }, 503);
-  }
-
-  if (config.webhookSecret) {
-    const secretHeader = c.req.header("X-Telegram-Bot-Api-Secret-Token");
-    if (secretHeader !== config.webhookSecret) {
-      return c.json({ error: "Unauthorized" }, 401);
-    }
   }
 
   const update = await c.req.json<TelegramUpdate>();

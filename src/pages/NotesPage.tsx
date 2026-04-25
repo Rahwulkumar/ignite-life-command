@@ -217,7 +217,7 @@ export default function NotesPage() {
   return (
     <MainLayout>
       <PageTransition>
-        <div className="min-h-screen flex">
+        <div className="flex h-full min-h-0 pt-12 sm:pt-14">
           {/* Mobile sidebar */}
           {isMobile ? (
             <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
@@ -230,7 +230,7 @@ export default function NotesPage() {
                   <Menu className="w-5 h-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="p-0 w-72">
+              <SheetContent side="left" className="w-80 max-w-[85vw] p-0">
                 {sidebarContent}
               </SheetContent>
             </Sheet>

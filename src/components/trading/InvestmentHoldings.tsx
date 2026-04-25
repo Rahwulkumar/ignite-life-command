@@ -5,13 +5,23 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { InvestmentDetailSheet } from "./InvestmentDetailSheet";
 import { PortfolioChart } from "./PortfolioChart";
 import { Holding, PortfolioDataPoint } from "@/types/domain";
+import { formatSensitiveInvestmentCurrency } from "@/lib/investment-format";
 
 interface InvestmentHoldingsProps {
   holdings: Holding[];
   portfolioData: PortfolioDataPoint[];
+  hideValues?: boolean;
 }
 
-function HoldingRow({ holding, onClick }: { holding: Holding; onClick: () => void }) {
+function HoldingRow({
+  holding,
+  onClick,
+  hideValues,
+}: {
+  holding: Holding;
+  onClick: () => void;
+  hideValues: boolean;
+}) {
   const isPositive = holding.returns >= 0;
   const totalValue = holding.units * holding.currentPrice;
 
@@ -26,11 +36,14 @@ function HoldingRow({ holding, onClick }: { holding: Holding; onClick: () => voi
           <span className="text-xs text-muted-foreground hidden sm:inline">{holding.name}</span>
         </div>
         <p className="text-xs text-muted-foreground mt-1">
-          {holding.units.toLocaleString(undefined, { maximumFractionDigits: 4 })} units @ ${holding.avgCost.toLocaleString()}
+          {holding.units.toLocaleString(undefined, { maximumFractionDigits: 4 })} units @{" "}
+          {formatSensitiveInvestmentCurrency(holding.avgCost, hideValues)}
         </p>
       </div>
       <div className="text-right">
-        <p className="font-medium tabular-nums">${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+        <p className="font-medium tabular-nums">
+          {formatSensitiveInvestmentCurrency(totalValue, hideValues)}
+        </p>
         <p className={cn("text-xs tabular-nums flex items-center gap-1 justify-end", isPositive ? "text-finance" : "text-destructive")}>
           {isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
           {isPositive ? "+" : ""}{holding.returnsPercent}%
@@ -41,27 +54,44 @@ function HoldingRow({ holding, onClick }: { holding: Holding; onClick: () => voi
   );
 }
 
-function HoldingsSummary({ holdings }: { holdings: Holding[] }) {
+function HoldingsSummary({
+  holdings,
+  hideValues,
+}: {
+  holdings: Holding[];
+  hideValues: boolean;
+}) {
   const totalValue = holdings.reduce((sum, h) => sum + h.units * h.currentPrice, 0);
   const totalCost = holdings.reduce((sum, h) => sum + h.units * h.avgCost, 0);
   const totalReturns = totalValue - totalCost;
-  const totalPercent = ((totalReturns / totalCost) * 100);
+  const totalPercent = totalCost > 0 ? (totalReturns / totalCost) * 100 : 0;
   const isPositive = totalReturns >= 0;
 
   return (
     <div className="grid grid-cols-3 gap-4 p-4 rounded-lg bg-muted/30 border border-border/50">
       <div>
         <p className="text-xs text-muted-foreground mb-1">Current Value</p>
-        <p className="text-lg font-medium tabular-nums">${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+        <p className="text-lg font-medium tabular-nums">
+          {formatSensitiveInvestmentCurrency(totalValue, hideValues)}
+        </p>
       </div>
       <div>
         <p className="text-xs text-muted-foreground mb-1">Invested</p>
-        <p className="text-lg font-medium tabular-nums">${totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+        <p className="text-lg font-medium tabular-nums">
+          {formatSensitiveInvestmentCurrency(totalCost, hideValues)}
+        </p>
       </div>
       <div>
         <p className="text-xs text-muted-foreground mb-1">Total Returns</p>
         <p className={cn("text-lg font-medium tabular-nums", isPositive ? "text-finance" : "text-destructive")}>
-          {isPositive ? "+" : ""}${totalReturns.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          {hideValues ? (
+            formatSensitiveInvestmentCurrency(Math.abs(totalReturns), true)
+          ) : (
+            <>
+              {isPositive ? "+" : "-"}
+              {formatSensitiveInvestmentCurrency(Math.abs(totalReturns), false)}
+            </>
+          )}
           <span className="text-xs ml-1">({isPositive ? "+" : ""}{totalPercent.toFixed(1)}%)</span>
         </p>
       </div>
@@ -69,7 +99,11 @@ function HoldingsSummary({ holdings }: { holdings: Holding[] }) {
   );
 }
 
-export function InvestmentHoldings({ holdings, portfolioData }: InvestmentHoldingsProps) {
+export function InvestmentHoldings({
+  holdings,
+  portfolioData,
+  hideValues = false,
+}: InvestmentHoldingsProps) {
   const [selectedHolding, setSelectedHolding] = useState<Holding | null>(null);
 
   const stocks = holdings.filter(h => h.type === "stock");
@@ -80,7 +114,12 @@ export function InvestmentHoldings({ holdings, portfolioData }: InvestmentHoldin
   const renderHoldings = (holdingsList: Holding[]) => (
     <div className="space-y-0">
       {holdingsList.map(holding => (
-        <HoldingRow key={holding.id} holding={holding} onClick={() => setSelectedHolding(holding)} />
+        <HoldingRow
+          key={holding.id}
+          holding={holding}
+          hideValues={hideValues}
+          onClick={() => setSelectedHolding(holding)}
+        />
       ))}
     </div>
   );
@@ -89,11 +128,11 @@ export function InvestmentHoldings({ holdings, portfolioData }: InvestmentHoldin
     <div className="space-y-6">
       {/* Portfolio Chart */}
       <div className="bg-card border border-border rounded-xl p-5">
-        <PortfolioChart data={portfolioData} />
+        <PortfolioChart data={portfolioData} hideValues={hideValues} />
       </div>
 
       {/* Summary */}
-      <HoldingsSummary holdings={holdings} />
+      <HoldingsSummary holdings={holdings} hideValues={hideValues} />
 
       {/* Holdings List */}
       <Tabs defaultValue="all" className="space-y-4">
@@ -115,6 +154,7 @@ export function InvestmentHoldings({ holdings, portfolioData }: InvestmentHoldin
       {/* Detail Sheet */}
       <InvestmentDetailSheet
         holding={selectedHolding}
+        hideValues={hideValues}
         isOpen={!!selectedHolding}
         onClose={() => setSelectedHolding(null)}
       />

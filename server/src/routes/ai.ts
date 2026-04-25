@@ -104,10 +104,11 @@ ai.post("/ai/nova", async (c) => {
 - Asset: ${investmentContext.name} (${investmentContext.symbol})
 - Type: ${investmentContext.type}
 - Units held: ${investmentContext.units}
-- Average cost: $${investmentContext.avgCost}
-- Current price: $${investmentContext.currentPrice}
-- Returns: ${investmentContext.returnsPercent > 0 ? "+" : ""}${investmentContext.returnsPercent}% ($${investmentContext.returns})
-- Total position value: $${(investmentContext.units * investmentContext.currentPrice).toFixed(2)}
+- Currency: INR
+- Average cost: Rs ${investmentContext.avgCost}
+- Current price: Rs ${investmentContext.currentPrice}
+- Returns: ${investmentContext.returnsPercent > 0 ? "+" : ""}${investmentContext.returnsPercent}% (Rs ${investmentContext.returns})
+- Total position value: Rs ${(investmentContext.units * investmentContext.currentPrice).toFixed(2)}
 
 Use this context to provide specific, actionable advice about this holding.`;
     }

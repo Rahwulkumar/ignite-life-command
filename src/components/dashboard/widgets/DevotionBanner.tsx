@@ -39,7 +39,7 @@ export function DevotionBanner({
             loop 
             muted 
             playsInline
-            className="w-full h-full object-cover opacity-40"
+            className="h-full w-full object-cover opacity-40"
           >
             <source src={videoSpiritual} type="video/mp4" />
           </video>

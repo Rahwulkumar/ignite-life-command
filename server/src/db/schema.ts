@@ -302,6 +302,101 @@ export const tradingPortfolioData = pgTable("trading_portfolio_data", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const tradingBrokerConnections = pgTable(
+  "trading_broker_connections",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    provider: text("provider").notNull(),
+    status: text("status").notNull().default("connected"),
+    providerUserId: text("provider_user_id"),
+    providerAccountLabel: text("provider_account_label"),
+    encryptedAccessToken: text("encrypted_access_token"),
+    publicToken: text("public_token"),
+    tokenExpiresAt: timestamp("token_expires_at"),
+    lastSyncedAt: timestamp("last_synced_at"),
+    lastError: text("last_error"),
+    metadata: jsonb("metadata").notNull().default({}),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (t) => [unique().on(t.userId, t.provider)],
+);
+
+export const tradingBrokerHoldings = pgTable(
+  "trading_broker_holdings",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    connectionId: uuid("connection_id")
+      .notNull()
+      .references(() => tradingBrokerConnections.id, { onDelete: "cascade" }),
+    provider: text("provider").notNull(),
+    externalId: text("external_id").notNull(),
+    name: text("name").notNull(),
+    symbol: text("symbol").notNull(),
+    type: text("type").notNull(),
+    units: numeric("units", { precision: 16, scale: 4 }).notNull(),
+    avgCost: numeric("avg_cost", { precision: 16, scale: 4 }).notNull(),
+    currentPrice: numeric("current_price", { precision: 16, scale: 4 }).notNull(),
+    returns: numeric("returns", { precision: 16, scale: 4 }).notNull(),
+    returnsPercent: numeric("returns_percent", { precision: 10, scale: 4 }).notNull(),
+    metadata: jsonb("metadata").notNull().default({}),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (t) => [unique().on(t.connectionId, t.externalId)],
+);
+
+export const tradingBrokerTrades = pgTable(
+  "trading_broker_trades",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    connectionId: uuid("connection_id")
+      .notNull()
+      .references(() => tradingBrokerConnections.id, { onDelete: "cascade" }),
+    provider: text("provider").notNull(),
+    externalId: text("external_id").notNull(),
+    symbol: text("symbol").notNull(),
+    type: text("type").notNull(),
+    quantity: numeric("quantity", { precision: 16, scale: 4 }).notNull(),
+    price: numeric("price", { precision: 16, scale: 4 }).notNull(),
+    dateLabel: text("date_label").notNull(),
+    notes: text("notes").notNull().default("Synced trade"),
+    pnl: numeric("pnl", { precision: 16, scale: 4 }),
+    metadata: jsonb("metadata").notNull().default({}),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (t) => [unique().on(t.connectionId, t.externalId)],
+);
+
+export const tradingBrokerSnapshots = pgTable(
+  "trading_broker_snapshots",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    connectionId: uuid("connection_id")
+      .notNull()
+      .references(() => tradingBrokerConnections.id, { onDelete: "cascade" }),
+    provider: text("provider").notNull(),
+    snapshotDate: date("snapshot_date").notNull(),
+    value: integer("value").notNull(),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (t) => [unique().on(t.connectionId, t.snapshotDate)],
+);
+
 export const techSkillDomains = pgTable(
   "tech_skill_domains",
   {

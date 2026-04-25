@@ -167,153 +167,161 @@ export default function CustomDomainPage() {
 
           <div className="px-4 pb-8 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-5xl">
-              {isLoading && (
-                <div className="rounded-2xl border border-border bg-card/80 p-6 text-sm text-muted-foreground">
-                  Loading custom domain...
-                </div>
-              )}
+              <div className="rounded-2xl border border-border/45 bg-card/35 p-3 backdrop-blur-sm sm:p-4">
+                {isLoading && (
+                  <div className="rounded-xl border border-border/40 bg-background/45 p-6 text-sm text-muted-foreground">
+                    Loading custom domain...
+                  </div>
+                )}
 
-              {isError && (
-                <div className="rounded-2xl border border-destructive/40 bg-card/80 p-6 text-sm text-destructive">
-                  Unable to load this custom domain.
-                </div>
-              )}
+                {isError && (
+                  <div className="rounded-xl border border-destructive/40 bg-background/45 p-6 text-sm text-destructive">
+                    Unable to load this custom domain.
+                  </div>
+                )}
 
-              {data && (
-                <Tabs defaultValue="records" className="space-y-6">
-                  <TabsList className="flex-wrap">
-                    <TabsTrigger value="records">Records</TabsTrigger>
-                    <TabsTrigger value="structure">Structure</TabsTrigger>
-                  </TabsList>
+                {data && (
+                  <Tabs defaultValue="records" className="space-y-4">
+                    <TabsList className="flex-wrap border border-border/40 bg-background/60">
+                      <TabsTrigger value="records">Records</TabsTrigger>
+                      <TabsTrigger value="structure">Structure</TabsTrigger>
+                    </TabsList>
 
-                  <TabsContent value="records">
-                    <div className="grid gap-4">
-                      {data.records.length === 0 ? (
-                        <div className="rounded-2xl border border-border bg-card/80 p-8 text-center">
-                          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-muted">
-                            <Icon className="h-6 w-6 text-muted-foreground" />
-                          </div>
-                          <h3 className="mt-4 text-lg font-semibold">
-                            No records yet
-                          </h3>
-                          <p className="mt-2 text-sm text-muted-foreground">
-                            This domain is ready. Add the first record without
-                            changing the current theme or layout language.
-                          </p>
-                          <Button
-                            className="mt-5"
-                            onClick={() => setIsCreateRecordOpen(true)}
-                          >
-                            Create First Record
-                          </Button>
-                        </div>
-                      ) : (
-                        data.records.map((record) => (
-                          <div
-                            key={record.id}
-                            className="rounded-2xl border border-border bg-card/80 p-5"
-                          >
-                            <div className="flex items-start justify-between gap-4">
-                              <div>
-                                <h3 className="text-lg font-semibold">
-                                  {record.title}
-                                </h3>
-                                <p className="mt-1 text-xs text-muted-foreground">
-                                  Updated{" "}
-                                  {record.updatedAt
-                                    ? new Date(record.updatedAt).toLocaleString()
-                                    : "recently"}
-                                </p>
-                              </div>
+                    <TabsContent
+                      value="records"
+                      className="rounded-xl border border-border/40 bg-background/45 p-3 outline-none sm:p-4"
+                    >
+                      <div className="grid gap-4">
+                        {data.records.length === 0 ? (
+                          <div className="rounded-2xl border border-border bg-card/80 p-8 text-center">
+                            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-muted">
+                              <Icon className="h-6 w-6 text-muted-foreground" />
                             </div>
-
-                            <div className="mt-5 grid gap-4 sm:grid-cols-2">
-                              {data.fields.map((field) => (
-                                <div
-                                  key={field.id}
-                                  className="rounded-xl border border-border/60 bg-background/40 p-3"
-                                >
-                                  <div className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
-                                    {field.label}
-                                  </div>
-                                  <div className="mt-2 text-sm text-foreground">
-                                    {renderRecordValue(
-                                      field,
-                                      record.values?.[field.key],
-                                    )}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </TabsContent>
-
-                  <TabsContent value="structure">
-                    <div className="rounded-2xl border border-border bg-card/80 p-5">
-                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                        <div>
-                          <h3 className="text-lg font-semibold">Field Structure</h3>
-                          <p className="mt-1 text-sm text-muted-foreground">
-                            Starter template: {data.domain.template}
-                          </p>
-                        </div>
-
-                        <Button
-                          variant="outline"
-                          onClick={() => setIsCreateFieldOpen(true)}
-                        >
-                          <Plus className="h-4 w-4" />
-                          Add Field
-                        </Button>
-                      </div>
-
-                      <div className="mt-5 grid gap-3">
-                        {data.fields.length === 0 ? (
-                          <div className="rounded-xl border border-border/60 bg-background/40 p-4 text-sm text-muted-foreground">
-                            No fields yet. Add the first field to define this
-                            domain's structure.
+                            <h3 className="mt-4 text-lg font-semibold">
+                              No records yet
+                            </h3>
+                            <p className="mt-2 text-sm text-muted-foreground">
+                              This domain is ready. Add the first record without
+                              changing the current theme or layout language.
+                            </p>
+                            <Button
+                              className="mt-5"
+                              onClick={() => setIsCreateRecordOpen(true)}
+                            >
+                              Create First Record
+                            </Button>
                           </div>
                         ) : (
-                          data.fields.map((field) => (
+                          data.records.map((record) => (
                             <div
-                              key={field.id}
-                              className="flex flex-col gap-3 rounded-xl border border-border/60 bg-background/40 p-4 sm:flex-row sm:items-center sm:justify-between"
+                              key={record.id}
+                              className="rounded-2xl border border-border bg-card/80 p-5"
                             >
-                              <div>
-                                <div className="font-medium">{field.label}</div>
-                                <div className="mt-1 text-sm text-muted-foreground">
-                                  {formatFieldType(field.fieldType)}
-                                  {field.isRequired ? " | required" : ""}
-                                </div>
-                                <div className="mt-2 text-xs text-muted-foreground">
-                                  Key: {field.key}
+                              <div className="flex items-start justify-between gap-4">
+                                <div>
+                                  <h3 className="text-lg font-semibold">
+                                    {record.title}
+                                  </h3>
+                                  <p className="mt-1 text-xs text-muted-foreground">
+                                    Updated{" "}
+                                    {record.updatedAt
+                                      ? new Date(record.updatedAt).toLocaleString()
+                                      : "recently"}
+                                  </p>
                                 </div>
                               </div>
 
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() =>
-                                  void handleDeleteField(field.id, field.label)
-                                }
-                                disabled={deleteField.isPending}
-                              >
-                                <Trash2 className="h-4 w-4 text-muted-foreground" />
-                                <span className="sr-only">
-                                  Remove {field.label}
-                                </span>
-                              </Button>
+                              <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                                {data.fields.map((field) => (
+                                  <div
+                                    key={field.id}
+                                    className="rounded-xl border border-border/60 bg-background/40 p-3"
+                                  >
+                                    <div className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
+                                      {field.label}
+                                    </div>
+                                    <div className="mt-2 text-sm text-foreground">
+                                      {renderRecordValue(
+                                        field,
+                                        record.values?.[field.key],
+                                      )}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
                             </div>
                           ))
                         )}
                       </div>
-                    </div>
-                  </TabsContent>
-                </Tabs>
-              )}
+                    </TabsContent>
+
+                    <TabsContent
+                      value="structure"
+                      className="rounded-xl border border-border/40 bg-background/45 p-3 outline-none sm:p-4"
+                    >
+                      <div className="rounded-2xl border border-border bg-card/80 p-5">
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                          <div>
+                            <h3 className="text-lg font-semibold">Field Structure</h3>
+                            <p className="mt-1 text-sm text-muted-foreground">
+                              Starter template: {data.domain.template}
+                            </p>
+                          </div>
+
+                          <Button
+                            variant="outline"
+                            onClick={() => setIsCreateFieldOpen(true)}
+                          >
+                            <Plus className="h-4 w-4" />
+                            Add Field
+                          </Button>
+                        </div>
+
+                        <div className="mt-5 grid gap-3">
+                          {data.fields.length === 0 ? (
+                            <div className="rounded-xl border border-border/60 bg-background/40 p-4 text-sm text-muted-foreground">
+                              No fields yet. Add the first field to define this
+                              domain's structure.
+                            </div>
+                          ) : (
+                            data.fields.map((field) => (
+                              <div
+                                key={field.id}
+                                className="flex flex-col gap-3 rounded-xl border border-border/60 bg-background/40 p-4 sm:flex-row sm:items-center sm:justify-between"
+                              >
+                                <div>
+                                  <div className="font-medium">{field.label}</div>
+                                  <div className="mt-1 text-sm text-muted-foreground">
+                                    {formatFieldType(field.fieldType)}
+                                    {field.isRequired ? " | required" : ""}
+                                  </div>
+                                  <div className="mt-2 text-xs text-muted-foreground">
+                                    Key: {field.key}
+                                  </div>
+                                </div>
+
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() =>
+                                    void handleDeleteField(field.id, field.label)
+                                  }
+                                  disabled={deleteField.isPending}
+                                >
+                                  <Trash2 className="h-4 w-4 text-muted-foreground" />
+                                  <span className="sr-only">
+                                    Remove {field.label}
+                                  </span>
+                                </Button>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    </TabsContent>
+                  </Tabs>
+                )}
+              </div>
             </div>
           </div>
         </div>

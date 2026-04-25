@@ -97,40 +97,46 @@ export function DomainPageTemplate({
 
                         <div className="px-4 sm:px-6 lg:px-8 pb-8">
                             <div className="max-w-5xl mx-auto">
-                                {/* Additional content before tabs */}
-                                {children}
+                                <div className="rounded-2xl border border-border/45 bg-card/35 p-3 backdrop-blur-sm sm:p-4">
+                                    {/* Additional content before tabs */}
+                                    {children}
 
-                                <Tabs
-                                    value={tabValue}
-                                    defaultValue={tabDefaultValue}
-                                    onValueChange={onTabChange}
-                                    className="space-y-6"
-                                >
-                                    <TabsList className="flex-wrap">
-                                        {tabs.map((tab) => (
-                                            <TabsTrigger key={tab.value} value={tab.value}>
-                                                {tab.label}
+                                    <Tabs
+                                        value={tabValue}
+                                        defaultValue={tabDefaultValue}
+                                        onValueChange={onTabChange}
+                                        className="space-y-4"
+                                    >
+                                        <TabsList className="flex-wrap border border-border/40 bg-background/60">
+                                            {tabs.map((tab) => (
+                                                <TabsTrigger key={tab.value} value={tab.value}>
+                                                    {tab.label}
+                                                </TabsTrigger>
+                                            ))}
+                                            {/* Notes tab - automatically included */}
+                                            <TabsTrigger value="notes" asChild>
+                                                <Link
+                                                    to="/notes"
+                                                    state={{ domain: domain.notesDomain }}
+                                                    className="flex items-center gap-1.5"
+                                                >
+                                                    <StickyNote className="w-3.5 h-3.5" />
+                                                    Notes
+                                                </Link>
                                             </TabsTrigger>
-                                        ))}
-                                        {/* Notes tab - automatically included */}
-                                        <TabsTrigger value="notes" asChild>
-                                            <Link
-                                                to="/notes"
-                                                state={{ domain: domain.notesDomain }}
-                                                className="flex items-center gap-1.5"
-                                            >
-                                                <StickyNote className="w-3.5 h-3.5" />
-                                                Notes
-                                            </Link>
-                                        </TabsTrigger>
-                                    </TabsList>
+                                        </TabsList>
 
-                                    {tabs.map((tab) => (
-                                        <TabsContent key={tab.value} value={tab.value}>
-                                            {tab.component}
-                                        </TabsContent>
-                                    ))}
-                                </Tabs>
+                                        {tabs.map((tab) => (
+                                            <TabsContent
+                                                key={tab.value}
+                                                value={tab.value}
+                                                className="rounded-xl border border-border/40 bg-background/45 p-3 outline-none sm:p-4"
+                                            >
+                                                {tab.component}
+                                            </TabsContent>
+                                        ))}
+                                    </Tabs>
+                                </div>
                             </div>
                         </div>
                     </div>

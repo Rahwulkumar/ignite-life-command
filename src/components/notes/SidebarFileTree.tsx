@@ -13,6 +13,12 @@ interface SidebarFileTreeProps {
     onSelectNote: (noteId: string) => void;
     onCreateItem?: (parentId: string, type: 'page' | 'folder') => void;
     onDeleteNote?: (noteId: string) => void;
+    tone: {
+        text: string;
+        bg: string;
+        border: string;
+        hover: string;
+    };
     level?: number;
 }
 
@@ -24,12 +30,13 @@ export function SidebarFileTree({
     onSelectNote,
     onCreateItem,
     onDeleteNote,
+    tone,
     level = 0
 }: SidebarFileTreeProps) {
     if (!data || data.length === 0) return null;
 
     return (
-        <div className={cn(level > 0 && "ml-2 border-l border-border/40")}>
+        <div className={cn(level > 0 && "ml-3 border-l border-border/40")}>
             {data.map((node) => {
                 const isFolder = node.note_type === 'folder' || node.note_type === 'hub';
                 const isExpanded = expandedFolders.has(node.id);
@@ -40,8 +47,10 @@ export function SidebarFileTree({
                     <div key={node.id} className="pl-2">
                         <div
                             className={cn(
-                                "flex items-center gap-2 py-1.5 px-2 rounded-md cursor-pointer transition-colors group relative",
-                                isSelected ? "bg-spiritual/10 text-spiritual font-medium" : "hover:bg-muted text-muted-foreground"
+                                "group relative flex cursor-pointer items-center gap-2.5 rounded-lg border border-transparent px-2.5 py-2 transition-colors",
+                                isSelected
+                                    ? [tone.bg, tone.border, tone.text, "font-medium"]
+                                    : ["text-muted-foreground hover:bg-card/70 hover:text-foreground", tone.hover]
                             )}
                             onClick={(e) => isFolder ? toggleFolder(node.id, e) : onSelectNote(node.id)}
                         >
@@ -49,7 +58,7 @@ export function SidebarFileTree({
                             {isFolder ? (
                                 <button
                                     onClick={(e) => toggleFolder(node.id, e)}
-                                    className="p-0.5 hover:bg-background rounded-sm text-muted-foreground/70 hover:text-foreground"
+                                    className="rounded-sm p-0.5 text-muted-foreground/70 hover:bg-background hover:text-foreground"
                                 >
                                     {isExpanded ? (
                                         <ChevronDown className="w-3 h-3" />
@@ -64,16 +73,16 @@ export function SidebarFileTree({
 
                             {/* Icon */}
                             {isFolder ? (
-                                <Folder className={cn("w-4 h-4", isSelected ? "text-spiritual" : "text-muted-foreground")} />
+                                <Folder className={cn("h-4 w-4 shrink-0", isSelected ? tone.text : "text-muted-foreground")} />
                             ) : (
-                                <FileText className={cn("w-4 h-4", isSelected ? "text-spiritual" : "text-muted-foreground")} />
+                                <FileText className={cn("h-4 w-4 shrink-0", isSelected ? tone.text : "text-muted-foreground")} />
                             )}
 
                             {/* Title */}
                             <span className="text-sm truncate flex-1 select-none">{node.title}</span>
 
                             {/* Quick Actions on Hover */}
-                            <div className="opacity-0 group-hover:opacity-100 flex gap-1 absolute right-2 bg-background/50 backdrop-blur-sm rounded-sm">
+                            <div className="absolute right-2 flex gap-1 rounded-sm bg-background/70 opacity-0 backdrop-blur-sm group-hover:opacity-100">
                                 {/* Add Page Button - Only for Folders */}
                                 {isFolder && onCreateItem && (
                                     <Button
@@ -119,6 +128,7 @@ export function SidebarFileTree({
                                 onSelectNote={onSelectNote}
                                 onCreateItem={onCreateItem}
                                 onDeleteNote={onDeleteNote}
+                                tone={tone}
                                 level={level + 1}
                             />
                         )}

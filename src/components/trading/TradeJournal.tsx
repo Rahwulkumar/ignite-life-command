@@ -3,13 +3,19 @@ import { ArrowUp, ArrowDown, Plus, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Trade } from "@/types/domain";
+import { formatSensitiveInvestmentCurrency } from "@/lib/investment-format";
 
 interface TradeJournalProps {
   trades: Trade[];
   onLogTrade?: () => void;
+  hideValues?: boolean;
 }
 
-export function TradeJournal({ trades, onLogTrade }: TradeJournalProps) {
+export function TradeJournal({
+  trades,
+  onLogTrade,
+  hideValues = false,
+}: TradeJournalProps) {
   const [showForm, setShowForm] = useState(false);
 
   return (
@@ -45,7 +51,8 @@ export function TradeJournal({ trades, onLogTrade }: TradeJournalProps) {
                   <div>
                     <p className="font-medium">{trade.symbol}</p>
                     <p className="text-xs text-muted-foreground">
-                      {trade.type === "buy" ? "Bought" : "Sold"} {trade.quantity} @ ${trade.price}
+                      {trade.type === "buy" ? "Bought" : "Sold"} {trade.quantity} @{" "}
+                      {formatSensitiveInvestmentCurrency(trade.price, hideValues)}
                     </p>
                   </div>
                 </div>
@@ -55,7 +62,8 @@ export function TradeJournal({ trades, onLogTrade }: TradeJournalProps) {
                       "font-medium tabular-nums",
                       trade.pnl > 0 ? "text-finance" : "text-destructive"
                     )}>
-                      {trade.pnl > 0 ? "+" : ""}${trade.pnl}
+                      {trade.pnl > 0 ? "+" : trade.pnl < 0 ? "-" : ""}
+                      {formatSensitiveInvestmentCurrency(Math.abs(trade.pnl), hideValues)}
                     </p>
                   )}
                   <p className="text-xs text-muted-foreground flex items-center gap-1 justify-end">

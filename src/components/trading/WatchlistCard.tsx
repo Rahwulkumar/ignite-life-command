@@ -2,13 +2,19 @@ import { ArrowUp, ArrowDown, Star, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { WatchlistItem } from "@/types/domain";
+import { formatSensitiveInvestmentCurrency } from "@/lib/investment-format";
 
 interface WatchlistCardProps {
   items: WatchlistItem[];
   onAddClick?: () => void;
+  hideValues?: boolean;
 }
 
-export function WatchlistCard({ items, onAddClick }: WatchlistCardProps) {
+export function WatchlistCard({
+  items,
+  onAddClick,
+  hideValues = false,
+}: WatchlistCardProps) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -34,7 +40,9 @@ export function WatchlistCard({ items, onAddClick }: WatchlistCardProps) {
                 </div>
               </div>
               <div className="text-right">
-                <p className="font-medium tabular-nums">${item.price}</p>
+                <p className="font-medium tabular-nums">
+                  {formatSensitiveInvestmentCurrency(item.price, hideValues)}
+                </p>
                 <p className={cn(
                   "text-xs tabular-nums flex items-center gap-1 justify-end",
                   item.change > 0 ? "text-finance" : "text-destructive"

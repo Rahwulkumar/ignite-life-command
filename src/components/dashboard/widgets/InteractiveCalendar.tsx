@@ -38,7 +38,7 @@ interface InteractiveCalendarProps {
   entries?: ChecklistEntry[];
 }
 
-const getExpectedTaskCount = (date: Date) => {
+const getExpectedTaskCount = (date: Date, allTaskIdsForDate: string[] = []) => {
   const dayOfWeek = getDay(date);
   // Calculate total standard tasks applicable for this day
   const applicableStandard = STANDARD_TASKS.filter((task) => {
@@ -48,8 +48,12 @@ const getExpectedTaskCount = (date: Date) => {
     }
     return false;
   });
+  const applicableStandardIds = new Set(applicableStandard.map((task) => task.id));
+  const extraTaskCount = allTaskIdsForDate.filter(
+    (id) => !applicableStandardIds.has(id),
+  ).length;
 
-  return applicableStandard.length;
+  return applicableStandard.length + extraTaskCount;
 };
 
 export function InteractiveCalendar({
@@ -68,6 +72,8 @@ export function InteractiveCalendar({
   const dayOfWeek = getDay(today);
   const todayKey = format(today, "yyyy-MM-dd");
   const todayCompleted = completedTasks[todayKey] || [];
+  const todayAllTaskIds = allTasks?.[todayKey] || [];
+  const standardTasksById = new Map(STANDARD_TASKS.map((task) => [task.id, task]));
 
   // Standard tasks for today
   const standardTodayTasks = STANDARD_TASKS.filter((task) => {
@@ -77,10 +83,16 @@ export function InteractiveCalendar({
     }
     return false;
   });
+  const standardTodayTaskIds = new Set(standardTodayTasks.map((task) => task.id));
+
+  const manuallyAddedStandardTodayTasks = todayAllTaskIds
+    .filter((id) => !standardTodayTaskIds.has(id))
+    .map((id) => standardTasksById.get(id))
+    .filter((task): task is TaskDefinition => Boolean(task));
 
   // Custom tasks for today
-  const customTodayTasks: TaskDefinition[] = todayCompleted
-    .filter((id) => !STANDARD_TASKS.some((t) => t.id === id))
+  const customTodayTasks: TaskDefinition[] = todayAllTaskIds
+    .filter((id) => !standardTasksById.has(id))
     .map((id) => ({
       id,
       label: formattedIdToLabel(id),
@@ -88,7 +100,11 @@ export function InteractiveCalendar({
       frequency: "daily",
     }));
 
-  const allTodayTasks = [...standardTodayTasks, ...customTodayTasks];
+  const allTodayTasks = [
+    ...standardTodayTasks,
+    ...manuallyAddedStandardTodayTasks,
+    ...customTodayTasks,
+  ];
   const remainingTasks = allTodayTasks.filter(
     (t) => !todayCompleted.includes(t.id),
   );
@@ -104,12 +120,9 @@ export function InteractiveCalendar({
   const getCompletionStatus = (date: Date) => {
     const dateKey = format(date, "yyyy-MM-dd");
     const completed = completedTasks[dateKey] || [];
+    const allForDate = allTasks?.[dateKey] || [];
 
-    // Also include custom tasks in the expected count for past days if they were completed
-    const customCount = completed.filter(
-      (id) => !STANDARD_TASKS.some((t) => t.id === id),
-    ).length;
-    const expected = getExpectedTaskCount(date) + customCount;
+    const expected = getExpectedTaskCount(date, allForDate);
 
     if (completed.length === 0) return "none";
     if (completed.length >= expected) return "complete";

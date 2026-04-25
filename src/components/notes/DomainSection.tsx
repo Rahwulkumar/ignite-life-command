@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronRight, ChevronDown, Plus, BookOpen, Home, FileText } from "lucide-react";
+import { ChevronRight, ChevronDown, Plus, BookOpen, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Collapsible,
@@ -25,6 +25,12 @@ interface DomainSectionProps {
   onSelectHub: (domainId: DomainId) => void;
   onCreatePage: (domainId: DomainId) => void;
   onDeleteNote?: (noteId: string) => void;
+  tone: {
+    text: string;
+    bg: string;
+    border: string;
+    hover: string;
+  };
 }
 
 export function DomainSection({
@@ -37,6 +43,7 @@ export function DomainSection({
   onSelectHub,
   onCreatePage,
   onDeleteNote,
+  tone,
 }: DomainSectionProps) {
   const [isExpanded, setIsExpanded] = useState(true);
 
@@ -58,13 +65,18 @@ export function DomainSection({
     <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
       <div className="group">
         <CollapsibleTrigger asChild>
-          <button className="w-full flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-muted/50 transition-colors">
+          <button
+            className={cn(
+              "flex w-full items-center gap-2 rounded-lg border border-transparent px-2.5 py-2 transition-colors hover:bg-card/70",
+              tone.hover,
+            )}
+          >
             {isExpanded ? (
               <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
             ) : (
               <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
             )}
-            <DomainIcon domainId={domain.id} className="w-4 h-4 text-muted-foreground" />
+            <DomainIcon domainId={domain.id} className={cn("h-4 w-4", tone.text)} />
             <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground flex-1 text-left">
               {domain.label}
             </span>
@@ -83,17 +95,17 @@ export function DomainSection({
         </CollapsibleTrigger>
 
         <CollapsibleContent>
-          <div className="ml-2 mt-0.5 space-y-0.5">
+          <div className="ml-2 mt-1 space-y-1">
             {/* Hub link */}
             {hubId && (
               <button
                 onClick={() => onSelectHub(domain.id)}
                 className={cn(
-                  "w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left text-sm transition-colors text-muted-foreground hover:text-foreground",
-                  selectedNoteId === hubId && "bg-muted text-foreground"
+                  "flex w-full items-center gap-2.5 rounded-lg border border-transparent px-2.5 py-2 text-left text-sm text-muted-foreground transition-colors hover:bg-card/70 hover:text-foreground",
+                  selectedNoteId === hubId && [tone.bg, tone.border, tone.text],
                 )}
               >
-                <Home className="w-3.5 h-3.5" />
+                <Home className="h-3.5 w-3.5 shrink-0" />
                 <span className="truncate flex-1">{domain.label} Hub</span>
               </button>
             )}
@@ -106,6 +118,7 @@ export function DomainSection({
               selectedNoteId={selectedNoteId}
               onSelectNote={onSelectNote}
               onDeleteNote={onDeleteNote}
+              tone={tone}
               // Main sidebar doesn't support inline creation yet, keeping parity
               onCreateItem={undefined}
             />
@@ -114,9 +127,12 @@ export function DomainSection({
             {journalCount > 0 && (
               <button
                 onClick={() => onSelectHub(domain.id)}
-                className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-left text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                className={cn(
+                  "flex w-full items-center gap-2.5 rounded-lg border border-transparent px-2.5 py-2 text-left text-sm text-muted-foreground transition-colors hover:bg-card/70 hover:text-foreground",
+                  tone.hover,
+                )}
               >
-                <BookOpen className="w-3.5 h-3.5" />
+                <BookOpen className="h-3.5 w-3.5 shrink-0" />
                 <span className="truncate flex-1">Journal</span>
                 <span className="text-xs bg-muted px-1.5 py-0.5 rounded-full">
                   {journalCount}

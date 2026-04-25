@@ -21,6 +21,8 @@ import trading from "./routes/trading.js";
 import tech from "./routes/tech.js";
 import customDomains from "./routes/custom-domains.js";
 import telegram, { syncTelegramBotCommands } from "./routes/telegram.js";
+import kite from "./routes/kite.js";
+import groww from "./routes/groww.js";
 
 const app = new Hono();
 
@@ -91,6 +93,9 @@ app.on(["GET", "POST"], "/api/auth/**", (c) => auth.handler(c.req.raw));
 
 // ── Feature Routes ────────────────────────────────────────────
 
+app.route("/api", telegram);
+app.route("/api", kite);
+app.route("/api", groww);
 app.route("/api", bible);
 app.route("/api", checklist);
 app.route("/api", notes);
@@ -106,7 +111,6 @@ app.route("/api", content);
 app.route("/api", trading);
 app.route("/api", tech);
 app.route("/api", customDomains);
-app.route("/api", telegram);
 
 // ── Start Server ──────────────────────────────────────────────
 

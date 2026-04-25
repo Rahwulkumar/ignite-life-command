@@ -1,61 +1,79 @@
-import { TrendingUp, DollarSign, BarChart3, Percent } from "lucide-react";
+import { TrendingUp, DollarSign, BarChart3, Percent, AlertTriangle, Eye, EyeOff } from "lucide-react";
 import { DomainPageTemplate } from "@/components/shared/DomainPageTemplate";
 import { PortfolioChart } from "@/components/trading/PortfolioChart";
 import { TradeJournal } from "@/components/trading/TradeJournal";
 import { WatchlistCard } from "@/components/trading/WatchlistCard";
 import { InvestmentHoldings } from "@/components/trading/InvestmentHoldings";
 import { NovaChat } from "@/components/trading/NovaChat";
-import { WatchlistItem, Trade, Holding, PortfolioDataPoint } from "@/types/domain";
-
-const stats = [
-  { icon: DollarSign, label: "Portfolio", value: "$24,850", color: "text-trading" },
-  { icon: BarChart3, label: "Invested", value: "$20,325", color: "text-muted-foreground" },
-  { icon: TrendingUp, label: "Returns", value: "+$4,525", color: "text-finance" },
-  { icon: Percent, label: "ROI", value: "+22.3%", color: "text-finance" },
-];
-
-// Mock data until portfolio persistence is wired to the API.
-const mockWatchlist: WatchlistItem[] = [
-  { id: 1, symbol: "AMZN", name: "Amazon", price: 153.42, change: 2.1, notes: "Watching for breakout" },
-  { id: 2, symbol: "AMD", name: "AMD Inc.", price: 147.80, change: -1.5, notes: "Support at $145" },
-  { id: 3, symbol: "COIN", name: "Coinbase", price: 178.30, change: 5.8, notes: "Crypto momentum" },
-  { id: 4, symbol: "PLTR", name: "Palantir", price: 18.45, change: -0.8, notes: "AI government plays" },
-];
-
-const mockTrades: Trade[] = [
-  { id: 1, symbol: "AAPL", type: "buy", quantity: 10, price: 185.50, date: "Dec 28", notes: "Support level bounce", pnl: 68 },
-  { id: 2, symbol: "NVDA", type: "buy", quantity: 3, price: 480.00, date: "Dec 26", notes: "AI momentum play", pnl: 45 },
-  { id: 3, symbol: "TSLA", type: "sell", quantity: 5, price: 252.30, date: "Dec 24", notes: "Taking profits at resistance", pnl: 120 },
-  { id: 4, symbol: "MSFT", type: "buy", quantity: 8, price: 375.00, date: "Dec 22", notes: "Cloud growth thesis", pnl: -52 },
-  { id: 5, symbol: "META", type: "sell", quantity: 4, price: 345.80, date: "Dec 20", notes: "Rebalancing portfolio", pnl: 85 },
-];
-
-const mockHoldings: Holding[] = [
-  { id: "1", name: "Apple Inc.", symbol: "AAPL", type: "stock", units: 15, avgCost: 145.50, currentPrice: 193.42, returns: 718.80, returnsPercent: 32.9 },
-  { id: "2", name: "Microsoft Corp.", symbol: "MSFT", type: "stock", units: 8, avgCost: 310.25, currentPrice: 378.91, returns: 549.28, returnsPercent: 22.1 },
-  { id: "3", name: "NVIDIA Corp.", symbol: "NVDA", type: "stock", units: 5, avgCost: 420.00, currentPrice: 495.22, returns: 376.10, returnsPercent: 17.9 },
-  { id: "4", name: "Vanguard 500 Index", symbol: "VFIAX", type: "mutual_fund", units: 25, avgCost: 410.50, currentPrice: 458.30, returns: 1195.00, returnsPercent: 11.6 },
-  { id: "5", name: "Fidelity Growth Fund", symbol: "FDGRX", type: "mutual_fund", units: 40, avgCost: 145.20, currentPrice: 168.45, returns: 930.00, returnsPercent: 16.0 },
-  { id: "6", name: "T. Rowe Price Blue Chip", symbol: "TRBCX", type: "mutual_fund", units: 30, avgCost: 138.00, currentPrice: 151.20, returns: 396.00, returnsPercent: 9.6 },
-  { id: "7", name: "SPDR S&P 500 ETF", symbol: "SPY", type: "etf", units: 10, avgCost: 420.00, currentPrice: 475.50, returns: 555.00, returnsPercent: 13.2 },
-  { id: "8", name: "Invesco QQQ Trust", symbol: "QQQ", type: "etf", units: 8, avgCost: 350.00, currentPrice: 405.80, returns: 446.40, returnsPercent: 15.9 },
-  { id: "9", name: "Vanguard Total Bond", symbol: "BND", type: "etf", units: 50, avgCost: 72.50, currentPrice: 71.20, returns: -65.00, returnsPercent: -1.8 },
-  { id: "10", name: "US Treasury 10Y", symbol: "T-10Y", type: "bond", units: 20, avgCost: 950.00, currentPrice: 942.50, returns: -150.00, returnsPercent: -0.8 },
-  { id: "11", name: "Bitcoin", symbol: "BTC", type: "crypto", units: 0.15, avgCost: 42000.00, currentPrice: 43250.00, returns: 187.50, returnsPercent: 3.0 },
-  { id: "12", name: "Ethereum", symbol: "ETH", type: "crypto", units: 2.5, avgCost: 2200.00, currentPrice: 2350.00, returns: 375.00, returnsPercent: 6.8 },
-];
-
-const mockPortfolioData: PortfolioDataPoint[] = [
-  { date: "Dec 1", value: 10000 },
-  { date: "Dec 5", value: 10250 },
-  { date: "Dec 10", value: 10100 },
-  { date: "Dec 15", value: 10800 },
-  { date: "Dec 20", value: 11200 },
-  { date: "Dec 25", value: 11050 },
-  { date: "Dec 30", value: 12450 },
-];
+import { useTradingOverview } from "@/hooks/useTrading";
+import { useSensitiveValueVisibility } from "@/hooks/useSensitiveValueVisibility";
+import { formatSensitiveCompactInvestmentCurrency } from "@/lib/investment-format";
+import { Switch } from "@/components/ui/switch";
 
 const TradingPage = () => {
+  const { data, isLoading, error } = useTradingOverview();
+  const { isHidden, setIsHidden } = useSensitiveValueVisibility();
+
+  const watchlist = data?.watchlist ?? [];
+  const trades = data?.trades ?? [];
+  const holdings = data?.holdings ?? [];
+  const portfolioData =
+    data?.portfolioData && data.portfolioData.length > 0
+      ? data.portfolioData
+      : holdings.length > 0
+        ? [
+            {
+              date: "Today",
+              value: Math.round(
+                holdings.reduce((sum, holding) => sum + holding.units * holding.currentPrice, 0),
+              ),
+            },
+          ]
+        : [];
+
+  const portfolioValue = holdings.reduce(
+    (sum, holding) => sum + holding.units * holding.currentPrice,
+    0,
+  );
+  const investedValue = holdings.reduce(
+    (sum, holding) => sum + holding.units * holding.avgCost,
+    0,
+  );
+  const returnsValue = portfolioValue - investedValue;
+  const roi = investedValue > 0 ? (returnsValue / investedValue) * 100 : 0;
+
+  const stats = [
+    {
+      icon: DollarSign,
+      label: "Portfolio",
+      value: formatSensitiveCompactInvestmentCurrency(portfolioValue, isHidden),
+      color: "text-trading",
+    },
+    {
+      icon: BarChart3,
+      label: "Invested",
+      value: formatSensitiveCompactInvestmentCurrency(investedValue, isHidden),
+      color: "text-muted-foreground",
+    },
+    {
+      icon: TrendingUp,
+      label: "Returns",
+      value: isHidden
+        ? formatSensitiveCompactInvestmentCurrency(Math.abs(returnsValue), true)
+        : `${returnsValue >= 0 ? "+" : "-"}${formatSensitiveCompactInvestmentCurrency(
+            Math.abs(returnsValue),
+            false,
+          )}`,
+      color: returnsValue >= 0 ? "text-finance" : "text-destructive",
+    },
+    {
+      icon: Percent,
+      label: "ROI",
+      value: `${roi >= 0 ? "+" : ""}${roi.toFixed(1)}%`,
+      color: roi >= 0 ? "text-finance" : "text-destructive",
+    },
+  ];
+
   return (
     <DomainPageTemplate
       domain={{
@@ -67,17 +85,88 @@ const TradingPage = () => {
       }}
       stats={stats}
       tabs={[
-        { value: "investments", label: "Investments", component: <InvestmentHoldings holdings={mockHoldings} portfolioData={mockPortfolioData} /> },
-        { value: "portfolio", label: "Performance", component: <PortfolioChart data={mockPortfolioData} /> },
-        { value: "journal", label: "Journal", component: <TradeJournal trades={mockTrades} /> },
-        { value: "watchlist", label: "Watchlist", component: <WatchlistCard items={mockWatchlist} /> },
+        {
+          value: "investments",
+          label: "Investments",
+          component: isLoading ? (
+            <div className="py-10 text-sm text-muted-foreground">Loading investment data...</div>
+          ) : (
+            <InvestmentHoldings
+              holdings={holdings}
+              portfolioData={portfolioData}
+              hideValues={isHidden}
+            />
+          ),
+        },
+        {
+          value: "portfolio",
+          label: "Performance",
+          component: isLoading ? (
+            <div className="py-10 text-sm text-muted-foreground">Loading investment data...</div>
+          ) : (
+            <PortfolioChart data={portfolioData} hideValues={isHidden} />
+          ),
+        },
+        {
+          value: "journal",
+          label: "Journal",
+          component: isLoading ? (
+            <div className="py-10 text-sm text-muted-foreground">Loading trade data...</div>
+          ) : (
+            <TradeJournal trades={trades} hideValues={isHidden} />
+          ),
+        },
+        {
+          value: "watchlist",
+          label: "Watchlist",
+          component: isLoading ? (
+            <div className="py-10 text-sm text-muted-foreground">Loading watchlist...</div>
+          ) : (
+            <WatchlistCard items={watchlist} hideValues={isHidden} />
+          ),
+        },
       ]}
       aiCoach={{
         name: "Nova",
         role: "Investment Mentor",
         component: <NovaChat />,
       }}
-    />
+    >
+      <div className="mb-4 flex items-center justify-between rounded-xl border border-border/50 bg-background/40 px-4 py-3">
+        <div className="flex items-center gap-3">
+          <div className="rounded-lg border border-border/50 bg-background/60 p-2">
+            {isHidden ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
+          </div>
+          <div>
+            <p className="text-sm font-medium text-foreground">Portfolio privacy</p>
+            <p className="text-xs text-muted-foreground">
+              Hide currency values across holdings, trades, charts, and watchlists.
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-muted-foreground">
+            {isHidden ? "Hidden" : "Visible"}
+          </span>
+          <Switch
+            checked={isHidden}
+            onCheckedChange={setIsHidden}
+            aria-label="Hide investment values"
+          />
+        </div>
+      </div>
+
+      {error ? (
+        <div className="mb-4 rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4" />
+            <span>
+              {error instanceof Error ? error.message : "Could not load investment data."}
+            </span>
+          </div>
+        </div>
+      ) : null}
+    </DomainPageTemplate>
   );
 };
 

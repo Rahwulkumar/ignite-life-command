@@ -41,8 +41,21 @@ export function CompletionChart({ entries, timeFilter, compact = false, useDummy
       });
     }
 
-    // Group entries by date
-    const byDate = dataSource.reduce((acc, entry) => {
+    // Track all task entries separately from completed entries so manual additions
+    // increase the expected count without being treated as completed work.
+    const allTasksByDate = dataSource.reduce((acc, entry) => {
+      if (!acc[entry.entry_date]) {
+        acc[entry.entry_date] = new Set<string>();
+      }
+      acc[entry.entry_date].add(entry.task_id);
+      return acc;
+    }, {} as Record<string, Set<string>>);
+
+    const completedByDate = dataSource.reduce((acc, entry) => {
+      if (!entry.is_completed) {
+        return acc;
+      }
+
       if (!acc[entry.entry_date]) {
         acc[entry.entry_date] = new Set<string>();
       }
@@ -52,10 +65,12 @@ export function CompletionChart({ entries, timeFilter, compact = false, useDummy
 
     return days.map((day) => {
       const dateKey = format(day, "yyyy-MM-dd");
-      const completed = byDate[dateKey]?.size || 0;
+      const completed = completedByDate[dateKey]?.size || 0;
       const dayOfWeek = getDay(day);
-      // Mon-Fri have 4 tasks (prayer, bible, trading, gym), Sat-Sun have 3 (prayer, bible, trading)
-      const expected = [1, 2, 3, 4, 5].includes(dayOfWeek) ? 4 : 3;
+      const baseExpected = [1, 2, 3, 4, 5].includes(dayOfWeek) ? 4 : 3;
+      const allTaskIds = allTasksByDate[dateKey] ?? new Set<string>();
+      const extraTaskCount = Math.max(0, allTaskIds.size - baseExpected);
+      const expected = baseExpected + extraTaskCount;
       const percentage = Math.round((completed / expected) * 100);
 
       return {

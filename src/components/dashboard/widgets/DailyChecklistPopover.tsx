@@ -56,6 +56,7 @@ export function DailyChecklistPopover({
   const dayOfWeek = getDay(date);
   const completedForDate = completedTasks[dateKey] || [];
   const allTasksForDate = allTasks?.[dateKey] || [];
+  const standardTasksById = new Map(STANDARD_TASKS.map((task) => [task.id, task]));
 
   // Filter tasks that apply to this day
   const standardTasksForDay = STANDARD_TASKS.filter((task) => {
@@ -65,10 +66,17 @@ export function DailyChecklistPopover({
     }
     return false;
   });
+  const standardTaskIdsForDay = new Set(standardTasksForDay.map((task) => task.id));
+
+  // Standard tasks can also be added manually on off-days, for example gym on a weekend.
+  const manuallyAddedStandardTasks = allTasksForDate
+    .filter((id) => !standardTaskIdsForDay.has(id))
+    .map((id) => standardTasksById.get(id))
+    .filter((task): task is TaskDefinition => Boolean(task));
 
   // Identify custom tasks
   const customTasksForDay: TaskDefinition[] = allTasksForDate
-    .filter((id) => !STANDARD_TASKS.some((t) => t.id === id))
+    .filter((id) => !standardTasksById.has(id))
     .map((id) => ({
       id,
       label: formattedIdToLabel(id),
@@ -76,7 +84,11 @@ export function DailyChecklistPopover({
       frequency: "daily",
     }));
 
-  const tasksForDay = [...standardTasksForDay, ...customTasksForDay];
+  const tasksForDay = [
+    ...standardTasksForDay,
+    ...manuallyAddedStandardTasks,
+    ...customTasksForDay,
+  ];
 
   const allCompleted =
     tasksForDay.length > 0 &&

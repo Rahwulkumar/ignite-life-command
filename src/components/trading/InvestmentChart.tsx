@@ -1,8 +1,10 @@
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { formatSensitiveInvestmentCurrency } from "@/lib/investment-format";
 
 interface InvestmentChartProps {
   symbol: string;
   isPositive?: boolean;
+  hideValues?: boolean;
 }
 
 // Generate mock historical data for the investment
@@ -28,7 +30,11 @@ function generateMockData(symbol: string) {
   return data;
 }
 
-export function InvestmentChart({ symbol, isPositive = true }: InvestmentChartProps) {
+export function InvestmentChart({
+  symbol,
+  isPositive = true,
+  hideValues = false,
+}: InvestmentChartProps) {
   const data = generateMockData(symbol);
   const color = isPositive ? "hsl(var(--finance))" : "hsl(var(--destructive))";
 
@@ -57,7 +63,10 @@ export function InvestmentChart({ symbol, isPositive = true }: InvestmentChartPr
               borderRadius: "8px",
               fontSize: "12px"
             }}
-            formatter={(value: number) => [`$${value.toFixed(2)}`, "Price"]}
+            formatter={(value: number) => [
+              formatSensitiveInvestmentCurrency(value, hideValues),
+              "Price",
+            ]}
           />
           <Area
             type="monotone"

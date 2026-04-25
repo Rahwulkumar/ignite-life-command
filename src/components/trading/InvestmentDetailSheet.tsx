@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { streamRequest } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { InvestmentChart } from "./InvestmentChart";
+import { formatSensitiveInvestmentCurrency } from "@/lib/investment-format";
 
 interface Holding {
   id: string;
@@ -35,6 +36,7 @@ interface InvestmentDetailSheetProps {
   holding: Holding | null;
   isOpen: boolean;
   onClose: () => void;
+  hideValues?: boolean;
 }
 
 // AI chat routes through the Hono backend.
@@ -43,6 +45,7 @@ export function InvestmentDetailSheet({
   holding,
   isOpen,
   onClose,
+  hideValues = false,
 }: InvestmentDetailSheetProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -183,10 +186,7 @@ export function InvestmentDetailSheet({
             </div>
             <div className="text-right">
               <p className="font-medium tabular-nums">
-                $
-                {totalValue.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                })}
+                {formatSensitiveInvestmentCurrency(totalValue, hideValues)}
               </p>
               <p
                 className={cn(
@@ -210,7 +210,11 @@ export function InvestmentDetailSheet({
           <p className="text-xs text-muted-foreground mb-2">
             30 Day Performance
           </p>
-          <InvestmentChart symbol={holding.symbol} isPositive={isPositive} />
+          <InvestmentChart
+            symbol={holding.symbol}
+            isPositive={isPositive}
+            hideValues={hideValues}
+          />
         </div>
 
         <div className="grid grid-cols-3 gap-4 p-4 border-b border-border text-center">
@@ -221,13 +225,13 @@ export function InvestmentDetailSheet({
           <div>
             <p className="text-xs text-muted-foreground">Avg Cost</p>
             <p className="font-medium tabular-nums">
-              ${holding.avgCost.toLocaleString()}
+              {formatSensitiveInvestmentCurrency(holding.avgCost, hideValues)}
             </p>
           </div>
           <div>
             <p className="text-xs text-muted-foreground">Current</p>
             <p className="font-medium tabular-nums">
-              ${holding.currentPrice.toLocaleString()}
+              {formatSensitiveInvestmentCurrency(holding.currentPrice, hideValues)}
             </p>
           </div>
         </div>
