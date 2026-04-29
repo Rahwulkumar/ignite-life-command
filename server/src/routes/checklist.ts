@@ -39,10 +39,22 @@ checklist.post("/checklist-entries", async (c) => {
     taskId: string;
     entryDate: string;
     isCompleted: boolean;
+    status?: "pending" | "completed" | "missed" | "skipped";
     metricsData?: Record<string, unknown>;
     durationSeconds?: number;
     notes?: string;
+    startedAt?: string | null;
+    endedAt?: string | null;
+    responseSource?: string | null;
   }>();
+
+  const status = body.status ?? (body.isCompleted ? "completed" : "pending");
+  const startedAt = body.startedAt ? new Date(body.startedAt) : null;
+  const endedAt = body.endedAt ? new Date(body.endedAt) : null;
+  const answeredAt =
+    status === "completed" || status === "missed" || status === "skipped"
+      ? new Date()
+      : null;
 
   const [entry] = await db
     .insert(dailyChecklistEntries)
@@ -51,9 +63,14 @@ checklist.post("/checklist-entries", async (c) => {
       taskId: body.taskId,
       entryDate: body.entryDate,
       isCompleted: body.isCompleted,
+      status,
+      startedAt,
+      endedAt,
       metricsData: body.metricsData ?? {},
       durationSeconds: body.durationSeconds ?? null,
       notes: body.notes ?? null,
+      answeredAt,
+      responseSource: body.responseSource ?? null,
     })
     .onConflictDoUpdate({
       target: [
@@ -63,9 +80,14 @@ checklist.post("/checklist-entries", async (c) => {
       ],
       set: {
         isCompleted: body.isCompleted,
+        status,
+        startedAt,
+        endedAt,
         metricsData: body.metricsData ?? {},
         durationSeconds: body.durationSeconds ?? null,
         notes: body.notes ?? null,
+        answeredAt,
+        responseSource: body.responseSource ?? null,
         updatedAt: new Date(),
       },
     })

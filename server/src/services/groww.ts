@@ -92,6 +92,12 @@ interface GrowwTokenResponse {
   expiry?: string;
 }
 
+interface GrowwDirectTokenResponse {
+  token?: string;
+  tokenRefId?: string;
+  expiry?: string;
+}
+
 export class GrowwApiError extends Error {
   status: number;
   code?: string;
@@ -228,7 +234,40 @@ export async function getGrowwAccessToken(): Promise<GrowwTokenData> {
     }),
   });
 
-  const payload = await parseGrowwResponse<GrowwTokenResponse>(response);
+  const raw = (await response.json().catch(() => null)) as
+    | GrowwApiResponse<GrowwTokenResponse>
+    | GrowwDirectTokenResponse
+    | null;
+
+  if (!response.ok || !raw) {
+    throw new GrowwApiError(`Groww request failed with status ${response.status}.`, {
+      status: response.status,
+    });
+  }
+
+  let payload: GrowwTokenResponse | GrowwDirectTokenResponse;
+
+  if ("status" in raw) {
+    if (raw.status === "FAILURE") {
+      throw new GrowwApiError(
+        raw.error?.message || `Groww request failed with status ${response.status}.`,
+        {
+          status: response.status,
+          code: raw.error?.code,
+        },
+      );
+    }
+
+    payload = raw.payload;
+  } else {
+    payload = raw;
+  }
+
+  if (!payload?.token) {
+    throw new GrowwApiError("Groww token response did not include an access token.", {
+      status: response.status,
+    });
+  }
 
   return {
     accessToken: payload.token,

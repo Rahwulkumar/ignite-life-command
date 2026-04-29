@@ -10,11 +10,16 @@ import {
 import { requireAuth } from "../middleware/auth.js";
 import {
   applyTelegramCapture,
-  supportsGeminiIntentParsing,
   telegramCommandHelpText,
   TELEGRAM_BOT_COMMANDS,
   type CaptureSourceType,
 } from "../services/telegram-capture.js";
+import { maybeSubmitTelegramDailyCheckinResponse } from "../services/daily-checkin.js";
+import {
+  getTelegramConfig,
+  sendTelegramMessage,
+  telegramApi,
+} from "../services/telegram-bot.js";
 import { getUserId } from "../utils/user-context.js";
 
 const telegramRoute = new Hono();
@@ -70,26 +75,6 @@ function normalizeWhitespace(value: string): string {
   return value.replace(/\s+/g, " ").trim();
 }
 
-function getTelegramConfig() {
-  const botToken = process.env.TELEGRAM_BOT_TOKEN?.trim() ?? "";
-  const botUsername = process.env.TELEGRAM_BOT_USERNAME?.trim() ?? "";
-  const webhookSecret = process.env.TELEGRAM_WEBHOOK_SECRET?.trim() ?? "";
-  const skipWebhookSecretCheck =
-    process.env.TELEGRAM_SKIP_WEBHOOK_SECRET_CHECK?.trim() === "true" ||
-    webhookSecret === "put_a_random_long_secret_here";
-
-  return {
-    botToken,
-    botUsername: botUsername || null,
-    botUrl: botUsername ? `https://t.me/${botUsername}` : null,
-    webhookSecret: webhookSecret || null,
-    skipWebhookSecretCheck,
-    configured: Boolean(botToken),
-    voiceTranscriptionEnabled: Boolean(process.env.OPENAI_API_KEY?.trim()),
-    geminiIntentEnabled: supportsGeminiIntentParsing(),
-  };
-}
-
 function getOpenAIClient(): OpenAI | null {
   if (openAIClient !== undefined) {
     return openAIClient;
@@ -98,50 +83,6 @@ function getOpenAIClient(): OpenAI | null {
   const apiKey = process.env.OPENAI_API_KEY?.trim();
   openAIClient = apiKey ? new OpenAI({ apiKey }) : null;
   return openAIClient;
-}
-
-async function telegramApi<T>(method: string, body?: unknown): Promise<T> {
-  const config = getTelegramConfig();
-
-  if (!config.botToken) {
-    throw new Error("Telegram bot is not configured on the server.");
-  }
-
-  const response = await fetch(`https://api.telegram.org/bot${config.botToken}/${method}`, {
-    method: body === undefined ? "GET" : "POST",
-    headers: body === undefined ? undefined : { "Content-Type": "application/json" },
-    body: body === undefined ? undefined : JSON.stringify(body),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Telegram API ${method} failed with status ${response.status}.`);
-  }
-
-  const payload = (await response.json()) as {
-    ok: boolean;
-    result?: T;
-    description?: string;
-  };
-
-  if (!payload.ok || payload.result === undefined) {
-    throw new Error(payload.description ?? `Telegram API ${method} failed.`);
-  }
-
-  return payload.result;
-}
-
-async function sendTelegramMessage(chatId: string, text: string): Promise<boolean> {
-  try {
-    await telegramApi("sendMessage", {
-      chat_id: chatId,
-      text,
-      disable_web_page_preview: true,
-    });
-    return true;
-  } catch (error) {
-    console.error("Telegram reply failed:", error);
-    return false;
-  }
 }
 
 async function transcribeVoiceNote(voice: TelegramVoice): Promise<string> {
@@ -592,12 +533,20 @@ telegramRoute.post("/integrations/telegram/webhook", async (c) => {
       return c.json({ ok: true });
     }
 
-    const result = await applyTelegramCapture(
+    const checkinResult = await maybeSubmitTelegramDailyCheckinResponse(
       connection.userId,
       inputText,
       sourceType,
       message.date,
     );
+    const result =
+      checkinResult?.capture ??
+      (await applyTelegramCapture(
+        connection.userId,
+        inputText,
+        sourceType,
+        message.date,
+      ));
     const replySent = await sendTelegramMessage(String(message.chat.id), result.replyText);
 
     await updateTelegramEvent(eventId, {

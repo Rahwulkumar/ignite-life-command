@@ -23,6 +23,8 @@ import customDomains from "./routes/custom-domains.js";
 import telegram, { syncTelegramBotCommands } from "./routes/telegram.js";
 import kite from "./routes/kite.js";
 import groww from "./routes/groww.js";
+import dailyCheckin from "./routes/daily-checkin.js";
+import { runDueTelegramCheckins } from "./services/daily-checkin.js";
 
 const app = new Hono();
 
@@ -94,6 +96,7 @@ app.on(["GET", "POST"], "/api/auth/**", (c) => auth.handler(c.req.raw));
 // ── Feature Routes ────────────────────────────────────────────
 
 app.route("/api", telegram);
+app.route("/api", dailyCheckin);
 app.route("/api", kite);
 app.route("/api", groww);
 app.route("/api", bible);
@@ -130,5 +133,9 @@ void checkDatabaseConnection()
   });
 
 void syncTelegramBotCommands();
+void runDueTelegramCheckins();
+setInterval(() => {
+  void runDueTelegramCheckins();
+}, 60_000);
 
 export default app;

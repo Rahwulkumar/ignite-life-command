@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export interface ContentFolder {
-  id: number;
+  id: string;
   name: string;
   count: number;
   color: string;
@@ -13,12 +13,30 @@ export interface ContentFolder {
 
 interface ContentFoldersProps {
   folders: ContentFolder[];
+  selectedFolderId?: string | null;
+  onSelectFolder?: (folderId: string | null) => void;
   onNewFolder?: () => void;
 }
 
-export function ContentFolders({ folders, onNewFolder }: ContentFoldersProps) {
-  const [selectedFolder, setSelectedFolder] = useState<number | null>(null);
+export function ContentFolders({
+  folders,
+  selectedFolderId = null,
+  onSelectFolder,
+  onNewFolder,
+}: ContentFoldersProps) {
+  const [internalSelectedFolder, setInternalSelectedFolder] = useState<string | null>(null);
+  const selectedFolder = onSelectFolder ? selectedFolderId : internalSelectedFolder;
   const totalItems = folders.reduce((sum, f) => sum + f.count, 0);
+
+  const handleSelect = (folderId: string) => {
+    const nextValue = selectedFolder === folderId ? null : folderId;
+    if (onSelectFolder) {
+      onSelectFolder(nextValue);
+      return;
+    }
+
+    setInternalSelectedFolder(nextValue);
+  };
 
   return (
     <motion.div
@@ -48,7 +66,7 @@ export function ContentFolders({ folders, onNewFolder }: ContentFoldersProps) {
               transition={{ duration: 0.3, delay: index * 0.03 }}
             >
               <button
-                onClick={() => setSelectedFolder(folder.id === selectedFolder ? null : folder.id)}
+                onClick={() => handleSelect(folder.id)}
                 className={cn(
                   "w-full text-left p-4 border rounded-lg transition-all group",
                   selectedFolder === folder.id

@@ -3,77 +3,20 @@ import { asc, desc, eq } from "drizzle-orm";
 import { db } from "../db/index.js";
 import { contentFolders, contentItems } from "../db/schema.js";
 import { requireAuth } from "../middleware/auth.js";
+import {
+  cleanupLegacySeedContent,
+  saveSharedContent,
+  type ContentItemType,
+} from "../services/content.js";
 import { getUserId } from "../utils/user-context.js";
 
 const contentRoute = new Hono();
 
 contentRoute.use("*", requireAuth);
 
-const seedFolders = [
-  { name: "Learning", itemCount: 34, color: "bg-tech" },
-  { name: "Entertainment", itemCount: 45, color: "bg-music" },
-  { name: "Inspiration", itemCount: 28, color: "bg-spiritual" },
-  { name: "Tech Tutorials", itemCount: 21, color: "bg-trading" },
-  { name: "Music Theory", itemCount: 15, color: "bg-music" },
-  { name: "Design Inspo", itemCount: 32, color: "bg-content" },
-  { name: "Productivity", itemCount: 18, color: "bg-finance" },
-  { name: "Watch Later", itemCount: 67, color: "bg-muted-foreground" },
-];
-
-const seedItems = [
-  { title: "React Server Components Deep Dive", source: "YouTube", type: "video", dateLabel: "Today", url: "#" },
-  { title: "Minimalist Desk Setup Inspo", source: "Instagram", type: "reel", dateLabel: "Yesterday", url: "#" },
-  { title: "System Design Interview Prep", source: "YouTube", type: "video", dateLabel: "Dec 27", url: "#" },
-  { title: "Morning Routine for Productivity", source: "Instagram", type: "reel", dateLabel: "Dec 26", url: "#" },
-  { title: "Advanced TypeScript Patterns", source: "Medium", type: "article", dateLabel: "Dec 25", url: "#" },
-];
-
-async function ensureContentSeedData(userId: string) {
-  const [existingFolders, existingItems] = await Promise.all([
-    db
-      .select({ id: contentFolders.id })
-      .from(contentFolders)
-      .where(eq(contentFolders.userId, userId))
-      .limit(1),
-    db
-      .select({ id: contentItems.id })
-      .from(contentItems)
-      .where(eq(contentItems.userId, userId))
-      .limit(1),
-  ]);
-
-  const writes: Promise<unknown>[] = [];
-
-  if (existingFolders.length === 0) {
-    writes.push(
-      db.insert(contentFolders).values(
-        seedFolders.map((folder) => ({
-          userId,
-          ...folder,
-        })),
-      ),
-    );
-  }
-
-  if (existingItems.length === 0) {
-    writes.push(
-      db.insert(contentItems).values(
-        seedItems.map((item) => ({
-          userId,
-          ...item,
-        })),
-      ),
-    );
-  }
-
-  if (writes.length > 0) {
-    await Promise.all(writes);
-  }
-}
-
 contentRoute.get("/content", async (c) => {
   const userId = getUserId(c);
-  await ensureContentSeedData(userId);
+  await cleanupLegacySeedContent(userId);
 
   const [folders, items] = await Promise.all([
     db
@@ -88,7 +31,24 @@ contentRoute.get("/content", async (c) => {
       .orderBy(desc(contentItems.createdAt)),
   ]);
 
-  return c.json({ folders, items });
+  const folderCounts = items.reduce<Map<string, number>>((accumulator, item) => {
+    if (item.folderId) {
+      accumulator.set(item.folderId, (accumulator.get(item.folderId) ?? 0) + 1);
+    }
+    return accumulator;
+  }, new Map());
+  const folderById = new Map(folders.map((folder) => [folder.id, folder]));
+
+  return c.json({
+    folders: folders.map((folder) => ({
+      ...folder,
+      itemCount: folderCounts.get(folder.id) ?? 0,
+    })),
+    items: items.map((item) => ({
+      ...item,
+      folderName: item.folderId ? (folderById.get(item.folderId)?.name ?? null) : null,
+    })),
+  });
 });
 
 contentRoute.post("/content/folders", async (c) => {
@@ -119,12 +79,36 @@ contentRoute.post("/content/folders", async (c) => {
 contentRoute.post("/content/items", async (c) => {
   const userId = getUserId(c);
   const body = await c.req.json<{
-    title: string;
-    source: string;
-    type: string;
+    title?: string;
+    source?: string;
+    type?: ContentItemType;
     dateLabel?: string;
     url?: string;
+    folderName?: string;
   }>();
+
+  const rawUrl = body.url?.trim();
+
+  if (rawUrl) {
+    const result = await saveSharedContent({
+      userId,
+      rawText: rawUrl,
+      captureSource: "manual",
+      messageDate: undefined,
+      explicitTitle: body.title?.trim() || null,
+      explicitUrl: rawUrl,
+      explicitFolderName: body.folderName?.trim() || null,
+      explicitSource: body.source?.trim() || null,
+      explicitType: body.type ?? null,
+    });
+
+    const item = result.savedItems[0] ?? result.duplicateItems[0];
+    if (!item) {
+      return c.json({ error: "Unable to save that link." }, 400);
+    }
+
+    return c.json(item, result.savedItems.length > 0 ? 201 : 200);
+  }
 
   const title = body.title?.trim();
   const source = body.source?.trim();
@@ -149,8 +133,12 @@ contentRoute.post("/content/items", async (c) => {
       title,
       source,
       type,
+      summary: null,
       dateLabel: body.dateLabel?.trim() || "Today",
       url: body.url?.trim() || "#",
+      metadata: {
+        captureSource: "manual",
+      },
     })
     .returning();
 

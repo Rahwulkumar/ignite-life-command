@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { DomainNavigation } from "@/components/dashboard/DomainNavigation";
 import { ZenLayout } from "@/components/dashboard/layouts/ZenLayout";
 import { HeroHeader } from "@/components/dashboard/widgets/HeroHeader";
+import { NightlyCheckinCard } from "@/components/dashboard/widgets/NightlyCheckinCard";
 import { CreateDomainDialog } from "@/components/custom-domains/CreateDomainDialog";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { PageTransition } from "@/components/layout/PageTransition";
@@ -28,6 +29,7 @@ const Index = () => {
       <PageTransition>
         <div className="h-full w-full px-4 pb-4 pt-2 sm:px-6 sm:pt-4 lg:px-8 xl:px-12">
           <HeroHeader currentTime={currentTime} />
+          <NightlyCheckinCard />
 
           <motion.div
             initial={{ opacity: 0, y: 15 }}

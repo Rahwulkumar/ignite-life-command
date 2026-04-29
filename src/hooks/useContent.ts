@@ -15,8 +15,11 @@ interface ContentItemApi {
   title: string;
   source: string;
   type: SavedItem["type"];
+  summary?: string | null;
   dateLabel: string;
   url: string;
+  folderId?: string | null;
+  folderName?: string | null;
 }
 
 interface ContentResponse {
@@ -44,6 +47,8 @@ function normalizeContentOverview(data: ContentResponse): ContentOverview {
       type: item.type,
       date: item.dateLabel,
       url: item.url,
+      summary: item.summary ?? null,
+      folderName: item.folderName ?? null,
     })),
   };
 }
@@ -89,12 +94,14 @@ export function useCreateContentItem() {
       type,
       dateLabel,
       url,
+      folderName,
     }: {
-      title: string;
-      source: string;
-      type: SavedItem["type"];
+      title?: string;
+      source?: string;
+      type?: SavedItem["type"];
       dateLabel?: string;
       url?: string;
+      folderName?: string;
     }) =>
       api.post<ContentItemApi>("/api/content/items", {
         title,
@@ -102,6 +109,7 @@ export function useCreateContentItem() {
         type,
         dateLabel,
         url,
+        folderName,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["content"] });

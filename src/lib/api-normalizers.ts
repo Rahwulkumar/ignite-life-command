@@ -65,8 +65,15 @@ export interface ApiChecklistEntry {
   taskId: string;
   entryDate: string;
   isCompleted: boolean;
+  status: "pending" | "completed" | "missed" | "skipped";
+  startedAt: string | null;
+  endedAt: string | null;
   durationSeconds: number | null;
   notes: string | null;
+  journalNoteId: string | null;
+  promptedAt: string | null;
+  answeredAt: string | null;
+  responseSource: string | null;
   metricsData: MetricsData | null;
   createdAt: string;
   updatedAt: string;
@@ -78,8 +85,15 @@ export interface ChecklistEntryRecord {
   task_id: string;
   entry_date: string;
   is_completed: boolean;
+  status: "pending" | "completed" | "missed" | "skipped";
+  started_at: string | null;
+  ended_at: string | null;
   duration_seconds: number | null;
   notes: string | null;
+  journal_note_id: string | null;
+  prompted_at: string | null;
+  answered_at: string | null;
+  response_source: string | null;
   metrics_data: MetricsData;
   created_at: string;
   updated_at: string;
@@ -94,8 +108,15 @@ export function normalizeChecklistEntry(
     task_id: entry.taskId,
     entry_date: entry.entryDate,
     is_completed: entry.isCompleted,
+    status: entry.status,
+    started_at: entry.startedAt,
+    ended_at: entry.endedAt,
     duration_seconds: entry.durationSeconds,
     notes: entry.notes,
+    journal_note_id: entry.journalNoteId,
+    prompted_at: entry.promptedAt,
+    answered_at: entry.answeredAt,
+    response_source: entry.responseSource,
     metrics_data: entry.metricsData ?? {},
     created_at: entry.createdAt,
     updated_at: entry.updatedAt,

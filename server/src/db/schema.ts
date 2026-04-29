@@ -233,11 +233,14 @@ export const contentItems = pgTable("content_items", {
   userId: text("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
+  folderId: uuid("folder_id").references(() => contentFolders.id, { onDelete: "set null" }),
   title: text("title").notNull(),
   source: text("source").notNull(),
   type: text("type").notNull(),
+  summary: text("summary"),
   dateLabel: text("date_label").notNull().default("Today"),
   url: text("url").notNull().default("#"),
+  metadata: jsonb("metadata").notNull().default({}),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -642,13 +645,47 @@ export const dailyChecklistEntries = pgTable(
     taskId: text("task_id").notNull(),
     entryDate: date("entry_date").notNull(),
     isCompleted: boolean("is_completed").default(false),
+    status: text("status").notNull().default("pending"),
+    startedAt: timestamp("started_at"),
+    endedAt: timestamp("ended_at"),
     durationSeconds: integer("duration_seconds"),
     notes: text("notes"),
+    journalNoteId: uuid("journal_note_id").references(() => officeNotes.id, {
+      onDelete: "set null",
+    }),
+    promptedAt: timestamp("prompted_at"),
+    answeredAt: timestamp("answered_at"),
+    responseSource: text("response_source"),
     metricsData: jsonb("metrics_data").default({}),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").defaultNow(),
   },
   (t) => [unique().on(t.userId, t.taskId, t.entryDate)]
+);
+
+export const dailyCheckinSessions = pgTable(
+  "daily_checkin_sessions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    sessionDate: date("session_date").notNull(),
+    timezone: text("timezone").notNull().default("Asia/Kolkata"),
+    status: text("status").notNull().default("pending"),
+    promptText: text("prompt_text").notNull(),
+    pendingTaskIds: jsonb("pending_task_ids").notNull().default([]),
+    channels: jsonb("channels").notNull().default(["app", "telegram"]),
+    telegramSentAt: timestamp("telegram_sent_at"),
+    appPromptedAt: timestamp("app_prompted_at"),
+    answeredAt: timestamp("answered_at"),
+    responseText: text("response_text"),
+    responseSource: text("response_source"),
+    metadata: jsonb("metadata").notNull().default({}),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (t) => [unique().on(t.userId, t.sessionDate)]
 );
 
 export const customTaskMetrics = pgTable(

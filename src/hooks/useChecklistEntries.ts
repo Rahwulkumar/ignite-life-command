@@ -55,11 +55,21 @@ export function useToggleChecklistEntry() {
       entryDate,
       isCompleted,
       metricsData,
+      status,
+      startedAt,
+      endedAt,
+      durationSeconds,
+      notes,
     }: {
       taskId: string;
       entryDate: string;
       isCompleted: boolean;
       metricsData?: MetricsData;
+      status?: "pending" | "completed" | "missed" | "skipped";
+      startedAt?: string | null;
+      endedAt?: string | null;
+      durationSeconds?: number | null;
+      notes?: string | null;
     }) =>
       api
         .post<ApiChecklistEntry>("/api/checklist-entries", {
@@ -67,10 +77,25 @@ export function useToggleChecklistEntry() {
           entryDate,
           isCompleted,
           metricsData: metricsData ?? {},
+          status,
+          startedAt,
+          endedAt,
+          durationSeconds,
+          notes,
         })
         .then(normalizeChecklistEntry),
     // Optimistic update for instant UI feedback
-    onMutate: async ({ taskId, entryDate, isCompleted, metricsData }) => {
+    onMutate: async ({
+      taskId,
+      entryDate,
+      isCompleted,
+      metricsData,
+      status,
+      startedAt,
+      endedAt,
+      durationSeconds,
+      notes,
+    }) => {
       await queryClient.cancelQueries({ queryKey: ["checklist-entries"] });
       await queryClient.cancelQueries({ queryKey: ["checklist-analytics"] });
 
@@ -93,6 +118,13 @@ export function useToggleChecklistEntry() {
             updated[existingIndex] = {
               ...updated[existingIndex],
               is_completed: isCompleted,
+              status: status ?? (isCompleted ? "completed" : "pending"),
+              started_at: startedAt ?? updated[existingIndex].started_at,
+              ended_at: endedAt ?? updated[existingIndex].ended_at,
+              duration_seconds:
+                durationSeconds ?? updated[existingIndex].duration_seconds,
+              notes: notes ?? updated[existingIndex].notes,
+              metrics_data: metricsData ?? updated[existingIndex].metrics_data,
               updated_at: new Date().toISOString(),
             };
             return updated;
@@ -103,8 +135,15 @@ export function useToggleChecklistEntry() {
             task_id: taskId,
             entry_date: entryDate,
             is_completed: isCompleted,
-            duration_seconds: null,
-            notes: null,
+            status: status ?? (isCompleted ? "completed" : "pending"),
+            started_at: startedAt ?? null,
+            ended_at: endedAt ?? null,
+            duration_seconds: durationSeconds ?? null,
+            notes: notes ?? null,
+            journal_note_id: null,
+            prompted_at: null,
+            answered_at: null,
+            response_source: null,
             metrics_data: metricsData || {},
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
@@ -140,11 +179,21 @@ export function useSaveChecklistMetrics() {
       entryDate,
       metricsData,
       isCompleted,
+      status,
+      startedAt,
+      endedAt,
+      durationSeconds,
+      notes,
     }: {
       taskId: string;
       entryDate: string;
       metricsData: MetricsData;
       isCompleted: boolean;
+      status?: "pending" | "completed" | "missed" | "skipped";
+      startedAt?: string | null;
+      endedAt?: string | null;
+      durationSeconds?: number | null;
+      notes?: string | null;
     }) =>
       api
         .post<ApiChecklistEntry>("/api/checklist-entries", {
@@ -152,6 +201,11 @@ export function useSaveChecklistMetrics() {
           entryDate,
           isCompleted,
           metricsData,
+          status,
+          startedAt,
+          endedAt,
+          durationSeconds,
+          notes,
         })
         .then(normalizeChecklistEntry),
     onSuccess: () => {
