@@ -5,6 +5,7 @@ import {
   ExternalLink,
   Link2,
   LineChart,
+  Mail,
   RefreshCw,
   Settings,
   Trash2,
@@ -33,6 +34,12 @@ import {
   useGrowwConnection,
   useSyncGrowwConnection,
 } from "@/hooks/useGrowwIntegration";
+import {
+  useDisconnectGoogleInvestments,
+  useGetGoogleInvestmentConnectUrl,
+  useGoogleInvestmentConnection,
+  useSyncGoogleInvestments,
+} from "@/hooks/useGoogleInvestmentIntegration";
 
 export default function SettingsPage() {
   const { data: customDomains = [], isLoading } = useCustomDomains();
@@ -48,22 +55,46 @@ export default function SettingsPage() {
   const connectGrowwConnection = useConnectGrowwConnection();
   const syncGrowwConnection = useSyncGrowwConnection();
   const disconnectGrowwConnection = useDisconnectGrowwConnection();
+  const {
+    data: googleInvestmentConnection,
+    isLoading: isGoogleInvestmentLoading,
+  } = useGoogleInvestmentConnection();
+  const getGoogleInvestmentConnectUrl = useGetGoogleInvestmentConnectUrl();
+  const syncGoogleInvestments = useSyncGoogleInvestments();
+  const disconnectGoogleInvestments = useDisconnectGoogleInvestments();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const kiteStatus = params.get("kite_status");
     const kiteMessage = params.get("kite_message");
+    const googleStatus = params.get("google_status");
+    const googleMessage = params.get("google_message");
+    let handled = false;
 
     if (kiteStatus === "connected") {
       toast.success("Kite connected and initial sync finished.");
+      handled = true;
     } else if (kiteStatus === "error") {
       toast.error(kiteMessage || "Kite connection failed.");
-    } else {
+      handled = true;
+    }
+
+    if (googleStatus === "connected") {
+      toast.success(googleMessage || "Gmail connected and investment sync finished.");
+      handled = true;
+    } else if (googleStatus === "error") {
+      toast.error(googleMessage || "Gmail investment connection failed.");
+      handled = true;
+    }
+
+    if (!handled) {
       return;
     }
 
     params.delete("kite_status");
     params.delete("kite_message");
+    params.delete("google_status");
+    params.delete("google_message");
 
     const nextQuery = params.toString();
     const nextUrl = nextQuery
@@ -220,6 +251,55 @@ export default function SettingsPage() {
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Failed to disconnect Groww";
+      toast.error(message);
+    }
+  };
+
+  const handleConnectGoogleInvestments = async () => {
+    try {
+      const result = await getGoogleInvestmentConnectUrl.mutateAsync();
+      window.location.assign(result.loginUrl);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to start Gmail connection";
+      toast.error(message);
+    }
+  };
+
+  const handleSyncGoogleInvestments = async () => {
+    try {
+      const result = await syncGoogleInvestments.mutateAsync();
+      toast.success(
+        `Gmail synced: ${result.sync.transactionsExtracted} transactions, ${result.sync.holdingsUpdated} holdings.`,
+      );
+
+      if (result.sync.attachmentOnlyMessages > 0) {
+        toast.message(
+          `${result.sync.attachmentOnlyMessages} CAS/PDF messages were found and queued for parser support.`,
+        );
+      }
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to sync Gmail investments";
+      toast.error(message);
+    }
+  };
+
+  const handleDisconnectGoogleInvestments = async () => {
+    const shouldDisconnect = window.confirm(
+      "Disconnect Gmail investment sync and remove email-derived investment data from this LifeOS account?",
+    );
+
+    if (!shouldDisconnect) {
+      return;
+    }
+
+    try {
+      await disconnectGoogleInvestments.mutateAsync();
+      toast.success("Gmail investment sync disconnected");
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to disconnect Gmail investments";
       toast.error(message);
     }
   };
@@ -632,6 +712,123 @@ export default function SettingsPage() {
                       >
                         <Trash2 className="mr-2 h-4 w-4" />
                         Disconnect Groww
+                      </Button>
+                    ) : null}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="rounded-2xl border border-border bg-card/80 p-5">
+              <div className="mb-4 flex items-center gap-2">
+                <Mail className="h-4 w-4 text-muted-foreground" />
+                <h2 className="text-base font-semibold text-foreground">
+                  Gmail Investment Email Sync
+                </h2>
+              </div>
+
+              {isGoogleInvestmentLoading ? (
+                <p className="text-sm text-muted-foreground">
+                  Loading Gmail investment sync status...
+                </p>
+              ) : googleInvestmentConnection?.configured === false ? (
+                <div className="space-y-3">
+                  <Badge variant="outline" className="w-fit">
+                    Not configured
+                  </Badge>
+                  <p className="text-sm text-muted-foreground">
+                    Add `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and
+                    `GOOGLE_REDIRECT_URI` on the server before connecting Gmail.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge
+                      variant={
+                        googleInvestmentConnection?.status === "connected"
+                          ? "default"
+                          : "outline"
+                      }
+                      className="w-fit"
+                    >
+                      {googleInvestmentConnection?.status === "connected"
+                        ? "Connected"
+                        : googleInvestmentConnection?.status === "expired"
+                          ? "Reconnect required"
+                          : googleInvestmentConnection?.status === "error"
+                            ? "Sync error"
+                            : "Not linked"}
+                    </Badge>
+
+                    {googleInvestmentConnection?.email ? (
+                      <Badge variant="outline" className="w-fit">
+                        {googleInvestmentConnection.email}
+                      </Badge>
+                    ) : null}
+                  </div>
+
+                  <p className="text-sm text-muted-foreground">
+                    Reads only investment-related Gmail messages from Groww,
+                    CAMS, KFintech, MF Central, CDSL, and NSDL. Parsed mutual
+                    fund transactions are reconstructed into holdings and valued
+                    with AMFI NAV data.
+                  </p>
+
+                  {googleInvestmentConnection?.lastSyncedAt ? (
+                    <p className="text-xs text-muted-foreground">
+                      Last synced on{" "}
+                      {new Date(googleInvestmentConnection.lastSyncedAt).toLocaleString()}
+                    </p>
+                  ) : null}
+
+                  {googleInvestmentConnection?.lastError ? (
+                    <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+                      {googleInvestmentConnection.lastError}
+                    </div>
+                  ) : null}
+
+                  <div className="rounded-xl border border-border/60 bg-background/40 p-4 text-sm text-muted-foreground">
+                    <p className="font-medium text-foreground">Automation path</p>
+                    <p className="mt-2">
+                      The system searches investment senders, extracts transaction
+                      facts from email text, queues CAS PDF messages for parser
+                      support, dedupes by Gmail message ID, and writes a separate
+                      `investment_email` source into the Investments page.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap gap-3">
+                    <Button
+                      onClick={() => void handleConnectGoogleInvestments()}
+                      disabled={getGoogleInvestmentConnectUrl.isPending}
+                    >
+                      <ExternalLink className="mr-2 h-4 w-4" />
+                      {googleInvestmentConnection?.status === "connected"
+                        ? "Reconnect Gmail"
+                        : "Connect Gmail"}
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      onClick={() => void handleSyncGoogleInvestments()}
+                      disabled={
+                        syncGoogleInvestments.isPending ||
+                        googleInvestmentConnection?.status === "not-linked"
+                      }
+                    >
+                      <RefreshCw className="mr-2 h-4 w-4" />
+                      Sync Investment Emails
+                    </Button>
+
+                    {googleInvestmentConnection?.status !== "not-linked" ? (
+                      <Button
+                        variant="destructive"
+                        onClick={() => void handleDisconnectGoogleInvestments()}
+                        disabled={disconnectGoogleInvestments.isPending}
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Disconnect Gmail
                       </Button>
                     ) : null}
                   </div>

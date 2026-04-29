@@ -400,6 +400,102 @@ export const tradingBrokerSnapshots = pgTable(
   (t) => [unique().on(t.connectionId, t.snapshotDate)],
 );
 
+export const googleIntegrationConnections = pgTable(
+  "google_integration_connections",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    provider: text("provider").notNull().default("google"),
+    status: text("status").notNull().default("connected"),
+    email: text("email"),
+    encryptedAccessToken: text("encrypted_access_token"),
+    encryptedRefreshToken: text("encrypted_refresh_token"),
+    tokenExpiresAt: timestamp("token_expires_at"),
+    scope: text("scope"),
+    lastHistoryId: text("last_history_id"),
+    lastSyncedAt: timestamp("last_synced_at"),
+    lastError: text("last_error"),
+    metadata: jsonb("metadata").notNull().default({}),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (t) => [unique().on(t.userId, t.provider)],
+);
+
+export const investmentEmailMessages = pgTable(
+  "investment_email_messages",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    connectionId: uuid("connection_id").references(() => googleIntegrationConnections.id, {
+      onDelete: "set null",
+    }),
+    provider: text("provider").notNull().default("gmail"),
+    messageId: text("message_id").notNull(),
+    threadId: text("thread_id"),
+    fromAddress: text("from_address"),
+    subject: text("subject"),
+    snippet: text("snippet"),
+    receivedAt: timestamp("received_at"),
+    classification: text("classification").notNull().default("unknown"),
+    status: text("status").notNull().default("received"),
+    extracted: jsonb("extracted").notNull().default({}),
+    error: text("error"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (t) => [unique().on(t.userId, t.messageId)],
+);
+
+export const investmentEmailTransactions = pgTable(
+  "investment_email_transactions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    emailMessageId: uuid("email_message_id").references(() => investmentEmailMessages.id, {
+      onDelete: "set null",
+    }),
+    source: text("source").notNull(),
+    externalId: text("external_id").notNull(),
+    schemeName: text("scheme_name").notNull(),
+    isin: text("isin"),
+    folio: text("folio"),
+    transactionType: text("transaction_type").notNull(),
+    amount: numeric("amount", { precision: 18, scale: 4 }),
+    units: numeric("units", { precision: 20, scale: 6 }),
+    nav: numeric("nav", { precision: 18, scale: 6 }),
+    transactionDate: date("transaction_date"),
+    confidence: numeric("confidence", { precision: 5, scale: 2 }).notNull().default("0"),
+    raw: jsonb("raw").notNull().default({}),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (t) => [unique().on(t.userId, t.externalId)],
+);
+
+export const mutualFundNavs = pgTable(
+  "mutual_fund_navs",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    schemeCode: text("scheme_code").notNull(),
+    schemeName: text("scheme_name").notNull(),
+    isinGrowth: text("isin_growth"),
+    isinDividend: text("isin_dividend"),
+    nav: numeric("nav", { precision: 18, scale: 6 }).notNull(),
+    navDate: date("nav_date"),
+    source: text("source").notNull().default("amfi"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (t) => [unique().on(t.schemeCode)],
+);
+
 export const techSkillDomains = pgTable(
   "tech_skill_domains",
   {
